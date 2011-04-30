@@ -6,7 +6,7 @@
 #include <assert.h>
 
 //static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
-static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = "lhm.string_string";
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = "lhm.string";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = "lhm.number";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = "lhm.integer";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = "lhm.pointer";
@@ -14,11 +14,31 @@ static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = "lhm.pointer";
 struct LuaHashMap
 {
 	lua_State* luaState;
+	/*
 	size_t numberOfStringKeys;
 	size_t numberOfNumberKeys;
 	size_t numberOfIntegerKeys;
 	size_t numberOfPointerKeys;
+	*/
 };
+
+static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
+{
+	/* Create a table in Lua to be our hash map */
+	/* We could just use one table since the use documents only
+	 * one kind of key-value type per instance, but for extra safety,
+	 * I will create a table for each key type so lua_next doesn't break
+	 * when fetching all keys.
+	 */
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER);
+}
 
 LuaHashMap* LuaHashMap_Create(void)
 {
@@ -36,20 +56,7 @@ LuaHashMap* LuaHashMap_Create(void)
 	}
 	hash_map->luaState = lua_state;
 
-	/* Create a table in Lua to be our hash map */
-	/* We could just use one table since the use documents only
-	 * one kind of key-value type per instance, but for extra safety,
-	 * I will create a table for each key type so lua_next doesn't break
-	 * when fetching all keys.
-	 */
-	lua_newtable(hash_map->luaState);
-	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
-	lua_newtable(hash_map->luaState);
-	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER);
-	lua_newtable(hash_map->luaState);
-	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER);
-	lua_newtable(hash_map->luaState);
-	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER);
+	Internal_InitializeInternalTables(hash_map);
 
 	assert(lua_gettop(hash_map->luaState) == 0);
 	return hash_map;
@@ -291,6 +298,10 @@ size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], 
 		/* removes 'value'; keeps 'key' for next iteration */
 		lua_pop(hash_map->luaState, 1);
 	}
+
+	/* Pop the global table */
+	lua_pop(hash_map->luaState, 1);	
+	assert(lua_gettop(hash_map->luaState) == 0);	
 	return total_count;
 }
 
@@ -320,6 +331,62 @@ size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_
 		/* removes 'value'; keeps 'key' for next iteration */
 		lua_pop(hash_map->luaState, 1);
 	}
+
+	/* Pop the global table */
+	lua_pop(hash_map->luaState, 1);	
+	assert(lua_gettop(hash_map->luaState) == 0);	
 	return total_count;
 }
+
+void LuaHashMap_Clear(LuaHashMap* hash_map)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	Internal_InitializeInternalTables(hash_map);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+}
+
+static bool Internal_IsEmpty(LuaHashMap* hash_map, const char* table_name)
+{
+	bool is_empty;
+	lua_getglobal(hash_map->luaState, table_name); /* stack: [table] */
+
+	lua_pushnil(hash_map->luaState);  /* first key */
+	if(lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		is_empty = false;
+		/* pop key, value, and table */
+		lua_pop(hash_map->luaState, 3);
+	}
+	else
+	{
+		is_empty = true;
+		/* pop table */
+		lua_pop(hash_map->luaState, 1);
+	}
+
+	return is_empty;
+}
+
+bool LuaHashMap_IsEmpty(LuaHashMap* hash_map)
+{
+	bool is_empty = true;
+	if(NULL == hash_map)
+	{
+		return true;
+	}
+
+	is_empty = Internal_IsEmpty(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING)
+		&&  Internal_IsEmpty(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER)
+		&&  Internal_IsEmpty(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER)
+		&&  Internal_IsEmpty(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER)
+		;
+
+	assert(lua_gettop(hash_map->luaState) == 0);		
+
+	return is_empty;
+}
+
 

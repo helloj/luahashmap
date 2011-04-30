@@ -50,7 +50,18 @@ int main(int argc, char* argv[])
 		fprintf(stderr, "Key[%d] is %s\n", i, key_array[i]);
 	}
 
-	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+
+
+	LuaHashMap_Clear(hash_map);
+	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
+	assert(0 == ret_size);
+
+
+	assert(1 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
+		
 
 
 	LuaHashMap_Free(hash_map);

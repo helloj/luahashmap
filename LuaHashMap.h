@@ -73,6 +73,8 @@ void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer);
 
 
 /* Clear List */
+void LuaHashMap_Clear(LuaHashMap* hash_map);
+bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 
 /* List Functions */
 size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
