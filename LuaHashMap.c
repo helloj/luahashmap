@@ -5,7 +5,12 @@
 
 #include <assert.h>
 
-static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
+//static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = "lhm.string_string";
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = "lhm.number";
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = "lhm.integer";
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = "lhm.pointer";
+
 struct LuaHashMap
 {
 	lua_State* luaState;
@@ -32,8 +37,19 @@ LuaHashMap* LuaHashMap_Create(void)
 	hash_map->luaState = lua_state;
 
 	/* Create a table in Lua to be our hash map */
+	/* We could just use one table since the use documents only
+	 * one kind of key-value type per instance, but for extra safety,
+	 * I will create a table for each key type so lua_next doesn't break
+	 * when fetching all keys.
+	 */
 	lua_newtable(hash_map->luaState);
-	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER);
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER);
 
 	assert(lua_gettop(hash_map->luaState) == 0);
 	return hash_map;
@@ -56,7 +72,7 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 		return;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, table] */
 	lua_setfield(hash_map->luaState, -2, key_string); /* table[key_string]=value_string; stack: [table] */
 	
@@ -72,7 +88,7 @@ void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value
 		return;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, table] */
 	lua_setfield(hash_map->luaState, -2, key_string);  /* table[key_string]=value_pointer; stack: [table] */
 
@@ -89,7 +105,7 @@ void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* valu
 		return;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, key_pointer, table] */
 	lua_settable(hash_map->luaState, -3);  /* table[key_pointer]=value_pointer; stack: [table] */
@@ -108,7 +124,7 @@ const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const ch
 		return NULL;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
 	ret_val = lua_tostring(hash_map->luaState, -1);
 
@@ -129,7 +145,7 @@ void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* hash_map, const char* r
 		return NULL;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
 	ret_val = lua_touserdata(hash_map->luaState, -1);
 
@@ -147,7 +163,7 @@ void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_po
 		return NULL;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_gettable(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
 	ret_val = lua_touserdata(hash_map->luaState, -1);
@@ -168,7 +184,7 @@ void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_s
 		return;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_pushnil(hash_map->luaState); /* stack: [nil, table] */
 	lua_setfield(hash_map->luaState, -2, key_string);  /* table[key_string]=nil ; stack: [table] */
 
@@ -184,7 +200,7 @@ void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 		return;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
 	lua_settable(hash_map->luaState, -3);  /* table[key_pointer]=nil; stack: [table] */
@@ -204,7 +220,7 @@ bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_s
 		return NULL;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
 
 	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
@@ -230,7 +246,7 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 		return NULL;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_gettable(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
 
@@ -249,7 +265,7 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	return ret_val;
 }
 
-size_t LuaHashMap_KeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size)
+size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size)
 {
 	size_t total_count = 0;
 	if(NULL == hash_map)
@@ -257,7 +273,7 @@ size_t LuaHashMap_KeysString(LuaHashMap* hash_map, const char* keys_array[], siz
 		return 0;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 
 	lua_pushnil(hash_map->luaState);  /* first key */
 	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
@@ -278,7 +294,7 @@ size_t LuaHashMap_KeysString(LuaHashMap* hash_map, const char* keys_array[], siz
 	return total_count;
 }
 
-size_t LuaHashMap_KeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size)
+size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size)
 {
 	size_t total_count = 0;
 	if(NULL == hash_map)
@@ -286,7 +302,7 @@ size_t LuaHashMap_KeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t m
 		return 0;
 	}
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 
 	lua_pushnil(hash_map->luaState);  /* first key */
 	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */

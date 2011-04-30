@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 	assert(0 == strcmp("value3", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 
-	ret_size = LuaHashMap_KeysString(hash_map, key_array, MAX_ARRAY_SIZE);
+	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
 	assert(3 == ret_size);
 	for(i=0; i<ret_size; i++)
 	{
