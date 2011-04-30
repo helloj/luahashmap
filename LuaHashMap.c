@@ -1,0 +1,309 @@
+#include "LuaHashMap.h"
+#include "lua.h"
+#include "lauxlib.h"
+#include <stdlib.h>
+
+#include <assert.h>
+
+static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
+struct LuaHashMap
+{
+	lua_State* luaState;
+	size_t numberOfStringKeys;
+	size_t numberOfNumberKeys;
+	size_t numberOfIntegerKeys;
+	size_t numberOfPointerKeys;
+};
+
+LuaHashMap* LuaHashMap_Create(void)
+{
+	LuaHashMap* hash_map;
+	lua_State* lua_state = luaL_newstate();
+	if(NULL == lua_state)
+	{
+		return NULL;
+	}
+	hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+	if(NULL == hash_map)
+	{
+		lua_close(lua_state);
+		return NULL;
+	}
+	hash_map->luaState = lua_state;
+
+	/* Create a table in Lua to be our hash map */
+	lua_newtable(hash_map->luaState);
+	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME);
+
+	assert(lua_gettop(hash_map->luaState) == 0);
+	return hash_map;
+}
+
+void LuaHashMap_Free(LuaHashMap* hash_map)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	free(hash_map->luaState);
+	free(hash_map);
+}
+
+void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, table] */
+	lua_setfield(hash_map->luaState, -2, key_string); /* table[key_string]=value_string; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
+
+void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, table] */
+	lua_setfield(hash_map->luaState, -2, key_string);  /* table[key_string]=value_pointer; stack: [table] */
+
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+}
+
+
+void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
+	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, key_pointer, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_pointer]=value_pointer; stack: [table] */
+
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
+
+
+const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+{
+	const char* ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
+	ret_val = lua_tostring(hash_map->luaState, -1);
+
+	fprintf(stderr, "ret_val=%s, %d\n", ret_val, lua_gettop(hash_map->luaState));
+
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+	return ret_val;
+}
+
+
+void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+{
+	void* ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
+	ret_val = lua_touserdata(hash_map->luaState, -1);
+
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+	return ret_val;
+}
+
+void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_pointer)
+{
+	void* ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
+	lua_gettable(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
+	ret_val = lua_touserdata(hash_map->luaState, -1);
+
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);
+	return ret_val;
+}
+
+
+
+
+void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushnil(hash_map->luaState); /* stack: [nil, table] */
+	lua_setfield(hash_map->luaState, -2, key_string);  /* table[key_string]=nil ; stack: [table] */
+
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+}
+
+void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
+	lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_pointer]=nil; stack: [table] */
+
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
+
+
+
+bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+{
+	bool ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
+
+	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
+	{
+		ret_val = false;
+	}
+	else
+	{
+		ret_val = true;
+	}
+	
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);	
+	return ret_val;
+}
+
+bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
+{
+	bool ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
+	lua_gettable(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
+
+	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
+	{
+		ret_val = false;
+	}
+	else
+	{
+		ret_val = true;
+	}
+
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);
+	return ret_val;
+}
+
+size_t LuaHashMap_KeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size)
+{
+	size_t total_count = 0;
+	if(NULL == hash_map)
+	{
+		return 0;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+
+	lua_pushnil(hash_map->luaState);  /* first key */
+	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
+		
+		/* Remember that lua_tolstring modifies the string and confuses lua_next, so be sure these are all strings */
+		if( (NULL != keys_array) && (total_count < max_array_size) )
+		{
+			keys_array[total_count] = lua_tostring(hash_map->luaState, -2);
+		}
+
+		total_count++;
+
+		/* removes 'value'; keeps 'key' for next iteration */
+		lua_pop(hash_map->luaState, 1);
+	}
+	return total_count;
+}
+
+size_t LuaHashMap_KeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size)
+{
+	size_t total_count = 0;
+	if(NULL == hash_map)
+	{
+		return 0;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME); /* stack: [table] */
+
+	lua_pushnil(hash_map->luaState);  /* first key */
+	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
+		
+		/* Remember that lua_tolstring modifies the string and confuses lua_next, so be sure these are all strings */
+		if( (NULL != keys_array) && (total_count < max_array_size) )
+		{
+			keys_array[total_count] = lua_touserdata(hash_map->luaState, -2);
+		}
+
+		total_count++;
+
+		/* removes 'value'; keeps 'key' for next iteration */
+		lua_pop(hash_map->luaState, 1);
+	}
+	return total_count;
+}
+
