@@ -12,6 +12,15 @@ typedef int LuaHashMapInteger;
 #include <stdbool.h>
 #include <stddef.h>
 
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
+	/* Not ISO/IEC 9899:1999-compliant. */
+	#if !defined(restrict)
+		#define restrict
+		#define __RESTRICT_KEYWORD_DEFINED__
+	#endif
+#endif
+	
+
 LuaHashMap* LuaHashMap_Create(void);
 /* Note: If created with an external Lua state, it will not delete the underlying Lua state. */
 void LuaHashMap_Free(LuaHashMap* hash_map);
@@ -80,6 +89,12 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 /* List Functions */
 size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
 size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
+
+	
+#if defined(__RESTRICT_KEYWORD_DEFINED__)
+	#undef restrict
+	#undef __RESTRICT_KEYWORD_DEFINED__
+#endif
 
 #ifdef __cplusplus
 }
