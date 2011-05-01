@@ -22,6 +22,20 @@ struct LuaHashMap
 	*/
 };
 
+struct LuaHashMapIterator
+{
+	LuaHashMap* hashMap;
+	const char* whichTable;
+	bool atEnd;
+	union LuaHashMapKeyType
+	{
+		const char* keyString;
+		lua_Number keyNumber;
+		lua_Integer keyInteger;
+		void* keyPointer;
+	} currentKey;
+};
+
 static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
 {
 	/* Create a table in Lua to be our hash map */
@@ -430,4 +444,84 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map)
 	return is_empty;
 }
 
+static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const char* table_name)
+{
+	LuaHashMapIterator the_iterator;
+	the_iterator.hashMap = hash_map;
+	the_iterator.whichTable = table_name;
 
+	the_iterator.whichTable = table_name;
+
+	
+	lua_getglobal(hash_map->luaState, table_name); /* stack: [table] */
+	
+	lua_pushnil(hash_map->luaState);  /* first key */
+	if(lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		the_iterator.atEnd = false;
+		switch(lua_type(hash_map->luaState, -2))
+		{
+			case LUA_TSTRING:
+			{
+				the_iterator.currentKey.keyString = lua_tostring(hash_map->luaState, -2);
+				break;
+			}
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TUSERDATA:
+			{
+				the_iterator.currentKey.keyPointer = lua_touserdata(hash_map->luaState, -2);
+				break;
+			}
+			case LUA_TNUMBER:
+			{
+				/* pointer comparison should be fine in this case */
+				if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == table_name)
+				{
+					the_iterator.currentKey.keyNumber = lua_tonumber(hash_map->luaState, -2);
+				}
+				else
+				{
+					the_iterator.currentKey.keyInteger = lua_tointeger(hash_map->luaState, -2);
+				}
+				break;
+			}
+			default:
+			{
+				the_iterator.currentKey = (union LuaHashMapKeyType)0;
+			}
+		}
+
+		/* pop key, value, and table */
+		lua_pop(hash_map->luaState, 3);
+	}
+	else
+	{
+		the_iterator.atEnd = true;
+		the_iterator.currentKey = (union LuaHashMapKeyType)0;
+
+		/* pop table */
+		lua_pop(hash_map->luaState, 1);
+	}
+	
+	return the_iterator;
+}
+
+static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, const char* table_name)
+{
+	LuaHashMapIterator the_iterator;
+	the_iterator.hashMap = hash_map;
+	the_iterator.whichTable = table_name;
+	the_iterator.atEnd = true;
+	the_iterator.currentKey = (union LuaHashMapKeyType)0;
+	return the_iterator;
+}
+
+LuaHashMapIterator LuaHashMap_GetIteratorBeginForKeyString(LuaHashMap* hash_map)
+{
+	return Internal_GetIteratorBegin(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+}
+
+LuaHashMapIterator LuaHashMap_GetIteratorEndForKeyString(LuaHashMap* hash_map)
+{
+	return Internal_GetIteratorEnd(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+}

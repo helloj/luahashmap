@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 typedef struct LuaHashMap LuaHashMap;
+typedef struct LuaHashMapIterator LuaHashMapIterator;
 /*
 typedef double LuaHashMapNumber;
 typedef int LuaHashMapInteger;
