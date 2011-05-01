@@ -4,6 +4,25 @@
 #include <assert.h>
 #include <string.h>
 
+static int Internal_safestrcmp(const char* str1, const char* str2)
+{
+	if(NULL == str1 && NULL == str2)
+	{
+		return 0;
+	}
+	else if(NULL == str1)
+	{
+		return 1;
+	}
+	else if(NULL == str2)
+	{
+		return -1;
+	}
+	else
+	{
+		return strcmp(str1, str2);
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -25,22 +44,24 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
 
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", "key3");
+//	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
+
 
 
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
 	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key1");
-	assert(0 == strcmp("value1", ret_string));
+	assert(0 == Internal_safestrcmp("value1", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
 	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key2");
-	assert(0 == strcmp("value2", ret_string));
+	assert(0 == Internal_safestrcmp("value2", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
 	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key3");
-	assert(0 == strcmp("value3", ret_string));
+	assert(0 == Internal_safestrcmp("value3", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 
 	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
@@ -61,6 +82,7 @@ int main(int argc, char* argv[])
 
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
+	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
 		
 
 

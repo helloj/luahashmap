@@ -25,6 +25,7 @@ void LuaHashMap_Free(LuaHashMap* hash_map);
 //struct lua_State* LuaHashMap_GetLuaState(void);
 
 /* string, string */
+/* Note: Inserting NULL values is like deleting a field. */
 void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
 
 

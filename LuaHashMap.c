@@ -40,7 +40,7 @@ static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
 	lua_setglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER);
 }
 
-LuaHashMap* LuaHashMap_Create(void)
+LuaHashMap* LuaHashMap_Create()
 {
 	LuaHashMap* hash_map;
 	lua_State* lua_state = luaL_newstate();
@@ -78,6 +78,10 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 	{
 		return;
 	}
+	if(NULL == key_string)
+	{
+		return;
+	}
 
 	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, table] */
@@ -91,6 +95,10 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string)
 {
 	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == key_string)
 	{
 		return;
 	}
@@ -108,6 +116,10 @@ void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value
 void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer)
 {
 	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == key_pointer)
 	{
 		return;
 	}
@@ -130,12 +142,16 @@ const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const ch
 	{
 		return NULL;
 	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
 
 	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_getfield(hash_map->luaState, -1, key_string); /* table[key_string]; stack: [value_string, table] */
 	ret_val = lua_tostring(hash_map->luaState, -1);
 
-	fprintf(stderr, "ret_val=%s, %d\n", ret_val, lua_gettop(hash_map->luaState));
+//	fprintf(stderr, "ret_val=%s, %d\n", ret_val, lua_gettop(hash_map->luaState));
 
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
@@ -148,6 +164,10 @@ void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* hash_map, const char* r
 {
 	void* ret_val;
 	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
 	{
 		return NULL;
 	}
@@ -166,6 +186,10 @@ void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_po
 {
 	void* ret_val;
 	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_pointer)
 	{
 		return NULL;
 	}
@@ -190,6 +214,10 @@ void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_s
 	{
 		return;
 	}
+	if(NULL == key_string)
+	{
+		return;
+	}
 
 	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
 	lua_pushnil(hash_map->luaState); /* stack: [nil, table] */
@@ -203,6 +231,10 @@ void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_s
 void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 {
 	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == key_pointer)
 	{
 		return;
 	}
@@ -224,7 +256,11 @@ bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_s
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
+	}
+	if(NULL == key_string)
+	{
+		return false;
 	}
 
 	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
@@ -252,6 +288,11 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	{
 		return NULL;
 	}
+	if(NULL == key_pointer)
+	{
+		return false;
+	}
+
 
 	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
