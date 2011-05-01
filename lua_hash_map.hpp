@@ -5,15 +5,87 @@ extern "C" {
 #include "LuaHashMap.h"
 }
 #include <utility>
+#include <iterator>
+
 namespace lhm
 {
+template<class _Key, class _Tp >
+	class lua_hash_map;
+	
+template<class Container_>
+class luahashmap_iterator : public std::iterator<std::forward_iterator_tag, Container_>
+{
+protected:
+//	friend class Container_;
+	Container_& hashMap;
+	const char* currentKeyString;
+	typedef std::pair<const char*, const char*> value_type;
 
+public:
+	explicit luahashmap_iterator(Container_& hash_map)
+		: hashMap(hash_map),
+	currentKeyString(NULL)
+	{
+	}
+	
+	~luahashmap_iterator()
+	{
+	}
+	
+	// The assignment and relational operators are straightforward
+	luahashmap_iterator& operator=(const luahashmap_iterator& value)
+	{
+		hashMap.insert(value);
+		return (*this);
+	}
+	
+//	luahashmap_iterator<Container_>& operator*()
+	std::pair<const char*, const char*> operator*()
+	{
+//		std::pair<const char*, const char*> value_type
+		LuaHashMap* luahash = hashMap.GetLuaHashMap();
+		return std::make_pair(currentKeyString, LuaHashMap_GetValueStringForKeyString(luahash, currentKeyString));
+//		value_type ret_val;
+//		return *this;
+	}
+	void setCurrentKey(const char* key)
+	{
+		currentKeyString = key;
+	}
+/*	
+	bool operator==(const Iterator& other)
+	{
+		return(node_ == other.node_);
+	}
+	
+	bool operator!=(const Iterator& other)
+	{
+		return(node_ != other.node_);
+	}
+	
+	//public: T& operator*();
+	const mylist_iterator<T>& operator++();
+	bool operator!=(const mylist_iterator<T>& other) const;
+	
+private: mylist_node<T> *pointee; mylist_iterator(mylist_node<T> *pointee) : pointee(pointee) {}
+template <typename T> T& mylist_iterator<T>::operator*() {
+return pointee->elem;
+}
+template <typename T> const mylist_iterator<T>& mylist_iterator<T>::operator++() {
+assert(pointee != NULL); pointee = pointee->next; return *this;
+}
+template <typename T> bool mylist_iterator<T>:: operator!=(const mylist_iterator<T>& other) const {
+return this->pointee != other.pointee;
+*/ 
+};
+	
 template<class _Key, class _Tp >
 //	template<class _Key, class _Tp, class _Alloc = allocator<_Tp> >
 class lua_hash_map
 {
 private:
 	LuaHashMap* hashMap;
+	const char* currentKeyString;
 
 public:
 	typedef _Key                                          key_type;
@@ -97,6 +169,19 @@ public:
 		const char* ret_val = LuaHashMap_GetValueStringForKeyString(hashMap, key_string);
 		return ret_val;
 	}
+	
+	luahashmap_iterator<lua_hash_map> find(const char* key_string)
+	{
+	//	const char* ret_val = LuaHashMap_GetValueStringForKeyString(hashMap, key_string);
+		luahashmap_iterator<lua_hash_map> iter(*this);
+		iter.setCurrentKey(key_string);
+		return iter;
+	}
+	
+	LuaHashMap* GetLuaHashMap() { return hashMap; }
+	
+//	luahashmap_iterator<Container_>& operator*()
+
 
 };
 	

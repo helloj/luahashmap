@@ -66,10 +66,19 @@ int main(int argc, char* argv[])
 	ret_string = hash_map["key3"];
 	assert(0 == Internal_safestrcmp("value3", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
-	hash_map["key3"] = "fee";
-	ret_string = hash_map["key3"];
-	fprintf(stderr, "ret_string=%s\n", ret_string);
+//	hash_map["key3"] = "fee";
+//	ret_string = hash_map["key3"];
+//	fprintf(stderr, "ret_string=%s\n", ret_string);
 
+
+	lhm::luahashmap_iterator<lhm::lua_hash_map<const char*, const char*> > iter = hash_map.find("key3");
+
+	std::pair<const char*, const char*> ret_pair = *iter;
+//	ret_string = hash_map["key1"];
+//	assert(0 == Internal_safestrcmp("value1", ret_string));
+	fprintf(stderr, "ret_string=%s\n", ret_pair.second);
+
+	
 #if 0
 
 	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
