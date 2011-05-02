@@ -1,17 +1,43 @@
 #ifndef C_LUA_HASH_MAP_H
 #define C_LUA_HASH_MAP_H
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//#include "luaconf.h"
+#include "lua.h"
+	
+#include <stdbool.h>
+#include <stddef.h>
+				
 typedef struct LuaHashMap LuaHashMap;
+
+struct LuaHashMapIterator
+{
+	/* These are all implementation details.
+	 * You should probably not directly touch.
+	 */
+	LuaHashMap* hashMap;
+	const char* whichTable;
+	bool atEnd;
+	union LuaHashMapKeyType
+	{
+		const char* keyString;
+		lua_Number keyNumber;
+		lua_Integer keyInteger;
+		void* keyPointer;
+	} currentKey;
+};
+
 typedef struct LuaHashMapIterator LuaHashMapIterator;
 /*
 typedef double LuaHashMapNumber;
 typedef int LuaHashMapInteger;
 */
-#include <stdbool.h>
-#include <stddef.h>
+
 
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
 	/* Not ISO/IEC 9899:1999-compliant. */
@@ -41,7 +67,7 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 
 
 /* string, number */
-//void LuaHashMap_InsertKeyStringValueNumber(LuaHashMap* hash_map, const char* restrict key_string, LuaHashMapNumber value_number); 
+void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
 
 /* number, number */
 //void LuaHashMap_InsertKeyNumberValueNumber(LuaHashMap* hash_map, LuaHashMapNumber key_number, LuaHashMapNumber value_number); 
@@ -53,6 +79,8 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
 
 /* pointer, string */
+void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer);
+
 /* string, pointer */
 void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);
 
@@ -61,7 +89,10 @@ void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value
 /* number, pointer */
 
 /* string, integer */
+
 /* integer, string */
+void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer);
+
 /* number, integer*/
 /* integer, integer*/
 /* integer, number */
@@ -76,11 +107,15 @@ void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_po
 /* Exists Functions*/
 bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_string);
 bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+bool LuaHashMap_ExistsKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
 
 /* Remove functions */
 void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_string);
 void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+void LuaHashMap_RemoveKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
 
 /* Clear List */
@@ -90,6 +125,21 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 /* List Functions */
 size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
 size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
+
+	
+	
+	
+bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator);
+LuaHashMapIterator LuaHashMap_GetIteratorBeginForKeyString(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorEndForKeyString(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string);
+bool LuaHashMap_IteratorIsEqual(LuaHashMapIterator* hash_iterator1, LuaHashMapIterator* hash_iterator2);
+
+	
+void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string);
+const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator);
+bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
+void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
 
 	
 #if defined(__RESTRICT_KEYWORD_DEFINED__)

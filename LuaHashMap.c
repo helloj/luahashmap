@@ -2,6 +2,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include <stdlib.h>
+#include <string.h>
 
 #include <assert.h>
 
@@ -22,19 +23,6 @@ struct LuaHashMap
 	*/
 };
 
-struct LuaHashMapIterator
-{
-	LuaHashMap* hashMap;
-	const char* whichTable;
-	bool atEnd;
-	union LuaHashMapKeyType
-	{
-		const char* keyString;
-		lua_Number keyNumber;
-		lua_Integer keyInteger;
-		void* keyPointer;
-	} currentKey;
-};
 
 static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
 {
@@ -148,6 +136,60 @@ void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* valu
 	assert(lua_gettop(hash_map->luaState) == 0);
 }
 
+void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == key_pointer)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
+	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
+	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_pointer, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_pointer]=value_string; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
+
+void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	lua_pushnumber(hash_map->luaState, key_number); /* stack: [key_number, table] */
+	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_number, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_number]=value_string; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
+
+void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
+	lua_pushinteger(hash_map->luaState, key_integer); /* stack: [key_integer, table] */
+	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_integer, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_integer]=value_string; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
 
 const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
 {
@@ -263,7 +305,39 @@ void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	assert(lua_gettop(hash_map->luaState) == 0);
 }
 
+void LuaHashMap_RemoveKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	lua_pushnumber(hash_map->luaState, key_number); /* stack: [key_number, table] */
+	lua_pushnil(hash_map->luaState); /* stack: [nil, key_number, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_number]=nil; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
 
+void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
+	lua_pushinteger(hash_map->luaState, key_integer); /* stack: [key_integer, table] */
+	lua_pushnil(hash_map->luaState); /* stack: [nil, key_integer, table] */
+	lua_settable(hash_map->luaState, -3);  /* table[key_integer]=nil; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	assert(lua_gettop(hash_map->luaState) == 0);
+}
 
 bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_string)
 {
@@ -321,6 +395,60 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 		ret_val = true;
 	}
 
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);
+	return ret_val;
+}
+
+bool LuaHashMap_ExistsKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
+{
+	bool ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	lua_pushnumber(hash_map->luaState, key_number); /* stack: [key_number, table] */
+	lua_gettable(hash_map->luaState, -2);  /* table[key_number]; stack: [value_pointer, table] */
+
+	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
+	{
+		ret_val = false;
+	}
+	else
+	{
+		ret_val = true;
+	}
+
+	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 2);
+	assert(lua_gettop(hash_map->luaState) == 0);
+	return ret_val;
+}
+
+bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
+{
+	bool ret_val;
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
+	lua_pushinteger(hash_map->luaState, key_integer); /* stack: [key_integer, table] */
+	lua_gettable(hash_map->luaState, -2);  /* table[key_integer]; stack: [value_pointer, table] */
+	
+	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
+	{
+		ret_val = false;
+	}
+	else
+	{
+		ret_val = true;
+	}
+	
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
 	assert(lua_gettop(hash_map->luaState) == 0);
@@ -444,14 +572,94 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map)
 	return is_empty;
 }
 
+static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
+{
+	LuaHashMap* hash_map = hash_iterator->hashMap;
+	const char* table_name = hash_iterator->whichTable;
+	
+	lua_getglobal(hash_map->luaState, table_name); /* stack: [table] */
+	
+	 /* first key */
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == table_name)
+	{
+		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == table_name)
+	{
+		lua_pushlightuserdata(hash_map->luaState, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == table_name)
+	{
+		lua_pushnumber(hash_map->luaState, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == table_name)
+	{
+		lua_pushinteger(hash_map->luaState, hash_iterator->currentKey.keyInteger);		
+	}
+	else
+	{
+		/* shouldn't get here */
+		assert(false);
+		lua_pop(hash_map->luaState, 1);
+		return false;
+	}
+
+	if(lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		hash_iterator->atEnd = false;
+		switch(lua_type(hash_map->luaState, -2))
+		{
+			case LUA_TSTRING:
+			{
+				hash_iterator->currentKey.keyString = lua_tostring(hash_map->luaState, -2);
+				break;
+			}
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TUSERDATA:
+			{
+				hash_iterator->currentKey.keyPointer = lua_touserdata(hash_map->luaState, -2);
+				break;
+			}
+			case LUA_TNUMBER:
+			{
+				/* pointer comparison should be fine in this case */
+				if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == table_name)
+				{
+					hash_iterator->currentKey.keyNumber = lua_tonumber(hash_map->luaState, -2);
+				}
+				else
+				{
+					hash_iterator->currentKey.keyInteger = lua_tointeger(hash_map->luaState, -2);
+				}
+				break;
+			}
+			default:
+			{
+				hash_iterator->currentKey = (union LuaHashMapKeyType)0;
+			}
+		}
+		
+		/* pop key, value, and table */
+		lua_pop(hash_map->luaState, 3);
+	}
+	else
+	{
+		hash_iterator->atEnd = true;
+		hash_iterator->currentKey = (union LuaHashMapKeyType)0;
+		
+		/* pop table */
+		lua_pop(hash_map->luaState, 1);
+	}
+	
+	/* return true if more keys follow, false if we're at the end */
+	return (false == hash_iterator->atEnd);
+}
+
 static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const char* table_name)
 {
 	LuaHashMapIterator the_iterator;
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = table_name;
-
-	the_iterator.whichTable = table_name;
-
 	
 	lua_getglobal(hash_map->luaState, table_name); /* stack: [table] */
 	
@@ -516,12 +724,244 @@ static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, const ch
 	return the_iterator;
 }
 
+bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return false;
+	}
+	return Internal_IteratorNext(hash_iterator);
+}
+
+static LuaHashMapIterator Internal_CreateBadIterator()
+{
+	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
+	the_iterator.atEnd = true;
+	return the_iterator;
+}
+
 LuaHashMapIterator LuaHashMap_GetIteratorBeginForKeyString(LuaHashMap* hash_map)
 {
+	if(NULL == hash_map)
+	{
+		return Internal_CreateBadIterator();
+	}
 	return Internal_GetIteratorBegin(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
 }
 
 LuaHashMapIterator LuaHashMap_GetIteratorEndForKeyString(LuaHashMap* hash_map)
 {
 	return Internal_GetIteratorEnd(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+}
+
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string)
+{
+	if(NULL == hash_map)
+	{
+		return Internal_CreateBadIterator();
+	}
+	if(LuaHashMap_ExistsKeyString(hash_map, key_string))
+	{
+		LuaHashMapIterator the_iterator;
+		the_iterator.hashMap = hash_map;
+		the_iterator.whichTable = LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING;
+		the_iterator.atEnd = false;
+		the_iterator.currentKey.keyString = key_string;
+		return the_iterator;
+	}
+	else
+	{
+		return Internal_CreateBadIterator();
+	}
+}
+
+
+static int Internal_safestrcmp(const char* str1, const char* str2)
+{
+	if(NULL == str1 && NULL == str2)
+	{
+		return 0;
+	}
+	else if(NULL == str1)
+	{
+		return 1;
+	}
+	else if(NULL == str2)
+	{
+		return -1;
+	}
+	else
+	{
+		return strcmp(str1, str2);
+	}
+}
+
+bool LuaHashMap_IteratorIsEqual(LuaHashMapIterator* hash_iterator1, LuaHashMapIterator* hash_iterator2)
+{
+	if(NULL == hash_iterator1 && NULL == hash_iterator2)
+	{
+		return true;
+	}
+	else if(NULL == hash_iterator1)
+	{
+		return false;
+	}
+	else if(NULL == hash_iterator2)
+	{
+		return false;
+	}
+	else
+	{
+		bool ret_flag = (hash_iterator1->hashMap == hash_iterator2->hashMap)
+			&& (hash_iterator1->whichTable == hash_iterator2->whichTable)
+			&& (hash_iterator1->atEnd == hash_iterator2->atEnd)
+		;
+		if(false == ret_flag)
+		{
+			return false;
+		}
+		
+		if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator1->whichTable)
+		{
+			return (0 == Internal_safestrcmp(hash_iterator1->currentKey.keyString, hash_iterator2->currentKey.keyString));
+		}
+		else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator1->whichTable)
+		{
+			return (hash_iterator1->currentKey.keyPointer == hash_iterator2->currentKey.keyPointer);
+		}
+		else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator1->whichTable)
+		{
+			return (hash_iterator1->currentKey.keyNumber == hash_iterator2->currentKey.keyNumber);
+		}
+		else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator1->whichTable)
+		{
+			return (hash_iterator1->currentKey.keyInteger == hash_iterator2->currentKey.keyInteger);
+		}
+		else
+		{
+			/* shouldn't get here */
+			assert(false);
+			return false;
+		}
+	}
+}
+
+void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string)
+{
+	if(NULL == hash_iterator)
+	{
+		return;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return;
+	}
+	
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+		LuaHashMap_InsertValueStringForKeyString(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+		LuaHashMap_InsertValueStringForKeyPointer(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+		LuaHashMap_InsertValueStringForKeyNumber(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+		LuaHashMap_InsertValueStringForKeyInteger(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		assert(false);
+		return;
+	}
+}
+
+const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	return LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+}
+
+bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return false;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return false;
+	}
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+		return LuaHashMap_ExistsKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+		return LuaHashMap_ExistsKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+		return LuaHashMap_ExistsKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+		return LuaHashMap_ExistsKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		assert(false);
+		return false;
+	}
+}
+
+void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return;
+	}
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+		LuaHashMap_RemoveKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+		LuaHashMap_RemoveKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+		LuaHashMap_RemoveKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+		LuaHashMap_RemoveKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		assert(false);
+		return;
+	}
 }

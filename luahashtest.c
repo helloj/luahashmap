@@ -75,17 +75,24 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
 
 
+
+	LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorBeginForKeyString(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));		
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+
+
+
 	LuaHashMap_Clear(hash_map);
 	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
 	assert(0 == ret_size);
-
-
+	
+	
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
-		
-
-
+	
 	LuaHashMap_Free(hash_map);
 
 	return 0;
