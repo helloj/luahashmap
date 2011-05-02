@@ -660,7 +660,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 			}
 			default:
 			{
-				hash_iterator->currentKey = (union LuaHashMapKeyType)0;
+				hash_iterator->currentKey.keyPointer = NULL;
 			}
 		}
 		
@@ -670,7 +670,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 	else
 	{
 		hash_iterator->atEnd = true;
-		hash_iterator->currentKey = (union LuaHashMapKeyType)0;
+		hash_iterator->currentKey.keyPointer = NULL;
 		
 		/* pop table */
 		lua_pop(hash_map->luaState, 1);
@@ -720,7 +720,7 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const 
 			}
 			default:
 			{
-				the_iterator.currentKey = (union LuaHashMapKeyType)0;
+				the_iterator.currentKey.keyPointer = NULL;
 			}
 		}
 
@@ -730,7 +730,7 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const 
 	else
 	{
 		the_iterator.atEnd = true;
-		the_iterator.currentKey = (union LuaHashMapKeyType)0;
+		the_iterator.currentKey.keyPointer = NULL;
 
 		/* pop table */
 		lua_pop(hash_map->luaState, 1);
@@ -745,7 +745,7 @@ static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, const ch
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = table_name;
 	the_iterator.atEnd = true;
-	the_iterator.currentKey = (union LuaHashMapKeyType)0;
+	the_iterator.currentKey.keyPointer = NULL;
 	return the_iterator;
 }
 
