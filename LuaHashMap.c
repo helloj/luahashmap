@@ -1050,7 +1050,7 @@ size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[],
 		return 0;
 	}
 	
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
 	
 	lua_pushnil(hash_map->luaState);  /* first key */
 	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
