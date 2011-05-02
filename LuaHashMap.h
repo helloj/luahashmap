@@ -89,41 +89,46 @@ void LuaHashMap_Free(LuaHashMap* hash_map);
 /* string, string */
 /* Note: Inserting NULL values is like deleting a field. */
 void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
-
-
-
+/* string, pointer */
+void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);	
 /* string, number */
-
-/* number, number */
-//void LuaHashMap_InsertKeyNumberValueNumber(LuaHashMap* hash_map, LuaHashMapNumber key_number, LuaHashMapNumber value_number); 
-
-/* number, string */
-//void LuaHashMap_InsertKeyNumberValueString(LuaHashMap* hash_map, LuaHashMapNumber key_number, const char* restrict value_string); 
-void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
+void LuaHashMap_InsertValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string);
+/* string, integer */
+void LuaHashMap_InsertValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string);
 
 
-/* pointer, pointer */
-void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
 
 /* pointer, string */
 void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer);
-
-/* string, pointer */
-void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);
-
-
+/* pointer, pointer */
+void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
 /* pointer, number */
+void LuaHashMap_InsertValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer);
+/* pointer, integer */
+void LuaHashMap_InsertValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer);
+	
+/* number, string */
+void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
 /* number, pointer */
+void LuaHashMap_InsertValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number);
+/* number, number */
+void LuaHashMap_InsertValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number);
+/* number, integer */
+void LuaHashMap_InsertValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number);
 
-/* string, integer */
 
 /* integer, string */
 void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer);
 
-/* number, integer*/
-/* integer, integer*/
+/* integer, pointer */
+void LuaHashMap_InsertValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer);
+
 /* integer, number */
-//void LuaHashMap_InsertKeyNumberValueString(LuaHashMap* hash_map, LuaHashMapInteger key_integer, const char* restrict value_string); 
+void LuaHashMap_InsertValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer);
+
+/* integer, integer*/
+void LuaHashMap_InsertValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer);
+	
 
 
 /* Get Functions */
