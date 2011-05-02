@@ -1009,6 +1009,73 @@ size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_
 	return total_count;
 }
 
+size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Number keys_array[], size_t max_array_size)
+{
+	size_t total_count = 0;
+	if(NULL == hash_map)
+	{
+		return 0;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	
+	lua_pushnil(hash_map->luaState);  /* first key */
+	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
+		
+		/* Remember that lua_tolstring modifies the string and confuses lua_next, so be sure these are all strings */
+		if( (NULL != keys_array) && (total_count < max_array_size) )
+		{
+			keys_array[total_count] = lua_tonumber(hash_map->luaState, -2);
+		}
+		
+		total_count++;
+		
+		/* removes 'value'; keeps 'key' for next iteration */
+		lua_pop(hash_map->luaState, 1);
+	}
+	
+	/* Pop the global table */
+	lua_pop(hash_map->luaState, 1);	
+	assert(lua_gettop(hash_map->luaState) == 0);	
+	return total_count;
+}
+
+size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size)
+{
+	size_t total_count = 0;
+	if(NULL == hash_map)
+	{
+		return 0;
+	}
+	
+	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
+	
+	lua_pushnil(hash_map->luaState);  /* first key */
+	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
+		
+		/* Remember that lua_tolstring modifies the string and confuses lua_next, so be sure these are all strings */
+		if( (NULL != keys_array) && (total_count < max_array_size) )
+		{
+			keys_array[total_count] = lua_tointeger(hash_map->luaState, -2);
+		}
+		
+		total_count++;
+		
+		/* removes 'value'; keeps 'key' for next iteration */
+		lua_pop(hash_map->luaState, 1);
+	}
+	
+	/* Pop the global table */
+	lua_pop(hash_map->luaState, 1);	
+	assert(lua_gettop(hash_map->luaState) == 0);	
+	return total_count;
+}
+
+
 void LuaHashMap_Clear(LuaHashMap* hash_map)
 {
 	if(NULL == hash_map)
