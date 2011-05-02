@@ -78,6 +78,7 @@ LuaHashMap* LuaHashMap_Create(void);
 void LuaHashMap_Free(LuaHashMap* hash_map);
 
 //LuaHashMap* LuaHashMap_CreateWithLuaState(struct lua_State* lua_state);
+//LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Allocator the_allocator);
 
 //LuaHashMap* LuaHashMap_CreateInNamespace(const char* name_space);
 //LuaHashMap* LuaHashMap_CreateWithLuaStateInNamespace(struct lua_State* lua_state, const char* restrict name_space);
@@ -92,13 +93,14 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 
 
 /* string, number */
-void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
 
 /* number, number */
 //void LuaHashMap_InsertKeyNumberValueNumber(LuaHashMap* hash_map, LuaHashMapNumber key_number, LuaHashMapNumber value_number); 
 
 /* number, string */
 //void LuaHashMap_InsertKeyNumberValueString(LuaHashMap* hash_map, LuaHashMapNumber key_number, const char* restrict value_string); 
+void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
+
 
 /* pointer, pointer */
 void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);

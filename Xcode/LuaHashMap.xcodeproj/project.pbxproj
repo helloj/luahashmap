@@ -44,15 +44,13 @@
 		007D08FD136D117300ADDD65 /* LuaHashMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LuaHashMap.c; path = ../LuaHashMap.c; sourceTree = "<group>"; };
 		007D08FE136D117300ADDD65 /* LuaHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaHashMap.h; path = ../LuaHashMap.h; sourceTree = "<group>"; };
 		007D0906136D118F00ADDD65 /* luahashtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtest; sourceTree = BUILT_PRODUCTS_DIR; };
-		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = luahashtest.c; path = ../../luahashtest.c; sourceTree = "<group>"; };
-		007D0912136D11F700ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = Library/Frameworks/Debug/LuaCocoa.framework; sourceTree = SDKROOT; };
-		007D0914136D125E00ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = Library/Frameworks/Debug/LuaCocoa.framework; sourceTree = SDKROOT; };
+		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = luahashtest.c; path = ../luahashtest.c; sourceTree = SOURCE_ROOT; };
 		007D0916136D127A00ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D0918136D128800ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D092B136D12C500ADDD65 /* luahashtestcpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtestcpp; sourceTree = BUILT_PRODUCTS_DIR; };
 		007D0934136D12D000ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
-		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_hash_map.hpp; path = ../../lua_hash_map.hpp; sourceTree = "<group>"; };
-		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luahashtest.cpp; path = ../../luahashtest.cpp; sourceTree = "<group>"; };
+		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_hash_map.hpp; path = ../lua_hash_map.hpp; sourceTree = SOURCE_ROOT; };
+		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luahashtest.cpp; path = ../luahashtest.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,8 +90,6 @@
 				007D0934136D12D000ADDD65 /* LuaCocoa.framework */,
 				007D0918136D128800ADDD65 /* LuaCocoa.framework */,
 				007D0916136D127A00ADDD65 /* LuaCocoa.framework */,
-				007D0914136D125E00ADDD65 /* LuaCocoa.framework */,
-				007D0912136D11F700ADDD65 /* LuaCocoa.framework */,
 				007D08FD136D117300ADDD65 /* LuaHashMap.c */,
 				007D08FE136D117300ADDD65 /* LuaHashMap.h */,
 				007D0908136D118F00ADDD65 /* luahashtest */,
@@ -394,6 +390,7 @@
 				007D090E136D118F00ADDD65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		007D0931136D12C500ADDD65 /* Build configuration list for PBXNativeTarget "luahashtestcpp" */ = {
 			isa = XCConfigurationList;
@@ -402,6 +399,7 @@
 				007D0933136D12C500ADDD65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
