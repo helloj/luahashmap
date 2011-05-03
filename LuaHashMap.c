@@ -45,8 +45,8 @@
  
  iMac i3, 32-bit with lua_get/settable ~15-16 sec;
  iMac i3, 32-bit with lua_raw/get/set ~14-15 sec;
- iMac i3, 64-bit with lua_get/settable ~12.5 sec;
- iMac i3, 64-bit with lua_raw/get/set ~13-13.5 sec;
+ iMac i3, 64-bit with lua_get/settable ~13-13.5 sec;
+ iMac i3, 64-bit with lua_raw/get/set  ~12.5 sec;
 */ 
 /* I don't expect we'll need metamethods so rawget/set is fine. */
 #if 1
