@@ -1120,6 +1120,24 @@ size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[],
 	return total_count;
 }
 
+void Internal_Clear(LuaHashMap* hash_map, const char* table_name)
+{
+	lua_getglobal(hash_map->luaState, table_name); /* stack: [table] */
+	lua_pushnil(hash_map->luaState);  /* first key */
+	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
+	{
+		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
+		
+		lua_pop(hash_map->luaState, 1); /* pop the value because we don't need it; stack: [key table] */
+		/* duplicate the key because we want to save a copy of it to be used for the next round of lua_next */
+		lua_pushvalue(hash_map->luaState, -1); /* stack: [key key table] */
+		lua_pushnil(hash_map->luaState); /* stack: [nil, key, key, table] */
+		LUAHASHMAP_SETTABLE(hash_map->luaState, -4);  /* table[key_pointer]=nil; stack: [key table] */
+		
+		/* key is at the top of the stack, ready for next round of lua_next() */
+	}
+	lua_pop(hash_map->luaState, 1); /* pop the table */
+}
 
 void LuaHashMap_Clear(LuaHashMap* hash_map)
 {
@@ -1132,75 +1150,13 @@ void LuaHashMap_Clear(LuaHashMap* hash_map)
 	 * So instead, it is probably better to iterate through all keys and remove them.
 	 * If the user wants to blow away everything for more speed, they can always destroy the hashmap and create a new one.
 	 * I'm concerned removing items while using lua_next may not work or be optimal...should ask on mailing list.
+	 * But testing 400000 entries seems to work.
 	 */
 
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING); /* stack: [table] */
-	lua_pushnil(hash_map->luaState);  /* first key */
-	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
-	{
-		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
-		
-		lua_pop(hash_map->luaState, 1);
-		lua_pushvalue(hash_map->luaState, -1);
-		lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
-		LUAHASHMAP_SETTABLE(hash_map->luaState, -4);  /* table[key_pointer]=nil; stack: [table] */
-		
-		/* removes 'value'; keeps 'key' for next iteration */
-		//lua_pop(hash_map->luaState, 1);
-	}
-	lua_pop(hash_map->luaState, 1);
-
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER); /* stack: [table] */
-	lua_pushnil(hash_map->luaState);  /* first key */
-	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
-	{
-		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
-		
-		lua_pop(hash_map->luaState, 1);
-		lua_pushvalue(hash_map->luaState, -1);
-
-		lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
-		LUAHASHMAP_SETTABLE(hash_map->luaState, -4);  /* table[key_pointer]=nil; stack: [table] */
-		
-		/* removes 'value'; keeps 'key' for next iteration */
-//		lua_pop(hash_map->luaState, 1);
-	}
-	lua_pop(hash_map->luaState, 1);	
-
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
-	lua_pushnil(hash_map->luaState);  /* first key */
-	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
-	{
-		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
-		
-		lua_pop(hash_map->luaState, 1);
-		lua_pushvalue(hash_map->luaState, -1);
-
-		lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
-		LUAHASHMAP_SETTABLE(hash_map->luaState, -4);  /* table[key_pointer]=nil; stack: [table] */
-		
-		/* removes 'value'; keeps 'key' for next iteration */
-//		lua_pop(hash_map->luaState, 1);
-	}
-	lua_pop(hash_map->luaState, 1);	
-
-	lua_getglobal(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
-	lua_pushnil(hash_map->luaState);  /* first key */
-	while (lua_next(hash_map->luaState, -2) != 0) /* use index of table */
-	{
-		/* lua_next puts 'key' (at index -2) and 'value' (at index -1) */
-		
-		lua_pop(hash_map->luaState, 1);
-		lua_pushvalue(hash_map->luaState, -1);
-
-		lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
-		LUAHASHMAP_SETTABLE(hash_map->luaState, -4);  /* table[key_pointer]=nil; stack: [table] */
-		
-		/* removes 'value'; keeps 'key' for next iteration */
-//		lua_pop(hash_map->luaState, 1);
-	}
-	lua_pop(hash_map->luaState, 1);	
-
+	Internal_Clear(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+	Internal_Clear(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER);
+	Internal_Clear(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER);
+	Internal_Clear(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER);
 	
 	assert(lua_gettop(hash_map->luaState) == 0);	
 	assert(true == LuaHashMap_IsEmpty(hash_map));
