@@ -177,16 +177,39 @@ size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Number keys_array[], s
 size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size);
 	
 	
-	
+/* Iterator functions */
 bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator);
-LuaHashMapIterator LuaHashMap_GetIteratorBeginForKeyString(LuaHashMap* hash_map);
-LuaHashMapIterator LuaHashMap_GetIteratorEndForKeyString(LuaHashMap* hash_map);
+	
+LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyString(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyString(LuaHashMap* hash_map);
 LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string);
+
+LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyPointer(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyPointer(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+
+LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyNumber(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyNumber(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+
+LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyInteger(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyInteger(LuaHashMap* hash_map);
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
+
+	
 bool LuaHashMap_IteratorIsEqual(LuaHashMapIterator* hash_iterator1, LuaHashMapIterator* hash_iterator2);
 
 	
 void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string);
+void LuaHashMap_InsertValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer);
+void LuaHashMap_InsertValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number);
+void LuaHashMap_InsertValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer);
+
+	
+	
 const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator);
+	
+	
 bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
 void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
 

@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
 
 
-	LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorBeginForKeyString(hash_map);
+	LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
 	do
 	{
 		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));		

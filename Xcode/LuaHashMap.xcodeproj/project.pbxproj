@@ -41,10 +41,10 @@
 
 /* Begin PBXFileReference section */
 		007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libLuaHashMap.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		007D08FD136D117300ADDD65 /* LuaHashMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LuaHashMap.c; path = ../LuaHashMap.c; sourceTree = "<group>"; };
-		007D08FE136D117300ADDD65 /* LuaHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LuaHashMap.h; path = ../LuaHashMap.h; sourceTree = "<group>"; };
+		007D08FD136D117300ADDD65 /* LuaHashMap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = LuaHashMap.c; path = ../LuaHashMap.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
+		007D08FE136D117300ADDD65 /* LuaHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = LuaHashMap.h; path = ../LuaHashMap.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		007D0906136D118F00ADDD65 /* luahashtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtest; sourceTree = BUILT_PRODUCTS_DIR; };
-		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = luahashtest.c; path = ../luahashtest.c; sourceTree = SOURCE_ROOT; };
+		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = luahashtest.c; path = ../luahashtest.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		007D0916136D127A00ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D0918136D128800ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D092B136D12C500ADDD65 /* luahashtestcpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtestcpp; sourceTree = BUILT_PRODUCTS_DIR; };
