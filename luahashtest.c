@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <QuartzCore/QuartzCore.h>
 
 static int Internal_safestrcmp(const char* str1, const char* str2)
 {
@@ -93,7 +94,24 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
 	
-	LuaHashMap_Free(hash_map);
+	CFTimeInterval start_time = CACurrentMediaTime();
 
+	void* ret_ptr = NULL;	
+	for(i=0; i<400000; i++)
+	{
+		LuaHashMap_InsertValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
+		LuaHashMap_InsertValueIntegerForKeyInteger(hash_map, rand(), rand());
+		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
+//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
+	}
+	fprintf(stderr, "num keys= %d\n", LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
+	
+	LuaHashMap_Clear(hash_map);
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+	assert(1 == LuaHashMap_IsEmpty(hash_map));
+
+	LuaHashMap_Free(hash_map);
+	fprintf(stderr, "Program passed all tests!\n");
 	return 0;
 }

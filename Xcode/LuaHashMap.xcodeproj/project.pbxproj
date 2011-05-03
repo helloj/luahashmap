@@ -16,6 +16,8 @@
 		007D0935136D12D000ADDD65 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D0934136D12D000ADDD65 /* LuaCocoa.framework */; };
 		007D0936136D12D400ADDD65 /* libLuaHashMap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */; };
 		007D0939136D131100ADDD65 /* luahashtest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007D0938136D131100ADDD65 /* luahashtest.cpp */; };
+		009ADB09136FEBD20027F0AD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 009ADB08136FEBD20027F0AD /* QuartzCore.framework */; };
+		009ADB0C136FEBDF0027F0AD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -51,6 +53,8 @@
 		007D0934136D12D000ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_hash_map.hpp; path = ../lua_hash_map.hpp; sourceTree = SOURCE_ROOT; };
 		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luahashtest.cpp; path = ../luahashtest.cpp; sourceTree = SOURCE_ROOT; };
+		009ADB08136FEBD20027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				009ADB0C136FEBDF0027F0AD /* QuartzCore.framework in Frameworks */,
 				007D0919136D128800ADDD65 /* LuaCocoa.framework in Frameworks */,
 				007D0911136D11D400ADDD65 /* libLuaHashMap.dylib in Frameworks */,
 			);
@@ -75,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				009ADB09136FEBD20027F0AD /* QuartzCore.framework in Frameworks */,
 				007D0936136D12D400ADDD65 /* libLuaHashMap.dylib in Frameworks */,
 				007D0935136D12D000ADDD65 /* LuaCocoa.framework in Frameworks */,
 			);
@@ -86,6 +92,8 @@
 		007D08E5136D10EF00ADDD65 = {
 			isa = PBXGroup;
 			children = (
+				009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */,
+				009ADB08136FEBD20027F0AD /* QuartzCore.framework */,
 				007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */,
 				007D0934136D12D000ADDD65 /* LuaCocoa.framework */,
 				007D0918136D128800ADDD65 /* LuaCocoa.framework */,
