@@ -1426,8 +1426,8 @@ void LuaHashMap_Clear(LuaHashMap* hash_map)
 	/* If we simply replace the current table with a new one, we lose the internal current size of the hash.
 	 * So instead, it is probably better to iterate through all keys and remove them.
 	 * If the user wants to blow away everything for more speed, they can always destroy the hashmap and create a new one.
-	 * I'm concerned removing items while using lua_next may not work or be optimal...should ask on mailing list.
-	 * But testing 400000 entries seems to work.
+     * Lua Gems verifies that removing entries only nils entries and doesn't rehash so 
+     * it is safe to iterate via lua_next while removing items.
 	 */
 
 	Internal_Clear(hash_map, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);

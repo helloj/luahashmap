@@ -34,17 +34,20 @@ extern "C" {
 	/* Not ISO/IEC 9899:1999-compliant. */
 	#if !defined(restrict)
 		#define restrict
-		#define __RESTRICT_KEYWORD_DEFINED__
+		#define __LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__
 	#endif
 	
 	#if !defined(bool)
 		#define bool char
+        #define __LUAHASHMAP_BOOL_KEYWORD_DEFINED__
 	#endif
 	#if !defined(false)
 		#define false (bool)0
+        #define __LUAHASHMAP_FALSE_KEYWORD_DEFINED__
 	#endif
 	#if !defined(true)
 		#define true (bool)1
+        #define __LUAHASHMAP_TRUE_KEYWORD_DEFINED__
 	#endif
 #else
 	#include <stdbool.h>
@@ -235,10 +238,27 @@ bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
 void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
 
 	
-#if defined(__RESTRICT_KEYWORD_DEFINED__)
+#if defined(__LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__)
 	#undef restrict
-	#undef __RESTRICT_KEYWORD_DEFINED__
+	#undef __LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__
 #endif
+    
+#if defined(__LUAHASHMAP_BOOL_KEYWORD_DEFINED__)
+	#undef bool
+	#undef __LUAHASHMAP_BOOL_KEYWORD_DEFINED__
+#endif
+    
+#if defined(__LUAHASHMAP_FALSE_KEYWORD_DEFINED__)
+	#undef false
+	#undef __LUAHASHMAP_FALSE_KEYWORD_DEFINED__
+#endif
+    
+#if defined(__LUAHASHMAP_TRUE_KEYWORD_DEFINED__)
+	#undef true
+	#undef __LUAHASHMAP_TRUE_KEYWORD_DEFINED__
+#endif
+    
+
 
 #ifdef __cplusplus
 }
