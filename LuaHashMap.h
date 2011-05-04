@@ -26,17 +26,33 @@
 #ifndef C_LUA_HASH_MAP_H
 #define C_LUA_HASH_MAP_H
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//#include "luaconf.h"
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
+	/* Not ISO/IEC 9899:1999-compliant. */
+	#if !defined(restrict)
+		#define restrict
+		#define __RESTRICT_KEYWORD_DEFINED__
+	#endif
+	
+	#if !defined(bool)
+		#define bool char
+	#endif
+	#if !defined(false)
+		#define false (bool)0
+	#endif
+	#if !defined(true)
+		#define true (bool)1
+	#endif
+#else
+	#include <stdbool.h>
+#endif
+
+#include <stddef.h>
 #include "lua.h"
 	
-#include <stdbool.h>
-#include <stddef.h>
 				
 typedef struct LuaHashMap LuaHashMap;
 
@@ -63,15 +79,6 @@ typedef double LuaHashMapNumber;
 typedef int LuaHashMapInteger;
 */
 
-
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-	/* Not ISO/IEC 9899:1999-compliant. */
-	#if !defined(restrict)
-		#define restrict
-		#define __RESTRICT_KEYWORD_DEFINED__
-	#endif
-#endif
-
 #define LUAHASHMAP_KEYSTRING_TYPE		0x01
 #define LUAHASHMAP_KEYPOINTER_TYPE		0x02
 #define LUAHASHMAP_KEYNUMBER_TYPE		0x04
@@ -83,7 +90,10 @@ typedef int LuaHashMapInteger;
 #define LUAHASHMAP_VALUEINTEGER_TYPE	0x80
 
 LuaHashMap* LuaHashMap_Create(void);
+LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_allocator, void* user_data);
+
 LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
+	LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 
 /* Note: If created with an external Lua state, it will not delete the underlying Lua state. */
 void LuaHashMap_Free(LuaHashMap* hash_map);
