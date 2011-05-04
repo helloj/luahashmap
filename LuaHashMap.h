@@ -71,9 +71,20 @@ typedef int LuaHashMapInteger;
 		#define __RESTRICT_KEYWORD_DEFINED__
 	#endif
 #endif
-	
+
+#define LUAHASHMAP_KEYSTRING_TYPE		0x01
+#define LUAHASHMAP_KEYPOINTER_TYPE		0x02
+#define LUAHASHMAP_KEYNUMBER_TYPE		0x04
+#define LUAHASHMAP_KEYINTEGER_TYPE		0x08
+
+#define LUAHASHMAP_VALUESTRING_TYPE		0x10
+#define LUAHASHMAP_VALUEPOINTER_TYPE	0x20
+#define LUAHASHMAP_VALUENUMBER_TYPE		0x40
+#define LUAHASHMAP_VALUEINTEGER_TYPE	0x80
 
 LuaHashMap* LuaHashMap_Create(void);
+LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
+
 /* Note: If created with an external Lua state, it will not delete the underlying Lua state. */
 void LuaHashMap_Free(LuaHashMap* hash_map);
 

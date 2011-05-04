@@ -35,7 +35,8 @@ int main(int argc, char* argv[])
 	size_t i;
 
 	fprintf(stderr, "create\n");
-	LuaHashMap* hash_map = LuaHashMap_Create();
+//	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 
 	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
