@@ -101,6 +101,8 @@ static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = "lhm.pointer";
 struct LuaHashMap
 {
 	lua_State* luaState;
+	lua_Alloc memoryAllocator;
+	void* allocatorUserData;
 	/*
 	size_t numberOfStringKeys;
 	size_t numberOfNumberKeys;
@@ -184,14 +186,19 @@ LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_allocator, void* user_d
 	{
 		return NULL;
 	}
-	hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+
+	hash_map = (LuaHashMap*)(*the_allocator)(user_data, NULL, 0, sizeof(LuaHashMap));
 	if(NULL == hash_map)
 	{
 		lua_close(lua_state);
 		return NULL;
 	}
+	memset(hash_map, 0, sizeof(LuaHashMap));
+
 	hash_map->luaState = lua_state;
-	
+	hash_map->memoryAllocator = the_allocator;
+	hash_map->allocatorUserData = user_data;
+
 	Internal_InitializeInternalTables(hash_map);
 	
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
@@ -214,8 +221,6 @@ LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int num
 		return NULL;
 	}
 	hash_map->luaState = lua_state;
-	
-	// Internal_InitializeInternalTables(hash_map);
 	
 	switch( 0x0F & key_type)
 	{
@@ -298,16 +303,19 @@ LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, 
 	{
 		return NULL;
 	}
-	hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+
+	hash_map = (LuaHashMap*)(*the_allocator)(user_data, NULL, 0, sizeof(LuaHashMap));
 	if(NULL == hash_map)
 	{
 		lua_close(lua_state);
 		return NULL;
 	}
+	memset(hash_map, 0, sizeof(LuaHashMap));
+
 	hash_map->luaState = lua_state;
-	
-	// Internal_InitializeInternalTables(hash_map);
-	
+	hash_map->memoryAllocator = the_allocator;
+	hash_map->allocatorUserData = user_data;
+
 	switch( 0x0F & key_type)
 	{
 		case LUAHASHMAP_KEYSTRING_TYPE:
@@ -387,8 +395,15 @@ void LuaHashMap_Free(LuaHashMap* hash_map)
 	{
 		return;
 	}
-	free(hash_map->luaState);
-	free(hash_map);
+	lua_close(hash_map->luaState);
+	if(NULL != hash_map->memoryAllocator)
+	{
+		(*hash_map->memoryAllocator)(hash_map->allocatorUserData, hash_map, sizeof(LuaHashMap), 0);
+	}
+	else
+	{
+		free(hash_map);
+	}
 }
 
 void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
