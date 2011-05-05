@@ -232,8 +232,10 @@ void LuaHashMap_InsertValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, 
 	
 	
 const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator);
-	
-	
+void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator);
+lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator);
+lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
+
 bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
 void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
 

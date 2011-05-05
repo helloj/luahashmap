@@ -43,6 +43,7 @@ class luahashmap_iterator : public std::iterator<std::forward_iterator_tag, Cont
 protected:
 //	friend class Container_;
 	Container_& hashMap;
+    LuaHashMapIterator luaHashMapIterator;
 	const char* currentKeyString;
 	typedef std::pair<const char*, const char*> value_type;
 
@@ -68,14 +69,17 @@ public:
 	std::pair<const char*, const char*> operator*()
 	{
 //		std::pair<const char*, const char*> value_type
-		LuaHashMap* luahash = hashMap.GetLuaHashMap();
-		return std::make_pair(currentKeyString, LuaHashMap_GetValueStringForKeyString(luahash, currentKeyString));
+//		LuaHashMap* luahash = hashMap.GetLuaHashMap();
+        
+        // User needs to be very careful about the pointer to the strings
+		return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator));
 //		value_type ret_val;
 //		return *this;
 	}
 	void setCurrentKey(const char* key)
 	{
-		currentKeyString = key;
+        luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(hashMap.GetLuaHashMap(), key);
+
 	}
 /*	
 	bool operator==(const Iterator& other)

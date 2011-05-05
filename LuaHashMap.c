@@ -2020,8 +2020,137 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 	{
 		return NULL;
 	}
-	return LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueStringForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueStringForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueStringForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
 }
+
+void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValuePointerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValuePointerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValuePointerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValuePointerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
+}
+
+lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueNumberForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueNumberForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueNumberForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueNumberForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0.0;
+	}
+}
+
+
+lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	
+	if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueIntegerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueIntegerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueIntegerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
+	}
+	else if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER == hash_iterator->whichTable)
+	{
+        return LuaHashMap_GetValueIntegerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger);
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0;
+	}
+}
+
 
 bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 {
