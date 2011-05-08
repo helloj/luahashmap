@@ -164,6 +164,8 @@ public:
 //	typedef _Key                                          const char*;
 //	typedef _Tp                                           const char*;
 	typedef std::pair<const char*, const char*> value_type;
+//    typedef __gnu_cxx::__normal_iterator<pointer, vector_type> iterator;
+
 //	typedef std::pair<const _Key, _Tp>                    value_type;
 	
 	lua_hash_map()
@@ -206,6 +208,15 @@ public:
 		iter.setCurrentKey(key_string);
 		return iter;
 	}
+    
+    luahashmap_iterator<lua_hash_map> begin()
+    {
+        
+        luahashmap_iterator<lua_hash_map<const char*, const char*> > the_iter(*this);
+        return the_iter.begin();
+    }
+    
+
 	
 	LuaHashMap* GetLuaHashMap() { return hashMap; }
 	
