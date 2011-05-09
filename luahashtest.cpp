@@ -51,6 +51,13 @@ int main(int argc, char* argv[])
 //	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
 	hash_map.insert(std::pair<const char*, const char*>("key3", "value3"));
 
+	
+	
+	ret_size = hash_map.size();
+	assert(3 == ret_size);
+	fprintf(stderr, "size=%d\n", ret_size);
+	
+	
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
 	ret_string = hash_map["key1"];
@@ -71,38 +78,62 @@ int main(int argc, char* argv[])
 //	fprintf(stderr, "ret_string=%s\n", ret_string);
 
 
-	lhm::luahashmap_iterator<lhm::lua_hash_map<const char*, const char*> > iter = hash_map.find("key3");
+//	lhm::luahashmap_iterator<lhm::lua_hash_map<const char*, const char*> > iter = hash_map.find("key3");
+	lhm::lua_hash_map<const char*, const char*>::iterator iter = hash_map.find("key3");
 
 	std::pair<const char*, const char*> ret_pair = *iter;
 //	ret_string = hash_map["key1"];
 //	assert(0 == Internal_safestrcmp("value1", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_pair.second);
+	fprintf(stderr, "*iter (pair)=%s, %s\n", ret_pair.first, ret_pair.second);
+
+
 
 	
-#if 0
+	fprintf(stderr, "erasing key3\n");
+	ret_size = hash_map.erase(iter);
+	assert(1 == ret_size);
+	
+	ret_size = hash_map.size();
+	assert(2 == ret_size);
+	
+	fprintf(stderr, "size=%d\n", ret_size);
 
-	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
-	assert(3 == ret_size);
-	for(i=0; i<ret_size; i++)
-	{
-		fprintf(stderr, "Key[%d] is %s\n", i, key_array[i]);
-	}
-
-	assert(0 == LuaHashMap_IsEmpty(hash_map));
-	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
-
-
-	LuaHashMap_Clear(hash_map);
-	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
+	fprintf(stderr, "erasing key3 again\n");
+	ret_size = hash_map.erase("key3");
 	assert(0 == ret_size);
 
 
-	assert(1 == LuaHashMap_IsEmpty(hash_map));
-	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
-	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
-		
+	fprintf(stderr, "erasing key2\n");
+	ret_size = hash_map.erase("key2");
+	assert(1 == ret_size);
 
-#endif
+	
+	hash_map.insert(std::pair<const char*, const char*>("key2", "value2"));
+	ret_size = hash_map.size();
+	assert(2 == ret_size);
+
+	hash_map.insert(std::pair<const char*, const char*>("key4", "value4"));
+	ret_size = hash_map.size();
+	assert(3 == ret_size);
+
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		fprintf(stderr, "*iter (pair)=%s, %s\n", (*iter).first, (*iter).second);
+	}
+	
+	
+	assert(false == hash_map.empty());
+	fprintf(stderr, "IsEmpty should be no: %d\n", hash_map.empty());
+
+
+	hash_map.clear();
+	ret_size = hash_map.size();
+	assert(0 == ret_size);
+
+	assert(true == hash_map.empty());
+	fprintf(stderr, "IsEmpty should be yes: %d\n", hash_map.empty());
+
+		
 
 	return 0;
 }

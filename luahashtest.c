@@ -25,6 +25,21 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 	}
 }
 
+
+
+static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
+	(void)ud;
+	(void)osize;
+	if (nsize == 0) {
+		free(ptr);
+		return NULL;
+	}
+	else
+		return realloc(ptr, nsize);
+}
+
+
+
 int main(int argc, char* argv[])
 {
 
@@ -36,7 +51,8 @@ int main(int argc, char* argv[])
 
 	fprintf(stderr, "create\n");
 //	LuaHashMap* hash_map = LuaHashMap_Create();
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
+//	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
+	LuaHashMap* hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 
 	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");

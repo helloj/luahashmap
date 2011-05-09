@@ -1814,7 +1814,7 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 	}
 }
 
-bool LuaHashMap_IteratorIsEqual(LuaHashMapIterator* hash_iterator1, LuaHashMapIterator* hash_iterator2)
+bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const LuaHashMapIterator* hash_iterator2)
 {
 	if(NULL == hash_iterator1 && NULL == hash_iterator2)
 	{
