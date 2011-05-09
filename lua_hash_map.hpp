@@ -330,9 +330,306 @@ public:
 			
 		}
 		
-		std::pair<const char*, void*> operator*()
+		std::pair<const char*, _TValue*> operator*()
 		{
 			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator));
+		}
+		
+		bool operator==(const iterator& the_other) const
+		{
+			return (true == LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		bool operator!=(const iterator& the_other) const
+		{
+			return (true != LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		const iterator& operator++()
+		{
+			LuaHashMap_IteratorNext(&this->luaHashMapIterator);
+			return *this;
+		}
+	};
+	
+	
+	iterator find(const char* key_string)
+	{
+		iterator the_iter(luaHashMap);
+		the_iter.set_current_key(key_string);
+		return the_iter;
+	}
+    
+    iterator begin()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_begin();
+		return the_iter;
+    }
+	iterator end()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_end();
+		return the_iter;
+    }
+	
+	size_t erase(iterator the_iterator)
+	{
+		return erase((*the_iterator).first);
+	}
+
+};
+
+	
+/* This seems stupid, but it seems I must reimplement every single method 
+ * for each partial specialization, even if I just want to reuse the base behavior.
+ */
+template<>
+class lua_hash_map<const char*, lua_Number>
+{
+protected:
+	LuaHashMap* luaHashMap;
+
+public:
+	typedef std::pair<const char*, lua_Number> value_type;
+	
+	lua_hash_map()
+	: luaHashMap(NULL)
+	{
+		luaHashMap = LuaHashMap_Create();
+	}
+	
+	~lua_hash_map()
+	{
+		LuaHashMap_Free(luaHashMap);
+	}
+	
+	void clear()
+	{
+		LuaHashMap_Clear(luaHashMap);
+	}
+	
+	bool empty() const
+	{
+		return LuaHashMap_IsEmpty(luaHashMap);
+	}
+	
+	size_t size() const
+	{
+		return LuaHashMap_GetKeysString(luaHashMap, NULL, 0);
+	}
+	
+	void insert(const value_type& key_value_pair)
+	{
+		LuaHashMap_InsertValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+	}
+	
+	size_t erase(const char* key)
+	{
+		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
+		{
+			LuaHashMap_RemoveKeyString(luaHashMap, key);
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	// This won't work right for assignment like foo[bar] = "fee";
+#ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
+	lua_Number operator[](const char* key_string)
+	{
+		lua_Number ret_val = LuaHashMap_GetValueNumberForKeyString(luaHashMap, key_string);
+		return ret_val;
+	}
+#endif
+	
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, lua_Number> >
+	{
+		LuaHashMapIterator luaHashMapIterator;
+		LuaHashMap* luaHashMap;
+		friend class lua_hash_map;
+
+		void set_begin()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+		}
+		void set_end()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+		}
+		
+		void set_current_key(const char* key)
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
+		}
+		
+	public:
+		iterator()
+		: luaHashMap(NULL)
+		{
+			
+		}
+		
+		iterator(LuaHashMap* lua_hash_map)
+		: luaHashMap(lua_hash_map)
+		{
+			
+		}
+		
+		std::pair<const char*, lua_Number> operator*()
+		{
+			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator));
+		}
+		
+		bool operator==(const iterator& the_other) const
+		{
+			return (true == LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		bool operator!=(const iterator& the_other) const
+		{
+			return (true != LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		const iterator& operator++()
+		{
+			LuaHashMap_IteratorNext(&this->luaHashMapIterator);
+			return *this;
+		}
+	};
+	
+	
+	iterator find(const char* key_string)
+	{
+		iterator the_iter(luaHashMap);
+		the_iter.set_current_key(key_string);
+		return the_iter;
+	}
+    
+    iterator begin()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_begin();
+		return the_iter;
+    }
+	iterator end()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_end();
+		return the_iter;
+    }
+	
+	size_t erase(iterator the_iterator)
+	{
+		return erase((*the_iterator).first);
+	}
+
+};
+
+/* This seems stupid, but it seems I must reimplement every single method 
+ * for each partial specialization, even if I just want to reuse the base behavior.
+ */
+template<>
+class lua_hash_map<const char*, lua_Integer>
+{
+protected:
+	LuaHashMap* luaHashMap;
+
+public:
+	typedef std::pair<const char*, lua_Integer> value_type;
+	
+	lua_hash_map()
+	: luaHashMap(NULL)
+	{
+		luaHashMap = LuaHashMap_Create();
+	}
+	
+	~lua_hash_map()
+	{
+		LuaHashMap_Free(luaHashMap);
+	}
+	
+	void clear()
+	{
+		LuaHashMap_Clear(luaHashMap);
+	}
+	
+	bool empty() const
+	{
+		return LuaHashMap_IsEmpty(luaHashMap);
+	}
+	
+	size_t size() const
+	{
+		return LuaHashMap_GetKeysString(luaHashMap, NULL, 0);
+	}
+	
+	void insert(const value_type& key_value_pair)
+	{
+		LuaHashMap_InsertValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+	}
+	
+	size_t erase(const char* key)
+	{
+		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
+		{
+			LuaHashMap_RemoveKeyString(luaHashMap, key);
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	// This won't work right for assignment like foo[bar] = "fee";
+#ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
+	lua_Integer operator[](const char* key_string)
+	{
+		lua_Integer ret_val = LuaHashMap_GetValueIntegerForKeyString(luaHashMap, key_string);
+		return ret_val;
+	}
+#endif
+	
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, lua_Integer> >
+	{
+		LuaHashMapIterator luaHashMapIterator;
+		LuaHashMap* luaHashMap;
+		friend class lua_hash_map;
+
+		void set_begin()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+		}
+		void set_end()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+		}
+		
+		void set_current_key(const char* key)
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
+		}
+		
+	public:
+		iterator()
+		: luaHashMap(NULL)
+		{
+			
+		}
+		
+		iterator(LuaHashMap* lua_hash_map)
+		: luaHashMap(lua_hash_map)
+		{
+			
+		}
+		
+		std::pair<const char*, lua_Integer> operator*()
+		{
+			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator));
 		}
 		
 		bool operator==(const iterator& the_other) const
