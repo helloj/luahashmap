@@ -290,9 +290,9 @@ public:
 	
 	// This won't work right for assignment like foo[bar] = "fee";
 #ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
-	void* operator[](const char* key_string)
+	_TValue* operator[](const char* key_string)
 	{
-		void* ret_val = LuaHashMap_GetValuePointerForKeyString(luaHashMap, key_string);
+		_TValue* ret_val = LuaHashMap_GetValuePointerForKeyString(luaHashMap, key_string);
 		return ret_val;
 	}
 #endif
@@ -330,9 +330,9 @@ public:
 			
 		}
 		
-		std::pair<const char*, _TValue*> operator*()
+		value_type operator*()
 		{
-			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator));
+			return std::make_pair(luaHashMapIterator.currentKey.keyString, static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -677,7 +677,157 @@ public:
 
 };
 
+
+
+/* This seems stupid, but it seems I must reimplement every single method 
+ * for each partial specialization, even if I just want to reuse the base behavior.
+ */
+template<typename _TKey, typename _TValue>
+class lua_hash_map<_TKey*, _TValue*>
+{
+protected:
+	LuaHashMap* luaHashMap;
+
+public:
+	typedef std::pair<_TKey*, _TValue*> value_type;
 	
+	lua_hash_map()
+	: luaHashMap(NULL)
+	{
+		luaHashMap = LuaHashMap_Create();
+	}
+	
+	~lua_hash_map()
+	{
+		LuaHashMap_Free(luaHashMap);
+	}
+	
+	void clear()
+	{
+		LuaHashMap_Clear(luaHashMap);
+	}
+	
+	bool empty() const
+	{
+		return LuaHashMap_IsEmpty(luaHashMap);
+	}
+	
+	size_t size() const
+	{
+		return LuaHashMap_GetKeysPointer(luaHashMap, NULL, 0);
+	}
+	
+	void insert(const value_type& key_value_pair)
+	{
+		LuaHashMap_InsertValuePointerForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
+	}
+	
+	size_t erase(_TKey* key)
+	{
+		if(true == LuaHashMap_ExistsKeyPointer(luaHashMap, key))
+		{
+			LuaHashMap_RemoveKeyPointer(luaHashMap, key);
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	// This won't work right for assignment like foo[bar] = "fee";
+#ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
+	_TValue* operator[](_TKey* key)
+	{
+		_TValue* ret_val = LuaHashMap_GetValuePointerForKeyPointer(luaHashMap, key);
+		return ret_val;
+	}
+#endif
+	
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<_TKey*, _TValue*> >
+	{
+		LuaHashMapIterator luaHashMapIterator;
+		LuaHashMap* luaHashMap;
+		friend class lua_hash_map;
+
+		void set_begin()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+		}
+		void set_end()
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+		}
+		
+		void set_current_key(_TKey* key)
+		{
+			luaHashMapIterator = LuaHashMap_GetIteratorForKeyPointer(luaHashMap, key);
+		}
+		
+	public:
+		iterator()
+		: luaHashMap(NULL)
+		{
+			
+		}
+		
+		iterator(LuaHashMap* lua_hash_map)
+		: luaHashMap(lua_hash_map)
+		{
+			
+		}
+		
+		value_type operator*()
+		{
+			return std::make_pair(static_cast<_TKey*>(luaHashMapIterator.currentKey.keyPointer), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
+		}
+		
+		bool operator==(const iterator& the_other) const
+		{
+			return (true == LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		bool operator!=(const iterator& the_other) const
+		{
+			return (true != LuaHashMap_IteratorIsEqual(&this->luaHashMapIterator, &(the_other.luaHashMapIterator)));
+		}
+		
+		const iterator& operator++()
+		{
+			LuaHashMap_IteratorNext(&this->luaHashMapIterator);
+			return *this;
+		}
+	};
+	
+	
+	iterator find(_TKey* key)
+	{
+		iterator the_iter(luaHashMap);
+		the_iter.set_current_key(key);
+		return the_iter;
+	}
+    
+    iterator begin()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_begin();
+		return the_iter;
+    }
+	iterator end()
+    {
+		iterator the_iter(luaHashMap);
+		the_iter.set_end();
+		return the_iter;
+    }
+	
+	size_t erase(iterator the_iterator)
+	{
+		return erase((*the_iterator).first);
+	}
+
+};
+
+
 	
 
 } /* end namespace */
