@@ -57,7 +57,8 @@ int DoKeyStringValueString()
 	assert(3 == ret_size);
 	fprintf(stderr, "size=%d\n", ret_size);
 	
-	
+#ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
+
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
 	ret_string = hash_map["key1"];
@@ -73,20 +74,33 @@ int DoKeyStringValueString()
 	ret_string = hash_map["key3"];
 	assert(0 == Internal_safestrcmp("value3", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
-//	hash_map["key3"] = "fee";
-//	ret_string = hash_map["key3"];
-//	fprintf(stderr, "ret_string=%s\n", ret_string);
+	
+	//	hash_map["key3"] = "fee";
+	//	ret_string = hash_map["key3"];
+	//	fprintf(stderr, "ret_string=%s\n", ret_string);
+	
+
+#endif
+	
+//	lhm::lua_hash_map<const char*, void*>::iterator iter = hash_map.find("key3");
+
+	lhm::lua_hash_map<const char*, const char*>::iterator iter;
+
+	iter = hash_map.find("key1");
+	fprintf(stderr, "*iter (pair)=%s, %s\n", (*iter).first, (*iter).second);
+	assert(0 == Internal_safestrcmp("value1", (*iter).second));
+
+	iter = hash_map.find("key2");
+	fprintf(stderr, "*iter (pair)=%s, %s\n", (*iter).first, (*iter).second);
+	assert(0 == Internal_safestrcmp("value2", (*iter).second));
+
+	iter = hash_map.find("key3");
+	fprintf(stderr, "*iter (pair)=%s, %s\n", (*iter).first, (*iter).second);
+	assert(0 == Internal_safestrcmp("value3", (*iter).second));
 
 
-//	lhm::luahashmap_iterator<lhm::lua_hash_map<const char*, const char*> > iter = hash_map.find("key3");
-	lhm::lua_hash_map<const char*, const char*>::iterator iter = hash_map.find("key3");
-
+	iter = hash_map.find("key3");
 	std::pair<const char*, const char*> ret_pair = *iter;
-//	ret_string = hash_map["key1"];
-//	assert(0 == Internal_safestrcmp("value1", ret_string));
-	fprintf(stderr, "*iter (pair)=%s, %s\n", ret_pair.first, ret_pair.second);
-
-
 
 	
 	fprintf(stderr, "erasing key3\n");
@@ -176,36 +190,12 @@ int DoKeyStringValuePointer()
 	ret_size = hash_map.size();
 	assert(3 == ret_size);
 	fprintf(stderr, "size=%d\n", ret_size);
-	
-	/*
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-	
-	ret_string = hash_map["key1"];
-	assert(0 == Internal_safestrcmp("value1", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-	
-	ret_string = hash_map["key2"];
-	assert(0 == Internal_safestrcmp("value2", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-	
-	ret_string = hash_map["key3"];
-	assert(0 == Internal_safestrcmp("value3", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-	 */
-	
-	//	hash_map["key3"] = "fee";
-	//	ret_string = hash_map["key3"];
-	//	fprintf(stderr, "ret_string=%s\n", ret_string);
-	
+
 	
 	//	lhm::luahashmap_iterator<lhm::lua_hash_map<const char*, const char*> > iter = hash_map.find("key3");
 	lhm::lua_hash_map<const char*, void*>::iterator iter = hash_map.find("key3");
 	
 	std::pair<const char*, void*> ret_pair = *iter;
-	//	ret_string = hash_map["key1"];
-	//	assert(0 == Internal_safestrcmp("value1", ret_string));
 	fprintf(stderr, "*iter (pair)=%s, %x\n", ret_pair.first, ret_pair.second);
 	
 	
