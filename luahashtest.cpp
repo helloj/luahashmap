@@ -780,14 +780,217 @@ int DoKeyPointerValueString()
 	return 0;
 }
 
+
+int DoKeyPointerValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer2, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyPointerValueInteger()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, lua_Integer> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer1, 1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer2, 2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer3, 3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, lua_Integer>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3 == (*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, lua_Integer> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer2, 2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer4, 4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
 int main(int argc, char* argv[])
 {
 	DoKeyStringValueString();
 	DoKeyStringValuePointer();
 	DoKeyStringValueNumber();
 	DoKeyStringValueInteger();
+    
 	DoKeyPointerValuePointer();
 	DoKeyPointer2ValuePointer2();
     DoKeyPointerValueString();
-	return 0;
+    DoKeyPointerValueNumber();
+    DoKeyPointerValueInteger();
+	
+    return 0;
 }
