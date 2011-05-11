@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <string.h>
 #include <iostream>
+#include <string>
+
 
 static int Internal_safestrcmp(const char* str1, const char* str2)
 {
@@ -1790,6 +1792,139 @@ int DoKeyNumberValueNumber()
 }
 
 
+int DoKeyStringCppValueStringCpp()
+{
+	size_t ret_val;
+
+	std::string key1 = std::string("key1");
+	std::string key2 = std::string("key2");
+	std::string key3 = std::string("key3");
+	std::string key4 = std::string("key4");
+
+	std::string value1 = std::string("value1");
+	std::string value2 = std::string("value2");
+	std::string value3 = std::string("value3");
+	std::string value4 = std::string("value4");
+	
+	std::cerr << "create\n";
+	lhm::lua_hash_map<std::string, std::string> hash_map;
+	
+	
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<std::string, std::string>(key1, value1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<std::string, std::string>(key2, value2));
+
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<std::string, std::string>(key3, value3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+#ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
+	const char* ret_string = NULL;
+	
+	std::cerr << "bracket[]\n";
+	
+	ret_string = hash_map["key1"];
+	assert(0 == Internal_safestrcmp("value1", ret_string));
+	std::cerr << "ret_string=" << ret_string << std::endl;
+	
+	std::cerr << "bracket[]\n";
+	
+	ret_string = hash_map["key2"];
+	assert(0 == Internal_safestrcmp("value2", ret_string));
+	std::cerr << "ret_string=" << ret_string << std::endl;
+	std::cerr << "bracket[]\n";
+	
+	ret_string = hash_map["key3"];
+	assert(0 == Internal_safestrcmp("value3", ret_string));
+	std::cerr << "ret_string=" << ret_string << std::endl;
+	
+	//	hash_map["key3"] = "fee";
+	//	ret_string = hash_map["key3"];
+	// std::cerr << "ret_string=" << ret_string << std::endl;
+	
+	
+#endif
+	
+	//	lhm::lua_hash_map<const char*, void*>::iterator iter = hash_map.find("key3");
+	
+	lhm::lua_hash_map<std::string, std::string>::iterator iter;
+	
+	iter = hash_map.find(key1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(value1 == (*iter).second);
+	
+	iter = hash_map.find(key2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(value2 == (*iter).second);
+	
+	iter = hash_map.find(key3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(value3 == (*iter).second);
+	
+	
+	iter = hash_map.find(key3);
+	std::pair<std::string, std::string> ret_pair = *iter;
+	
+	
+	std::cerr << "erasing key3\n";
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(key3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(key2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<std::string, std::string>(key2, value2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<std::string, std::string>(key4, value4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+
 int main(int argc, char* argv[])
 {
 	DoKeyStringValueString();
@@ -1813,7 +1948,7 @@ int main(int argc, char* argv[])
 	DoKeyNumberValueInteger();
 	DoKeyNumberValueNumber();
 	
-	
+	DoKeyStringCppValueStringCpp();
 	
     return 0;
 }
