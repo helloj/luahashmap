@@ -1280,6 +1280,106 @@ int DoKeyIntegerValueInteger()
 	return 0;
 }
 
+int DoKeyIntegerValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Integer, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Integer, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3);
+	
+	std::pair<lua_Integer, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(2, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
 int main(int argc, char* argv[])
 {
 	DoKeyStringValueString();
@@ -1296,6 +1396,8 @@ int main(int argc, char* argv[])
     DoKeyIntegerValuePointer();
 	DoKeyIntegerValueString();
 	DoKeyIntegerValueInteger();
+	DoKeyIntegerValueNumber();
+	
 	
     return 0;
 }
