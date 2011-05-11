@@ -1543,7 +1543,8 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 			}
 			default:
 			{
-				hash_iterator->currentKey.keyPointer = NULL;
+				/* Clear the largest field to make sure every thing is cleared. */
+				memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyType));
 			}
 		}
 		
@@ -1553,7 +1554,8 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 	else
 	{
 		hash_iterator->atEnd = true;
-		hash_iterator->currentKey.keyPointer = NULL;
+		/* Clear the largest field to make sure every thing is cleared. */
+		memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyType));
 		
 		/* pop table */
 		lua_pop(hash_map->luaState, 1);
@@ -1628,7 +1630,8 @@ static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, const ch
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = table_name;
 	the_iterator.atEnd = true;
-	the_iterator.currentKey.keyPointer = NULL;
+	/* Clear the largest field to make sure every thing is cleared. */
+	memset(&the_iterator.currentKey, 0, sizeof(union LuaHashMapKeyType));
 	return the_iterator;
 }
 
@@ -1838,6 +1841,12 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
 		{
 			return false;
 		}
+		/* If the iterators are both atEnd, we can consider them equal. */
+		if(true == hash_iterator1->atEnd)
+		{
+			return true;
+		}
+		 
 		
 		if(LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING == hash_iterator1->whichTable)
 		{

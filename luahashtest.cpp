@@ -1380,6 +1380,416 @@ int DoKeyIntegerValueNumber()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int DoKeyNumberValuePointer()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, void*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, void*>(1.1, s_valuePointer1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, void*>(2.2, s_valuePointer2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, void*>(3.3, s_valuePointer3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, void*>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(0x1 == (int)(*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0x2 == (int)(*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0x3 == (int)(*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, void*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, void*>(2.5, s_valuePointer2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, void*>(4.4, s_valuePointer4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyNumberValueString()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, const char*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(1.1, "value1"));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(2.2, "value2"));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(3.3, "value3"));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, const char*>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(0 == Internal_safestrcmp("value1", (*iter).second));
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value2", (*iter).second));
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value3", (*iter).second));
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, const char*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, const char*>(2.5, "value2"));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, const char*>(4.4, "value4"));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+int DoKeyNumberValueInteger()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, lua_Integer> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(1.1, 1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(2.2, 2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(3.3, 3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, lua_Integer>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1 == (*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2 == (*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, lua_Integer> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(2.5, 2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(4.4, 4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+int DoKeyNumberValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(1.1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(2.2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(3.3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, lua_Number>(2.5, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, lua_Number>(4.4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
 int main(int argc, char* argv[])
 {
 	DoKeyStringValueString();
@@ -1397,6 +1807,12 @@ int main(int argc, char* argv[])
 	DoKeyIntegerValueString();
 	DoKeyIntegerValueInteger();
 	DoKeyIntegerValueNumber();
+	
+	DoKeyNumberValuePointer();
+	DoKeyNumberValueString();
+	DoKeyNumberValueInteger();
+	DoKeyNumberValueNumber();
+	
 	
 	
     return 0;
