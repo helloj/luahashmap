@@ -88,8 +88,9 @@ protected:
 	LuaHashMap* luaHashMap;
 
 public:
-	typedef std::pair<const char*, const char*> pair_type;
-
+	typedef const char* _TKey;
+	typedef const char* _TValue;
+	typedef std::pair<_TKey, _TValue> pair_type;
 	
 	lua_hash_map()
 	: luaHashMap(NULL)
@@ -122,7 +123,7 @@ public:
 		LuaHashMap_InsertValueStringForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
-	size_t erase(const char* key)
+	size_t erase(_TKey key)
 	{
 		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
 		{
@@ -137,14 +138,14 @@ public:
 	
 	// This won't work right for assignment like foo[bar] = "fee";
 #ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
-	const char* operator[](const char* key_string)
+	const char* operator[](_TKey key_string)
 	{
-		const char* ret_val = LuaHashMap_GetValueStringForKeyString(luaHashMap, key_string);
+		_TKey ret_val = LuaHashMap_GetValueStringForKeyString(luaHashMap, key_string);
 		return ret_val;
 	}
 #endif
 	
-	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, const char*> >
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<_TKey, _TValue> >
 	{
 		LuaHashMapIterator luaHashMapIterator;
 		LuaHashMap* luaHashMap;
@@ -159,7 +160,7 @@ public:
 			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
 		}
 		
-		void set_current_key(const char* key)
+		void set_current_key(_TKey key)
 		{
 			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
 		}
@@ -177,10 +178,10 @@ public:
 			
 		}
 		
-		std::pair<const char*, const char*> operator*()
+		pair_type operator*()
 		{
 			// User needs to be very careful about the pointer to the strings
-			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyString), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -201,7 +202,7 @@ public:
 	};
 	
 	
-	iterator find(const char* key_string)
+	iterator find(_TKey key_string)
 	{
 		iterator the_iter(luaHashMap);
 		the_iter.set_current_key(key_string);
@@ -242,7 +243,8 @@ protected:
 	LuaHashMap* luaHashMap;
 
 public:
-	typedef std::pair<const char*, _TValue*> pair_type;
+	typedef const char* _TKey;
+	typedef std::pair<_TKey, _TValue*> pair_type;
 	
 	lua_hash_map()
 	: luaHashMap(NULL)
@@ -275,7 +277,7 @@ public:
 		LuaHashMap_InsertValuePointerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
-	size_t erase(const char* key)
+	size_t erase(_TKey key)
 	{
 		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
 		{
@@ -290,14 +292,14 @@ public:
 	
 	// This won't work right for assignment like foo[bar] = "fee";
 #ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
-	_TValue* operator[](const char* key_string)
+	_TValue* operator[](_TKey key_string)
 	{
 		_TValue* ret_val = LuaHashMap_GetValuePointerForKeyString(luaHashMap, key_string);
 		return ret_val;
 	}
 #endif
 	
-	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, _TValue*> >
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<_TKey, _TValue*> >
 	{
 		LuaHashMapIterator luaHashMapIterator;
 		LuaHashMap* luaHashMap;
@@ -312,7 +314,7 @@ public:
 			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
 		}
 		
-		void set_current_key(const char* key)
+		void set_current_key(_TKey key)
 		{
 			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
 		}
@@ -332,7 +334,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(luaHashMapIterator.currentKey.keyString, static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyString), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -353,7 +355,7 @@ public:
 	};
 	
 	
-	iterator find(const char* key_string)
+	iterator find(_TKey key_string)
 	{
 		iterator the_iter(luaHashMap);
 		the_iter.set_current_key(key_string);
@@ -391,7 +393,9 @@ protected:
 	LuaHashMap* luaHashMap;
 
 public:
-	typedef std::pair<const char*, lua_Number> pair_type;
+	typedef const char* _TKey;
+	typedef lua_Number _TValue;
+	typedef std::pair<_TKey, _TValue> pair_type;
 	
 	lua_hash_map()
 	: luaHashMap(NULL)
@@ -424,7 +428,7 @@ public:
 		LuaHashMap_InsertValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
-	size_t erase(const char* key)
+	size_t erase(_TKey key)
 	{
 		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
 		{
@@ -439,14 +443,14 @@ public:
 	
 	// This won't work right for assignment like foo[bar] = "fee";
 #ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
-	lua_Number operator[](const char* key_string)
+	lua_Number operator[](_TKey key_string)
 	{
 		lua_Number ret_val = LuaHashMap_GetValueNumberForKeyString(luaHashMap, key_string);
 		return ret_val;
 	}
 #endif
 	
-	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, lua_Number> >
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<_TKey, lua_Number> >
 	{
 		LuaHashMapIterator luaHashMapIterator;
 		LuaHashMap* luaHashMap;
@@ -461,7 +465,7 @@ public:
 			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
 		}
 		
-		void set_current_key(const char* key)
+		void set_current_key(_TKey key)
 		{
 			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
 		}
@@ -479,9 +483,9 @@ public:
 			
 		}
 		
-		std::pair<const char*, lua_Number> operator*()
+		std::pair<_TKey, lua_Number> operator*()
 		{
-			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyString), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -502,7 +506,7 @@ public:
 	};
 	
 	
-	iterator find(const char* key_string)
+	iterator find(_TKey key_string)
 	{
 		iterator the_iter(luaHashMap);
 		the_iter.set_current_key(key_string);
@@ -539,7 +543,9 @@ protected:
 	LuaHashMap* luaHashMap;
 
 public:
-	typedef std::pair<const char*, lua_Integer> pair_type;
+	typedef const char* _TKey;
+	typedef lua_Integer _TValue;
+	typedef std::pair<_TKey, _TValue> pair_type;
 	
 	lua_hash_map()
 	: luaHashMap(NULL)
@@ -572,7 +578,7 @@ public:
 		LuaHashMap_InsertValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
-	size_t erase(const char* key)
+	size_t erase(_TKey key)
 	{
 		if(true == LuaHashMap_ExistsKeyString(luaHashMap, key))
 		{
@@ -587,14 +593,14 @@ public:
 	
 	// This won't work right for assignment like foo[bar] = "fee";
 #ifdef LUAHASHMAPCPP_USE_BRACKET_OPERATOR
-	lua_Integer operator[](const char* key_string)
+	lua_Integer operator[](_TKey key_string)
 	{
 		lua_Integer ret_val = LuaHashMap_GetValueIntegerForKeyString(luaHashMap, key_string);
 		return ret_val;
 	}
 #endif
 	
-	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<const char*, lua_Integer> >
+	class iterator : public std::iterator<std::forward_iterator_tag, lua_hash_map<_TKey, lua_Integer> >
 	{
 		LuaHashMapIterator luaHashMapIterator;
 		LuaHashMap* luaHashMap;
@@ -609,7 +615,7 @@ public:
 			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
 		}
 		
-		void set_current_key(const char* key)
+		void set_current_key(_TKey key)
 		{
 			luaHashMapIterator = LuaHashMap_GetIteratorForKeyString(luaHashMap, key);
 		}
@@ -627,9 +633,9 @@ public:
 			
 		}
 		
-		std::pair<const char*, lua_Integer> operator*()
+		std::pair<_TKey, lua_Integer> operator*()
 		{
-			return std::make_pair(luaHashMapIterator.currentKey.keyString, LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyString), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -650,7 +656,7 @@ public:
 	};
 	
 	
-	iterator find(const char* key_string)
+	iterator find(_TKey key_string)
 	{
 		iterator the_iter(luaHashMap);
 		the_iter.set_current_key(key_string);
