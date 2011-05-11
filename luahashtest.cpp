@@ -1949,6 +1949,20 @@ int main(int argc, char* argv[])
 	DoKeyNumberValueNumber();
 	
 	DoKeyStringCppValueStringCpp();
+	// TODO: Add tests for
+	/*
+	DoKeyStringCppValueString();
+	DoKeyStringValueStringCpp();
+	 
+	DoKeyStringCppValuePointer();
+	DoKeyStringCppValueNumber();
+	DoKeyStringCppValueInteger();
 	
+	DoKeyPointerValueStringCpp();
+	DoKeyIntegerValueStringCpp();
+	DoKeyNumberValueStringCpp();
+	 */
+
+
     return 0;
 }
