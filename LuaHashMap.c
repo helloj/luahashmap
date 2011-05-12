@@ -406,6 +406,15 @@ void LuaHashMap_Free(LuaHashMap* hash_map)
 	}
 }
 
+lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return hash_map->luaState;
+}
+
 void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
 {
 	if(NULL == hash_map)
