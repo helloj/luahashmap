@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
+
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 #include <QuartzCore/QuartzCore.h>
 #endif
@@ -41,20 +43,22 @@ static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
 }
 
 
+#define MAX_ARRAY_SIZE 10
 
 int main(int argc, char* argv[])
 {
 
 	const char* ret_string = NULL;
-	const size_t MAX_ARRAY_SIZE = 10;
 	const char* key_array[MAX_ARRAY_SIZE];
 	size_t ret_size;
 	size_t i;
+	LuaHashMap* hash_map;
+	LuaHashMapIterator the_iterator;
 
 	fprintf(stderr, "create\n");
-	LuaHashMap* hash_map = LuaHashMap_Create();
-//	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
-//	LuaHashMap* hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
+	hash_map = LuaHashMap_Create();
+//	hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
+//	hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 
 	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
@@ -96,7 +100,7 @@ int main(int argc, char* argv[])
 
 
 
-	LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
+	the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
 	do
 	{
 		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));		
