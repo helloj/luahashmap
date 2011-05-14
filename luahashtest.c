@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 #include <QuartzCore/QuartzCore.h>
+#endif
 
 static int Internal_safestrcmp(const char* str1, const char* str2)
 {
@@ -50,9 +52,9 @@ int main(int argc, char* argv[])
 	size_t i;
 
 	fprintf(stderr, "create\n");
-//	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMap* hash_map = LuaHashMap_Create();
 //	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
-	LuaHashMap* hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
+//	LuaHashMap* hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 
 	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
@@ -111,6 +113,7 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
 	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
 	
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	void* ret_ptr = NULL;	
@@ -127,6 +130,8 @@ int main(int argc, char* argv[])
 	CFTimeInterval end_time = CACurrentMediaTime();
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
+#endif
+
 
 	LuaHashMap_Free(hash_map);
 	fprintf(stderr, "Program passed all tests!\n");
