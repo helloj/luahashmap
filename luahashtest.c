@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+//#define ENABLE_BENCHMARK
+
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 #include <QuartzCore/QuartzCore.h>
 #endif

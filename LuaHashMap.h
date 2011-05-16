@@ -87,6 +87,21 @@ extern "C" {
 
 typedef struct LuaHashMap LuaHashMap;
 
+/* This was an experiment to see if integer keys on the global table with 
+ * rawset/geti was faster than the rawset/get with light userdata keys (which 
+ * are also effectively integers).
+ * My benchmarks are inconclusive, testing with 10000000 insert/removes.
+ * They appear to be the same speed, though I've seen large timing variations in
+ * both tests.
+ */
+#define LUAHASHMAP_USE_INDEX_LOOKUP
+
+#ifdef LUAHASHMAP_USE_INDEX_LOOKUP
+	typedef lua_Number LuaHashMap_InternalGlobalKeyType;
+#else
+	typedef const char* LuaHashMap_InternalGlobalKeyType;
+#endif
+	
 /* Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
  * This allows you to use iterators without worrying about leaking.
  */
@@ -96,7 +111,7 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 	 * You should probably not directly touch.
 	 */
 	LuaHashMap* hashMap;
-	const char* whichTable;
+	LuaHashMap_InternalGlobalKeyType whichTable;
 	bool atEnd;
 	union LuaHashMapKeyType
 	{

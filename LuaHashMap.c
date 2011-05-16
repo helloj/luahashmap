@@ -82,25 +82,32 @@
 
 #if 1
 
-	#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) \
-		lua_pushlightuserdata(hash_map->luaState, (void*)unique_string_pointer); \
-		LUAHASHMAP_GETTABLE(hash_map->luaState, LUA_GLOBALSINDEX);
+	#ifdef LUAHASHMAP_USE_INDEX_LOOKUP
+		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_GLOBALSINDEX, unique_key)
 
-	/* The lua_insert is used to swap the value and key positions because settable assumes the order:
-		lua_pushlightuserdata(hash_map->luaState, (void*)LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
-		lua_newtable(hash_map->luaState);	
-		LUAHASHMAP_SETTABLE(hash_map->luaState, LUA_GLOBALSINDEX);
-	 
-		But with this API, the user must have already pushed the newtable before calling this.
-	 */
+		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key)
 
-	#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) \
-		lua_pushlightuserdata(hash_map->luaState, (void*)unique_string_pointer); \
-		lua_insert(lua_state, -2); \
-		LUAHASHMAP_SETTABLE(lua_state, LUA_GLOBALSINDEX);
+	#else
+		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) \
+			lua_pushlightuserdata(lua_state, (void*)unique_string_pointer); \
+			LUAHASHMAP_GETTABLE(lua_state, LUA_GLOBALSINDEX);
 
+		/* The lua_insert is used to swap the value and key positions because settable assumes the order:
+			lua_pushlightuserdata(hash_map->luaState, (void*)LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING);
+			lua_newtable(hash_map->luaState);	
+			LUAHASHMAP_SETTABLE(hash_map->luaState, LUA_GLOBALSINDEX);
+		 
+			But with this API, the user must have already pushed the newtable before calling this.
+		 */
+
+		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) \
+			lua_pushlightuserdata(lua_state, (void*)unique_string_pointer); \
+			lua_insert(lua_state, -2); \
+			LUAHASHMAP_SETTABLE(lua_state, LUA_GLOBALSINDEX);
+
+	#endif
 #else
-	#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) lua_getglobal(hash_map->luaState, unique_string_pointer)
+	#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) lua_getglobal(lua_state, unique_string_pointer)
 
 	#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_string_pointer) lua_setglobal(lua_state, unique_string_pointer)
 
@@ -114,12 +121,18 @@
 #endif
 
 
-
+#ifdef LUAHASHMAP_USE_INDEX_LOOKUP
+static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = 1;
+static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = 2;
+static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = 3;
+static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = 4;
+#else
 //static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = "lhm.string";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = "lhm.number";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = "lhm.integer";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = "lhm.pointer";
+#endif
 
 struct LuaHashMap
 {
@@ -1429,7 +1442,7 @@ size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[],
 	return total_count;
 }
 
-void Internal_Clear(LuaHashMap* hash_map, const char* table_name)
+void Internal_Clear(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, table_name); /* stack: [table] */
 	lua_pushnil(hash_map->luaState);  /* first key */
@@ -1471,7 +1484,7 @@ void LuaHashMap_Clear(LuaHashMap* hash_map)
 	LUAHASHMAP_ASSERT(true == LuaHashMap_IsEmpty(hash_map));
 }
 
-static bool Internal_IsEmpty(LuaHashMap* hash_map, const char* table_name)
+static bool Internal_IsEmpty(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	bool is_empty;
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, table_name); /* stack: [table] */
@@ -1515,8 +1528,8 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map)
 static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 {
 	LuaHashMap* hash_map = hash_iterator->hashMap;
-	const char* table_name = hash_iterator->whichTable;
-	
+	LuaHashMap_InternalGlobalKeyType table_name = hash_iterator->whichTable;
+
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, table_name); /* stack: [table] */
 	
 	 /* first key */
@@ -1597,7 +1610,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 	return (false == hash_iterator->atEnd);
 }
 
-static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const char* table_name)
+static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LuaHashMapIterator the_iterator;
 	the_iterator.hashMap = hash_map;
@@ -1656,7 +1669,7 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, const 
 	return the_iterator;
 }
 
-static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, const char* table_name)
+static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LuaHashMapIterator the_iterator;
 	the_iterator.hashMap = hash_map;
