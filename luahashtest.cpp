@@ -2860,5 +2860,6 @@ int main(int argc, char* argv[])
 	DoKeyNumberValueStringCpp();
 
 	
+	fprintf(stderr, "Program passed all tests!\n");
     return 0;
 }

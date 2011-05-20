@@ -122,10 +122,10 @@
 
 
 #ifdef LUAHASHMAP_USE_INDEX_LOOKUP
-static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = 1;
-static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = 2;
-static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = 3;
-static const lua_Number LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = 4;
+static const lua_Integer LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = 1;
+static const lua_Integer LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER = 2;
+static const lua_Integer LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER = 3;
+static const lua_Integer LUAHASHMAP_DEFAULT_TABLE_NAME_KEYPOINTER = 4;
 #else
 //static const char* LUAHASHMAP_DEFAULT_TABLE_NAME = "lhm";
 static const char* LUAHASHMAP_DEFAULT_TABLE_NAME_KEYSTRING = "lhm.string";
@@ -1229,7 +1229,7 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 	if(NULL == key_pointer)
 	{
@@ -1261,7 +1261,7 @@ bool LuaHashMap_ExistsKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYNUMBER); /* stack: [table] */
@@ -1288,7 +1288,7 @@ bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, LUAHASHMAP_DEFAULT_TABLE_NAME_KEYINTEGER); /* stack: [table] */
