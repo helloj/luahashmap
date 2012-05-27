@@ -174,7 +174,7 @@ LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_allocator, void* user_d
 }
 
 
-LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type)
+LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements)
 {
 	LuaHashMap* hash_map;
 	lua_State* lua_state = luaL_newstate();
@@ -224,7 +224,7 @@ LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int num
 }
 
 
-LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type)
+LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements)
 {
 	LuaHashMap* hash_map;
 	lua_State* lua_state = lua_newstate(the_allocator, user_data);
@@ -306,7 +306,7 @@ LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map)
 }
 
 
-LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type)
+LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements)
 {
 	LuaHashMap* hash_map;
 	if(NULL == original_hash_map->memoryAllocator)

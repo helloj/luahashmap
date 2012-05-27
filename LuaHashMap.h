@@ -124,6 +124,8 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;
 
+/* No longer used. */
+/*
 #define LUAHASHMAP_KEYSTRING_TYPE		0x01
 #define LUAHASHMAP_KEYPOINTER_TYPE		0x02
 #define LUAHASHMAP_KEYNUMBER_TYPE		0x04
@@ -133,12 +135,13 @@ typedef struct LuaHashMapIterator LuaHashMapIterator;
 #define LUAHASHMAP_VALUEPOINTER_TYPE	0x20
 #define LUAHASHMAP_VALUENUMBER_TYPE		0x40
 #define LUAHASHMAP_VALUEINTEGER_TYPE	0x80
-
+*/
+	
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_Create(void);
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_allocator, void* user_data);
 
-LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
-LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements);
 
 /* Special Memory Optimization: Allows you to create new LuaHashMaps from an existing one which will share the same lua_State under the hood.
  * My measurements of a new lua_State instance seem to take about 4-5KB on 64-bit Mac. This will avoid incuring that cost.
@@ -147,7 +150,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_All
  * Make sure to free any shared maps with FreeShare() before you close the final hash map with Free() as Free() calls lua_close().
  */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map);
-LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements);
 
 
 /* Important Note: This closes the lua_State. If there are any shared hash maps (used CreateShare), 
