@@ -1156,7 +1156,7 @@ bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 	if(NULL == key_pointer)
 	{
@@ -1188,7 +1188,7 @@ bool LuaHashMap_ExistsKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
@@ -1215,7 +1215,7 @@ bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
 	bool ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return false;
 	}
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
@@ -2348,6 +2348,7 @@ int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator)
 int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 {
 	int ret_val;
+	LuaHashMap* hash_map;
 	if(NULL == hash_iterator)
 	{
 		return LUA_TNONE;
@@ -2357,7 +2358,7 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 		return LUA_TNONE;
 	}
 	
-	LuaHashMap* hash_map = hash_iterator->hashMap;
+	hash_map = hash_iterator->hashMap;
 	if(NULL == hash_map)
 	{
 		return LUA_TNONE;

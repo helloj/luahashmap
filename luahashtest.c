@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 	assert(3 == ret_size);
 	for(i=0; i<ret_size; i++)
 	{
-		fprintf(stderr, "Key[%d] is %s\n", i, key_array[i]);
+		fprintf(stderr, "Key[%zd] is %s\n", i, key_array[i]);
 	}
 
 	assert(0 == LuaHashMap_IsEmpty(hash_map));
