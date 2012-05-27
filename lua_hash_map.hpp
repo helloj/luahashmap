@@ -121,7 +121,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -275,7 +275,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValuePointerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValuePointerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -426,7 +426,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -576,7 +576,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -726,7 +726,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValuePointerForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey* key)
@@ -880,7 +880,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey* key)
@@ -1031,7 +1031,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueNumberForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueNumberForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey* key)
@@ -1181,7 +1181,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueIntegerForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueIntegerForKeyPointer(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey* key)
@@ -1331,7 +1331,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValuePointerForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValuePointerForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -1481,7 +1481,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -1631,7 +1631,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueIntegerForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -1782,7 +1782,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueNumberForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueNumberForKeyInteger(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -1931,7 +1931,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValuePointerForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValuePointerForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -2081,7 +2081,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -2231,7 +2231,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueIntegerForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueIntegerForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -2381,7 +2381,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
+		LuaHashMap_SetValueNumberForKeyNumber(luaHashMap, key_value_pair.second, key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -2537,7 +2537,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
+		LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
 	}
 	
 	size_t erase(_TKey key)
@@ -2690,7 +2690,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -2843,7 +2843,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first.c_str());
+		LuaHashMap_SetValueStringForKeyString(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first.c_str());
 	}
 	
 	size_t erase(_TKey key)
@@ -2994,7 +2994,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValuePointerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
+		LuaHashMap_SetValuePointerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
 	}
 	
 	size_t erase(_TKey key)
@@ -3145,7 +3145,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
+		LuaHashMap_SetValueNumberForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
 	}
 	
 	size_t erase(_TKey key)
@@ -3295,7 +3295,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
+		LuaHashMap_SetValueIntegerForKeyString(luaHashMap, key_value_pair.second, key_value_pair.first.c_str());
 	}
 	
 	size_t erase(_TKey key)
@@ -3448,7 +3448,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyPointer(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyPointer(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
 	}
 	
 	size_t erase(_TKey* key)
@@ -3600,7 +3600,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyInteger(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyInteger(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
@@ -3751,7 +3751,7 @@ public:
 	
 	void insert(const pair_type& key_value_pair)
 	{
-		LuaHashMap_LuaHashMap_SetValueStringForKeyNumber(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
+		LuaHashMap_SetValueStringForKeyNumber(luaHashMap, key_value_pair.second.c_str(), key_value_pair.first);
 	}
 	
 	size_t erase(_TKey key)
