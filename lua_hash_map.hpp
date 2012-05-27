@@ -154,11 +154,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -308,11 +308,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -459,11 +459,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -609,11 +609,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -759,11 +759,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey* key)
@@ -913,11 +913,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey* key)
@@ -1064,11 +1064,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey* key)
@@ -1214,11 +1214,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey* key)
@@ -1364,11 +1364,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -1390,7 +1390,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyInteger), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyNumber), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -1514,11 +1514,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -1540,7 +1540,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyInteger), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyNumber), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -1664,11 +1664,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -1690,7 +1690,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyInteger), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyNumber), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -1815,11 +1815,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -1841,7 +1841,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyInteger), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyNumber), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -1964,11 +1964,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -2114,11 +2114,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -2264,11 +2264,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -2414,11 +2414,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -2570,11 +2570,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -2723,11 +2723,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -2876,11 +2876,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -3027,11 +3027,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -3178,11 +3178,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -3328,11 +3328,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyString(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey key)
@@ -3481,11 +3481,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyPointer(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		
 		void set_current_key(_TKey* key)
@@ -3633,11 +3633,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyInteger(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{
@@ -3659,7 +3659,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyInteger), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.keyNumber), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -3784,11 +3784,11 @@ public:
 
 		void set_begin()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtBeginForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtBegin(luaHashMap);			
 		}
 		void set_end()
 		{
-			luaHashMapIterator = LuaHashMap_GetIteratorAtEndForKeyNumber(luaHashMap);			
+			luaHashMapIterator = LuaHashMap_GetIteratorAtEnd(luaHashMap);			
 		}
 		void set_current_key(_TKey key)
 		{

@@ -11,13 +11,17 @@
 		007D0900136D117300ADDD65 /* LuaHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 007D08FE136D117300ADDD65 /* LuaHashMap.h */; };
 		007D0910136D11A900ADDD65 /* luahashtest.c in Sources */ = {isa = PBXBuildFile; fileRef = 007D090F136D11A900ADDD65 /* luahashtest.c */; };
 		007D0911136D11D400ADDD65 /* libLuaHashMap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */; };
-		007D0917136D127A00ADDD65 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D0916136D127A00ADDD65 /* LuaCocoa.framework */; };
-		007D0919136D128800ADDD65 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D0918136D128800ADDD65 /* LuaCocoa.framework */; };
-		007D0935136D12D000ADDD65 /* LuaCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D0934136D12D000ADDD65 /* LuaCocoa.framework */; };
 		007D0936136D12D400ADDD65 /* libLuaHashMap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */; };
 		007D0939136D131100ADDD65 /* luahashtest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 007D0938136D131100ADDD65 /* luahashtest.cpp */; };
 		009ADB09136FEBD20027F0AD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 009ADB08136FEBD20027F0AD /* QuartzCore.framework */; };
 		009ADB0C136FEBDF0027F0AD /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */; };
+		00B0CE4615720EF500FF3908 /* lua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B0CE4515720EF500FF3908 /* lua.framework */; };
+		00B0CE4715720F0700FF3908 /* lua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B0CE4515720EF500FF3908 /* lua.framework */; };
+		00B0CE4815720F0F00FF3908 /* lua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B0CE4515720EF500FF3908 /* lua.framework */; };
+		00B0CE5E1572123900FF3908 /* lua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B0CE4515720EF500FF3908 /* lua.framework */; };
+		00B0CE5F1572123900FF3908 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */; };
+		00B0CE601572123900FF3908 /* libLuaHashMap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */; };
+		00B0CE69157212C900FF3908 /* luahashtestshared.c in Sources */ = {isa = PBXBuildFile; fileRef = 00B0CE671572127100FF3908 /* luahashtestshared.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,6 +43,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		00B0CE611572123900FF3908 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -47,14 +60,14 @@
 		007D08FE136D117300ADDD65 /* LuaHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = LuaHashMap.h; path = ../LuaHashMap.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		007D0906136D118F00ADDD65 /* luahashtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = luahashtest.c; path = ../luahashtest.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		007D0916136D127A00ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
-		007D0918136D128800ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D092B136D12C500ADDD65 /* luahashtestcpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtestcpp; sourceTree = BUILT_PRODUCTS_DIR; };
-		007D0934136D12D000ADDD65 /* LuaCocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LuaCocoa.framework; path = ../../../../../../../../Library/Frameworks/LuaCocoa.framework; sourceTree = "<group>"; };
 		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_hash_map.hpp; path = ../lua_hash_map.hpp; sourceTree = SOURCE_ROOT; };
 		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luahashtest.cpp; path = ../luahashtest.cpp; sourceTree = SOURCE_ROOT; };
 		009ADB08136FEBD20027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		00B0CE4515720EF500FF3908 /* lua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = lua.framework; path = Library/Frameworks/lua.framework; sourceTree = SDKROOT; };
+		00B0CE651572123900FF3908 /* luahashtest copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "luahashtest copy"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00B0CE671572127100FF3908 /* luahashtestshared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = luahashtestshared.c; path = ../luahashtestshared.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				007D0917136D127A00ADDD65 /* LuaCocoa.framework in Frameworks */,
+				00B0CE4615720EF500FF3908 /* lua.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,8 +83,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00B0CE4815720F0F00FF3908 /* lua.framework in Frameworks */,
 				009ADB0C136FEBDF0027F0AD /* QuartzCore.framework in Frameworks */,
-				007D0919136D128800ADDD65 /* LuaCocoa.framework in Frameworks */,
 				007D0911136D11D400ADDD65 /* libLuaHashMap.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -80,9 +93,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				00B0CE4715720F0700FF3908 /* lua.framework in Frameworks */,
 				009ADB09136FEBD20027F0AD /* QuartzCore.framework in Frameworks */,
 				007D0936136D12D400ADDD65 /* libLuaHashMap.dylib in Frameworks */,
-				007D0935136D12D000ADDD65 /* LuaCocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		00B0CE5D1572123900FF3908 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00B0CE5E1572123900FF3908 /* lua.framework in Frameworks */,
+				00B0CE5F1572123900FF3908 /* QuartzCore.framework in Frameworks */,
+				00B0CE601572123900FF3908 /* libLuaHashMap.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,15 +115,14 @@
 		007D08E5136D10EF00ADDD65 = {
 			isa = PBXGroup;
 			children = (
+				00B0CE4515720EF500FF3908 /* lua.framework */,
 				009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */,
 				009ADB08136FEBD20027F0AD /* QuartzCore.framework */,
 				007D08F0136D110600ADDD65 /* libLuaHashMap.dylib */,
-				007D0934136D12D000ADDD65 /* LuaCocoa.framework */,
-				007D0918136D128800ADDD65 /* LuaCocoa.framework */,
-				007D0916136D127A00ADDD65 /* LuaCocoa.framework */,
 				007D08FD136D117300ADDD65 /* LuaHashMap.c */,
 				007D08FE136D117300ADDD65 /* LuaHashMap.h */,
 				007D0908136D118F00ADDD65 /* luahashtest */,
+				00B0CE59157211CE00FF3908 /* luahashtestshared */,
 				007D092D136D12C500ADDD65 /* luahashtestcpp */,
 				007D08F1136D110600ADDD65 /* Products */,
 			);
@@ -111,6 +133,7 @@
 			children = (
 				007D0906136D118F00ADDD65 /* luahashtest */,
 				007D092B136D12C500ADDD65 /* luahashtestcpp */,
+				00B0CE651572123900FF3908 /* luahashtest copy */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,6 +153,14 @@
 				007D0938136D131100ADDD65 /* luahashtest.cpp */,
 			);
 			path = luahashtestcpp;
+			sourceTree = "<group>";
+		};
+		00B0CE59157211CE00FF3908 /* luahashtestshared */ = {
+			isa = PBXGroup;
+			children = (
+				00B0CE671572127100FF3908 /* luahashtestshared.c */,
+			);
+			name = luahashtestshared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,6 +228,23 @@
 			productReference = 007D092B136D12C500ADDD65 /* luahashtestcpp */;
 			productType = "com.apple.product-type.tool";
 		};
+		00B0CE5A1572123900FF3908 /* luahashtestshared */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 00B0CE621572123900FF3908 /* Build configuration list for PBXNativeTarget "luahashtestshared" */;
+			buildPhases = (
+				00B0CE5B1572123900FF3908 /* Sources */,
+				00B0CE5D1572123900FF3908 /* Frameworks */,
+				00B0CE611572123900FF3908 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = luahashtestshared;
+			productName = luahashtest;
+			productReference = 00B0CE651572123900FF3908 /* luahashtest copy */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -220,6 +268,7 @@
 				007D08EF136D110600ADDD65 /* LuaHashMap */,
 				007D0905136D118F00ADDD65 /* luahashtest */,
 				007D092A136D12C500ADDD65 /* luahashtestcpp */,
+				00B0CE5A1572123900FF3908 /* luahashtestshared */,
 			);
 		};
 /* End PBXProject section */
@@ -249,6 +298,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		00B0CE5B1572123900FF3908 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00B0CE69157212C900FF3908 /* luahashtestshared.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -264,7 +321,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /Library/Frameworks/LuaCocoa.framework/Headers;
+				HEADER_SEARCH_PATHS = /Library/Frameworks/Lua.framework/Headers;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -280,7 +337,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = /Library/Frameworks/LuaCocoa.framework/Headers;
+				HEADER_SEARCH_PATHS = /Library/Frameworks/Lua.framework/Headers;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
 			};
@@ -370,6 +427,36 @@
 			};
 			name = Release;
 		};
+		00B0CE631572123900FF3908 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)/Frameworks/Debug\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = luahashtestshared;
+			};
+			name = Debug;
+		};
+		00B0CE641572123900FF3908 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SDKROOT)$(LOCAL_LIBRARY_DIR)/Frameworks/Debug\"",
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = luahashtestshared;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -405,6 +492,15 @@
 			buildConfigurations = (
 				007D0932136D12C500ADDD65 /* Debug */,
 				007D0933136D12C500ADDD65 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00B0CE621572123900FF3908 /* Build configuration list for PBXNativeTarget "luahashtestshared" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00B0CE631572123900FF3908 /* Debug */,
+				00B0CE641572123900FF3908 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

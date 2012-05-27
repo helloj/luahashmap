@@ -101,8 +101,10 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
 
 
-
+/*
 	the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
+ */
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
 	do
 	{
 		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));		

@@ -54,8 +54,17 @@ extern "C" {
 #endif
 
 #include <stddef.h>
-#include "lua.h"
-	
+
+#if defined(LUAHASHMAP_DONT_EXPOSE_LUA_HEADER)
+	#if !defined(lua_Number)
+		#define lua_Number double
+	#endif
+	#if !defined(lua_Integer)
+		#define lua_Integer ptrdiff_t
+	#endif
+#else
+	#include "lua.h"
+#endif
 	
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
@@ -97,7 +106,7 @@ typedef struct LuaHashMap LuaHashMap;
 #define LUAHASHMAP_USE_INDEX_LOOKUP
 
 #ifdef LUAHASHMAP_USE_INDEX_LOOKUP
-	typedef lua_Number LuaHashMap_InternalGlobalKeyType;
+	typedef int LuaHashMap_InternalGlobalKeyType;
 #else
 	typedef const char* LuaHashMap_InternalGlobalKeyType;
 #endif
@@ -113,11 +122,12 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 	LuaHashMap* hashMap;
 	LuaHashMap_InternalGlobalKeyType whichTable;
 	bool atEnd;
+	int keyType;
 	union LuaHashMapKeyType
 	{
 		const char* keyString;
 		lua_Number keyNumber;
-		lua_Integer keyInteger;
+/*		lua_Integer keyInteger; */
 		void* keyPointer;
 	} currentKey;
 };
@@ -140,15 +150,11 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_alloc
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 
-/* Note: If created with an external Lua state, it will not delete the underlying Lua state. */
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateNewShareFromLuaHashMap(LuaHashMap* original_hash_map);
+
+
 LUAHASHMAP_EXPORT void LuaHashMap_Free(LuaHashMap* hash_map);
-
-//LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithLuaState(struct lua_State* lua_state);
-//LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Allocator the_allocator);
-
-//LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateInNamespace(const char* name_space);
-//LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithLuaStateInNamespace(struct lua_State* lua_state, const char* restrict name_space);
-//LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_Free(LuaHashMap* hash_map);
+LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
 
 /* This is only for backdoor access. Most people should never use this */
 LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
@@ -234,36 +240,24 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Int
 
 
 /* Clear List */
+/* This removes all entries, but doesn't shrink the hash (doesn't reclaim memory). */
 LUAHASHMAP_EXPORT void LuaHashMap_Clear(LuaHashMap* hash_map);
+/* This removes all entries and resets the hash size to 0 (reclaims memory). */
+LUAHASHMAP_EXPORT void LuaHashMap_Purge(LuaHashMap* hash_map);
+
 LUAHASHMAP_EXPORT bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 
-/* List Functions */
-LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
-LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
-LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Number keys_array[], size_t max_array_size);
-LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size);
-	
-	
 /* Iterator functions */
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator);
-	
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyString(LuaHashMap* hash_map);
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyString(LuaHashMap* hash_map);
+
+
+LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* hash_map);
+LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEnd(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string);
-
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyPointer(LuaHashMap* hash_map);
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyPointer(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
-
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyNumber(LuaHashMap* hash_map);
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyNumber(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
-
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBeginForKeyInteger(LuaHashMap* hash_map);
-LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEndForKeyInteger(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
-	
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const LuaHashMapIterator* hash_iterator2);
 
 	
@@ -282,7 +276,27 @@ LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIte
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
 
-	
+
+
+
+/* Experimental Functions: These might be removed */
+/* This is O(n). Since it is slow, it should be used sparingly. */
+LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
+
+/* List Functions */
+/* The iterator functions are much cleaner than these. These are also O(n). 
+ * Also, now that mixing key types in the same hash is no longer explictly forbidden/caught, 
+ * these functions are not resilient to mixed keys.
+ * Maybe these functions should be removed. 
+ */
+LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
+LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
+LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Number keys_array[], size_t max_array_size);
+LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size);
+/* End Experiemental Functions */	
+
+
+
 #if defined(__LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__)
 	#undef restrict
 	#undef __LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__
