@@ -1,6 +1,6 @@
 /*
  LuaHashMap
- Copyright (C) 2011 PlayControl Software, LLC. 
+ Copyright (C) 2011-2012 PlayControl Software, LLC. 
  Eric Wing <ewing . public @ playcontrol.net>
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -62,6 +62,9 @@ extern "C" {
 	#if !defined(lua_Integer)
 		#define lua_Integer ptrdiff_t
 	#endif
+	#if !defined(lua_State)
+		#define lua_State void
+	#endif
 #else
 	#include "lua.h"
 #endif
@@ -96,20 +99,7 @@ extern "C" {
 
 typedef struct LuaHashMap LuaHashMap;
 
-/* This was an experiment to see if integer keys on the global table with 
- * rawset/geti was faster than the rawset/get with light userdata keys (which 
- * are also effectively integers).
- * My benchmarks are inconclusive, testing with 10000000 insert/removes.
- * They appear to be the same speed, though I've seen large timing variations in
- * both tests.
- */
-#define LUAHASHMAP_USE_INDEX_LOOKUP
-
-#ifdef LUAHASHMAP_USE_INDEX_LOOKUP
-	typedef int LuaHashMap_InternalGlobalKeyType;
-#else
-	typedef const char* LuaHashMap_InternalGlobalKeyType;
-#endif
+typedef int LuaHashMap_InternalGlobalKeyType;
 	
 /* Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
  * This allows you to use iterators without worrying about leaking.
@@ -121,8 +111,8 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 	 */
 	LuaHashMap* hashMap;
 	LuaHashMap_InternalGlobalKeyType whichTable;
-	bool atEnd;
 	int keyType;
+	bool atEnd;
 	union LuaHashMapKeyType
 	{
 		const char* keyString;
@@ -150,9 +140,19 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_alloc
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 
-LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateNewShareFromLuaHashMap(LuaHashMap* original_hash_map);
+/* Special Memory Optimization: Allows you to create new LuaHashMaps from an existing one which will share the same lua_State under the hood.
+ * My measurements of a new lua_State instance seem to take about 4-5KB on 64-bit Mac. This will avoid incuring that cost.
+ * Technically speaking, the original and shared maps are peers of each other. The implementation does not make a distinction 
+ * about which one the original is so any hash map with the lua_State you want to share may be passed in as the parameter.
+ * Make sure to free any shared maps with FreeShare() before you close the final hash map with Free() as Free() calls lua_close().
+ */
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements, int key_type, int value_type);
 
 
+/* Important Note: This closes the lua_State. If there are any shared hash maps (used CreateShare), 
+ * the shared hash maps should be freed before this is called.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_Free(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
 
@@ -282,6 +282,10 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iter
 /* Experimental Functions: These might be removed */
 /* This is O(n). Since it is slow, it should be used sparingly. */
 LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
+
+/* I don't think I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
+LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+LUAHASHMAP_EXPORT int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
 /* List Functions */
 /* The iterator functions are much cleaner than these. These are also O(n). 

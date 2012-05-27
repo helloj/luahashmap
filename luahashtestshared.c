@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
 //	hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 //	hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 
-	hash_map_shared_keystring_valuestring = LuaHashMap_CreateNewShareFromLuaHashMap(hash_map_main);
+	hash_map_shared_keystring_valuestring = LuaHashMap_CreateShare(hash_map_main);
 
 	DoKeyStringValueString(hash_map_main);
 	DoKeyStringValueString(hash_map_shared_keystring_valuestring);
@@ -272,9 +272,9 @@ int main(int argc, char* argv[])
 	
 	fprintf(stderr, "Creating num and int shares\n" );
 
-	hash_map_shared_keynum_valuenum = LuaHashMap_CreateNewShareFromLuaHashMap(hash_map_main);
+	hash_map_shared_keynum_valuenum = LuaHashMap_CreateShare(hash_map_main);
 	sleep(2);
-	hash_map_shared_keyint_valueint = LuaHashMap_CreateNewShareFromLuaHashMap(hash_map_main);
+	hash_map_shared_keyint_valueint = LuaHashMap_CreateShare(hash_map_main);
 	sleep(2);
 
 	
