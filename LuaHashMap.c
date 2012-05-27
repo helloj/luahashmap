@@ -84,7 +84,6 @@
 
 #define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key)
 
-#define LUAHASHMAP_DEBUG
 #ifdef LUAHASHMAP_DEBUG
 	#define LUAHASHMAP_ASSERT(e) assert(e)
 #else
@@ -508,7 +507,6 @@ void LuaHashMap_SetValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_p
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, key_pointer, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_pointer]=value_pointer; stack: [table] */
-//	lua_rawset(hash_map->luaState, -3);  /* table[key_pointer]=value_pointer; stack: [table] */
 
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 1);
@@ -719,8 +717,6 @@ const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const ch
 	
 	ret_val = lua_tostring(hash_map->luaState, -1);
 
-//	fprintf(stderr, "ret_val=%s, %d\n", ret_val, lua_gettop(hash_map->luaState));
-
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
@@ -836,7 +832,6 @@ void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_po
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
-//	lua_rawget(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
 	ret_val = lua_touserdata(hash_map->luaState, -1);
 
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
@@ -1085,7 +1080,6 @@ void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	lua_pushnil(hash_map->luaState); /* stack: [nil, key_pointer, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_pointer]=nil; stack: [table] */
-//	lua_rawset(hash_map->luaState, -3);  /* table[key_pointer]=nil; stack: [table] */
 
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 1);

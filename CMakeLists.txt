@@ -21,7 +21,7 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Allow the user to specify if Logger should be compiled with or without
 # thread/file locking.
-OPTION(LOGGER_ENABLE_LOCKING "Compiles Logger with mutexes and file locking" ON)
+OPTION(LUAHASHMAP_ENABLE_DEBUG "Compiles LuaHashMap with internal debug assertions" OFF)
 
 # By default, BUILD_DOCUMENTATION and CMAKE_VERBOSE_MAKEFILE
 # are marked as advanced (hidden in the advanced menu).
@@ -34,35 +34,40 @@ MARK_AS_ADVANCED(CLEAR
 
 # If the user wants to compile the library with locking, add the 
 # appropriate -D flags.
-IF(LOGGER_ENABLE_LOCKING)
-	ADD_DEFINITIONS(-DLOGGER_ENABLE_LOCKING)
-ENDIF(LOGGER_ENABLE_LOCKING)
+IF(LUAHASHMAP_ENABLE_DEBUG)
+	ADD_DEFINITIONS(-DLUAHASHMAP_DEBUG)
+ENDIF(LUAHASHMAP_ENABLE_DEBUG)
 
 ADD_LIBRARY(LuaHashMap STATIC
         ${PROJECT_SOURCE_DIR}/LuaHashMap.h
         ${PROJECT_SOURCE_DIR}/LuaHashMap.c
 )
 
-# Create an executable program called "testlogger".
+# test programs that use the library
 # As with the ADD_LIBRARY command, you should list all the files
 # that are needed to build the executable.
 ADD_EXECUTABLE(luahashtest
 	luahashtest.c
 )
+ADD_EXECUTABLE(luahashtestshared
+	luahashtestshared.c
+)
 ADD_EXECUTABLE(luahashtestcpp
 	luahashtest.cpp
 )
-# This tells the build system that the executable "testlogger" must
-# be linked against the "logger" library.
+# This tells the build system that the executable must
+# be linked against which libraries.
 TARGET_LINK_LIBRARIES(luahashtest
 	LuaHashMap
 	${LUA_LIBRARIES}
-
+)
+TARGET_LINK_LIBRARIES(luahashtestshared
+	LuaHashMap
+	${LUA_LIBRARIES}
 )
 TARGET_LINK_LIBRARIES(luahashtestcpp
 	LuaHashMap
 	${LUA_LIBRARIES}
-	
 )
 
 
