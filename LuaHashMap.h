@@ -161,43 +161,43 @@ LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
 	
 /* string, string */
 /* Note: Inserting NULL values is like deleting a field. */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
 /* string, pointer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);	
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);	
 /* string, number */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string);
 /* string, integer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string);
 
 
 /* pointer, string */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer);
 /* pointer, pointer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
 /* pointer, number */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer);
 /* pointer, integer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer);
 	
 	
 /* number, string */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number);
 /* number, pointer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number);
 /* number, number */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number);
 /* number, integer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number);
 
 	
 /* integer, string */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer);
 /* integer, pointer */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer);
 /* integer, number */
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer);
 /* integer, integer*/
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer);
 	
 
 
@@ -261,10 +261,10 @@ LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHash
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const LuaHashMapIterator* hash_iterator2);
 
 	
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string);
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer);
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number);
-LUAHASHMAP_EXPORT void LuaHashMap_InsertValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number);
+LUAHASHMAP_EXPORT void LuaHashMap_LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer);
 
 	
 	

@@ -56,8 +56,8 @@ void DoBenchMark(LuaHashMap* hash_map)
 	void* ret_ptr = NULL;	
 	for(i=0; i<400000; i++)
 	{
-		LuaHashMap_InsertValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
-		LuaHashMap_InsertValueIntegerForKeyInteger(hash_map, rand(), rand());
+		LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
+		LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_map, rand(), rand());
 		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
 		//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
 	}
@@ -79,15 +79,15 @@ void DoKeyStringValueString(LuaHashMap* hash_map)
 	size_t i;
 	LuaHashMapIterator the_iterator;
 
-	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
-	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
-	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
+	fprintf(stderr, "LuaHashMap_LuaHashMap_SetValueStringForKeyString\n");
+	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value1", "key1");
+	fprintf(stderr, "LuaHashMap_LuaHashMap_SetValueStringForKeyString\n");
 	
-	LuaHashMap_InsertValueStringForKeyString(hash_map, "value2", "key2");
-	fprintf(stderr, "LuaHashMap_InsertValueStringForKeyString\n");
+	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value2", "key2");
+	fprintf(stderr, "LuaHashMap_LuaHashMap_SetValueStringForKeyString\n");
 	
-	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", "key3");
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
+	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value3", "key3");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
 	
 	
 	
@@ -136,7 +136,7 @@ void DoKeyStringValueString(LuaHashMap* hash_map)
 	
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
-	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", NULL);
+	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value3", NULL);
 	
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 	CFTimeInterval start_time = CACurrentMediaTime();
@@ -144,8 +144,8 @@ void DoKeyStringValueString(LuaHashMap* hash_map)
 	void* ret_ptr = NULL;	
 	for(i=0; i<400000; i++)
 	{
-		LuaHashMap_InsertValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
-		LuaHashMap_InsertValueIntegerForKeyInteger(hash_map, rand(), rand());
+		LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
+		LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_map, rand(), rand());
 		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
 		//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
 	}
@@ -168,15 +168,15 @@ void TestSharedSeparationWithNumberAndInt(LuaHashMap* hash_map_shared_keynumber_
 	size_t count_keynum_valuenum = 0;
 	size_t count_keyint_valueint = 0;
 
-	fprintf(stderr, "LuaHashMap_InsertValueNumberForKeyNumber\n");
-	LuaHashMap_InsertValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 100.0, 1.0);
-	LuaHashMap_InsertValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 200.2, 2.2);
-	LuaHashMap_InsertValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 300.3, 3.3);
+	fprintf(stderr, "LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber\n");
+	LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 100.0, 1.0);
+	LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 200.2, 2.2);
+	LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(hash_map_shared_keynumber_valuenumber, 300.3, 3.3);
 
-	fprintf(stderr, "LuaHashMap_InsertValueIntegetForKeyInteger\n");
-	LuaHashMap_InsertValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 1000, 1);
-	LuaHashMap_InsertValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 2000, 2);
-	LuaHashMap_InsertValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 3000, 3);
+	fprintf(stderr, "LuaHashMap_LuaHashMap_SetValueIntegetForKeyInteger\n");
+	LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 1000, 1);
+	LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 2000, 2);
+	LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_map_shared_keyint_valueint, 3000, 3);
 
 	
 	fprintf(stderr, "LuaHashMap_GetValueNumberForKeyNumber 1.0\n");

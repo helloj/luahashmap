@@ -38,15 +38,15 @@ int DoKeyStringValueString()
 	std::cerr << "insert1\n";
 	hash_map.insert(std::pair<const char*, const char*>("key1", "value1"));
 						
-//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
+//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value1", "key1");
 	std::cerr << "insert2\n";
 	hash_map.insert(std::pair<const char*, const char*>("key2", "value2"));
 
-//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value2", "key2");
+//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value2", "key2");
 	std::cerr << "insert3\n";
 
-//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", "key3");
-//	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
+//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value3", "key3");
+//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
 	hash_map.insert(std::pair<const char*, const char*>("key3", "value3"));
 
 	
@@ -170,15 +170,15 @@ int DoKeyStringValuePointer()
 	std::cerr << "insert1\n";
 	hash_map.insert(std::pair<const char*, void*>("key1", s_valuePointer1));
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value1", "key1");
 	std::cerr << "insert2\n";
 	hash_map.insert(std::pair<const char*, void*>("key2", s_valuePointer2));
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value2", "key2");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value2", "key2");
 	std::cerr << "insert3\n";
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", "key3");
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value3", "key3");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
 	hash_map.insert(std::pair<const char*, void*>("key3", s_valuePointer3));
 	
 	
@@ -2200,15 +2200,15 @@ int DoKeyStringCppValuePointer()
 	std::cerr << "insert1\n";
 	hash_map.insert(std::pair<std::string, void*>(key1, s_valuePointer1));
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value1", "key1");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value1", "key1");
 	std::cerr << "insert2\n";
 	hash_map.insert(std::pair<std::string, void*>(key2, s_valuePointer2));
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value2", "key2");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value2", "key2");
 	std::cerr << "insert3\n";
 	
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, "value3", "key3");
-	//	LuaHashMap_InsertValueStringForKeyString(hash_map, NULL, "key3");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, "value3", "key3");
+	//	LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
 	hash_map.insert(std::pair<std::string, void*>(key3, s_valuePointer3));
 	
 	

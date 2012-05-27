@@ -59,7 +59,7 @@
  void* ret_ptr = NULL;	
  for(i=0; i<40000000; i++)
  {
- LuaHashMap_InsertValuePointerForKeyPointer(hash_map, (void*)i, (void*)i);
+ LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(hash_map, (void*)i, (void*)i);
  ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
  LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
  }
@@ -384,7 +384,7 @@ lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map)
 	return hash_map->luaState;
 }
 
-void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
+void LuaHashMap_LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
@@ -405,7 +405,7 @@ void LuaHashMap_InsertValueStringForKeyString(LuaHashMap* hash_map, const char* 
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string)
+void LuaHashMap_LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
@@ -426,7 +426,7 @@ void LuaHashMap_InsertValuePointerForKeyString(LuaHashMap* hash_map, void* value
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
 }
 
-void LuaHashMap_InsertValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string)
+void LuaHashMap_LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
@@ -447,7 +447,7 @@ void LuaHashMap_InsertValueNumberForKeyString(LuaHashMap* hash_map, lua_Number v
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
 }
 
-void LuaHashMap_InsertValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string)
+void LuaHashMap_LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
@@ -472,7 +472,7 @@ void LuaHashMap_InsertValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer
 
 
 
-void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer)
+void LuaHashMap_LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer)
 {
 	if(NULL == hash_map)
 	{
@@ -493,7 +493,7 @@ void LuaHashMap_InsertValueStringForKeyPointer(LuaHashMap* hash_map, const char*
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer)
+void LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer)
 {
 	if(NULL == hash_map)
 	{
@@ -516,7 +516,7 @@ void LuaHashMap_InsertValuePointerForKeyPointer(LuaHashMap* hash_map, void* valu
 }
 
 
-void LuaHashMap_InsertValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer)
+void LuaHashMap_LuaHashMap_SetValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer)
 {
 	if(NULL == hash_map)
 	{
@@ -537,7 +537,7 @@ void LuaHashMap_InsertValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number 
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer)
+void LuaHashMap_LuaHashMap_SetValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer)
 {
 	if(NULL == hash_map)
 	{
@@ -559,7 +559,7 @@ void LuaHashMap_InsertValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Intege
 }
 
 
-void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number)
+void LuaHashMap_LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number)
 {
 	if(NULL == hash_map)
 	{
@@ -577,7 +577,7 @@ void LuaHashMap_InsertValueStringForKeyNumber(LuaHashMap* hash_map, const char* 
 }
 
 
-void LuaHashMap_InsertValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number)
+void LuaHashMap_LuaHashMap_SetValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number)
 {
 	if(NULL == hash_map)
 	{
@@ -595,7 +595,7 @@ void LuaHashMap_InsertValuePointerForKeyNumber(LuaHashMap* hash_map, void* value
 }
 
 
-void LuaHashMap_InsertValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number)
+void LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number)
 {
 	if(NULL == hash_map)
 	{
@@ -612,7 +612,7 @@ void LuaHashMap_InsertValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number v
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number)
+void LuaHashMap_LuaHashMap_SetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number)
 {
 	if(NULL == hash_map)
 	{
@@ -630,7 +630,7 @@ void LuaHashMap_InsertValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer
 }
 
 
-void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer)
+void LuaHashMap_LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer)
 {
 	if(NULL == hash_map)
 	{
@@ -647,7 +647,7 @@ void LuaHashMap_InsertValueStringForKeyInteger(LuaHashMap* hash_map, const char*
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer)
+void LuaHashMap_LuaHashMap_SetValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer)
 {
 	if(NULL == hash_map)
 	{
@@ -664,7 +664,7 @@ void LuaHashMap_InsertValuePointerForKeyInteger(LuaHashMap* hash_map, void* valu
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer)
+void LuaHashMap_LuaHashMap_SetValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer)
 {
 	if(NULL == hash_map)
 	{
@@ -681,7 +681,7 @@ void LuaHashMap_InsertValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number 
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-void LuaHashMap_InsertValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer)
+void LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer)
 {
 	if(NULL == hash_map)
 	{
@@ -1822,7 +1822,7 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
 	}
 }
 
-void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string)
+void LuaHashMap_LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string)
 {
 	if(NULL == hash_iterator)
 	{
@@ -1836,24 +1836,24 @@ void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, c
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueStringForKeyString(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyString);
+		LuaHashMap_LuaHashMap_SetValueStringForKeyString(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueStringForKeyPointer(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyPointer);
+		LuaHashMap_LuaHashMap_SetValueStringForKeyPointer(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyPointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
 		/* Warning: This might be a problem. I can't easily distinguish between a number and integer.
-		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_InsertValue*ForKeyInteger..
+		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_LuaHashMap_SetValue*ForKeyInteger..
 		 * As of this writing, the only difference between the functions is whether I call pushnumber or pushinteger.
 		 * In stock Lua cases, I don't think there will be a real difference.
 		 * To solve this, I would need to know the intention either by an explicit function, 
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-		LuaHashMap_InsertValueStringForKeyNumber(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyNumber);
-		/* LuaHashMap_InsertValueStringForKeyInteger(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyInteger); */
+		LuaHashMap_LuaHashMap_SetValueStringForKeyNumber(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyNumber);
+		/* LuaHashMap_LuaHashMap_SetValueStringForKeyInteger(hash_iterator->hashMap, value_string, hash_iterator->currentKey.keyInteger); */
 	}
 	else
 	{
@@ -1863,7 +1863,7 @@ void LuaHashMap_InsertValueStringAtIterator(LuaHashMapIterator* hash_iterator, c
 	}
 }
 
-void LuaHashMap_InsertValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer)
+void LuaHashMap_LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer)
 {
 	if(NULL == hash_iterator)
 	{
@@ -1876,24 +1876,24 @@ void LuaHashMap_InsertValuePointerAtIterator(LuaHashMapIterator* hash_iterator, 
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValuePointerForKeyString(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyString);
+		LuaHashMap_LuaHashMap_SetValuePointerForKeyString(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValuePointerForKeyPointer(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyPointer);
+		LuaHashMap_LuaHashMap_SetValuePointerForKeyPointer(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyPointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
 		/* Warning: This might be a problem. I can't easily distinguish between a number and integer.
-		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_InsertValue*ForKeyInteger..
+		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_LuaHashMap_SetValue*ForKeyInteger..
 		 * As of this writing, the only difference between the functions is whether I call pushnumber or pushinteger.
 		 * In stock Lua cases, I don't think there will be a real difference.
 		 * To solve this, I would need to know the intention either by an explicit function, 
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-		LuaHashMap_InsertValuePointerForKeyNumber(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyNumber);
-		/* LuaHashMap_InsertValuePointerForKeyInteger(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyInteger); */
+		LuaHashMap_LuaHashMap_SetValuePointerForKeyNumber(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyNumber);
+		/* LuaHashMap_LuaHashMap_SetValuePointerForKeyInteger(hash_iterator->hashMap, value_pointer, hash_iterator->currentKey.keyInteger); */
 	}
 	else
 	{
@@ -1903,7 +1903,7 @@ void LuaHashMap_InsertValuePointerAtIterator(LuaHashMapIterator* hash_iterator, 
 	}
 }
 
-void LuaHashMap_InsertValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number)
+void LuaHashMap_LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number)
 {
 	if(NULL == hash_iterator)
 	{
@@ -1917,24 +1917,24 @@ void LuaHashMap_InsertValueNumberAtIterator(LuaHashMapIterator* hash_iterator, l
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueNumberForKeyString(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyString);
+		LuaHashMap_LuaHashMap_SetValueNumberForKeyString(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueNumberForKeyPointer(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyPointer);
+		LuaHashMap_LuaHashMap_SetValueNumberForKeyPointer(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyPointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
 		/* Warning: This might be a problem. I can't easily distinguish between a number and integer.
-		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_InsertValue*ForKeyInteger.
+		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_LuaHashMap_SetValue*ForKeyInteger.
 		 * As of this writing, the only difference between the functions is whether I call pushnumber or pushinteger.
 		 * In stock Lua cases, I don't think there will be a real difference.
 		 * To solve this, I would need to know the intention either by an explicit function, 
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-		LuaHashMap_InsertValueNumberForKeyNumber(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyNumber);
-		/* LuaHashMap_InsertValueNumberForKeyInteger(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyInteger); */
+		LuaHashMap_LuaHashMap_SetValueNumberForKeyNumber(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyNumber);
+		/* LuaHashMap_LuaHashMap_SetValueNumberForKeyInteger(hash_iterator->hashMap, value_number, hash_iterator->currentKey.keyInteger); */
 	}
 	else
 	{
@@ -1944,7 +1944,7 @@ void LuaHashMap_InsertValueNumberAtIterator(LuaHashMapIterator* hash_iterator, l
 	}
 }
 
-void LuaHashMap_InsertValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer)
+void LuaHashMap_LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer)
 {
 	if(NULL == hash_iterator)
 	{
@@ -1958,24 +1958,24 @@ void LuaHashMap_InsertValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, 
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueIntegerForKeyString(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyString);
+		LuaHashMap_LuaHashMap_SetValueIntegerForKeyString(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-		LuaHashMap_InsertValueIntegerForKeyPointer(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyPointer);
+		LuaHashMap_LuaHashMap_SetValueIntegerForKeyPointer(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyPointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
 		/* Warning: This might be a problem. I can't easily distinguish between a number and integer.
-		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_InsertValue*ForKeyInteger.
+		 * If this is supposed to be an integer, I technically should be calling LuaHashMap_LuaHashMap_SetValue*ForKeyInteger.
 		 * As of this writing, the only difference between the functions is whether I call pushnumber or pushinteger.
 		 * In stock Lua cases, I don't think there will be a real difference.
 		 * To solve this, I would need to know the intention either by an explicit function, 
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-		LuaHashMap_InsertValueIntegerForKeyNumber(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyNumber);
-		/* LuaHashMap_InsertValueIntegerForKeyInteger(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyInteger); */
+		LuaHashMap_LuaHashMap_SetValueIntegerForKeyNumber(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyNumber);
+		/* LuaHashMap_LuaHashMap_SetValueIntegerForKeyInteger(hash_iterator->hashMap, value_integer, hash_iterator->currentKey.keyInteger); */
 	}
 	else
 	{

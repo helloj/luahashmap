@@ -61,13 +61,13 @@
 		007D0906136D118F00ADDD65 /* luahashtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtest; sourceTree = BUILT_PRODUCTS_DIR; };
 		007D090F136D11A900ADDD65 /* luahashtest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = luahashtest.c; path = ../luahashtest.c; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		007D092B136D12C500ADDD65 /* luahashtestcpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtestcpp; sourceTree = BUILT_PRODUCTS_DIR; };
-		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = lua_hash_map.hpp; path = ../lua_hash_map.hpp; sourceTree = SOURCE_ROOT; };
-		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = luahashtest.cpp; path = ../luahashtest.cpp; sourceTree = SOURCE_ROOT; };
+		007D0937136D131100ADDD65 /* lua_hash_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; lineEnding = 0; name = lua_hash_map.hpp; path = ../lua_hash_map.hpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
+		007D0938136D131100ADDD65 /* luahashtest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = luahashtest.cpp; path = ../luahashtest.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		009ADB08136FEBD20027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		00B0CE4515720EF500FF3908 /* lua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = lua.framework; path = Library/Frameworks/lua.framework; sourceTree = SDKROOT; };
 		00B0CE651572123900FF3908 /* luahashtest copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "luahashtest copy"; sourceTree = BUILT_PRODUCTS_DIR; };
-		00B0CE671572127100FF3908 /* luahashtestshared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = luahashtestshared.c; path = ../luahashtestshared.c; sourceTree = "<group>"; };
+		00B0CE671572127100FF3908 /* luahashtestshared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = luahashtestshared.c; path = ../luahashtestshared.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
