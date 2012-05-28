@@ -263,11 +263,18 @@ LUAHASHMAP_EXPORT bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator
 
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEnd(LuaHashMap* hash_map);
+
+/* Find functions: Returns an iterator at the designated position if found. 
+ @see LuaHashMap_IteratorIsNotFound, LuaHashMap_ExistsKeyString, LuaHashMap_ExistsKeyPointer, LuaHashMap_ExistsKeyNumber, LuaHashMap_ExistsKeyInteger 
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
+/* Returns true if the iterator is bad (i.e. you tried to get an iterator for a key that doesn't exist. End iterators are distinct from NotFound. */
+LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator);
+/* Returns true if two iterators are pointing to the same location */
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const LuaHashMapIterator* hash_iterator2);
 
 	

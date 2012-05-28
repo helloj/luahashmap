@@ -1636,6 +1636,23 @@ static LuaHashMapIterator Internal_CreateBadIterator()
 	return the_iterator;
 }
 
+bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return true;
+	}
+	/* To make this distinct from a good iterator and an end iterator, whichTable==LUA_NOREF seems to be the only unique characteristic. */
+	if(LUA_NOREF == hash_iterator->whichTable)
+	{
+		return true;
+	}
+	else
+	{
+		return false;		
+	}
+}
+
 LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* hash_map)
 {
 	if(NULL == hash_map)
