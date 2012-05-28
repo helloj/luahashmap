@@ -1623,6 +1623,10 @@ bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator)
 	{
 		return false;
 	}
+	if(true == hash_iterator->atEnd)
+	{
+		return false;
+	}
 	return Internal_IteratorNext(hash_iterator);
 }
 
