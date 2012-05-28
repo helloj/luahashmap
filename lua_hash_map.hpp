@@ -1,6 +1,6 @@
 /*
- lua_hash_map - An STL-like adator for LuaHashMap
- Copyright (C) 2011 PlayControl Software, LLC. 
+ lua_hash_map - An STL-like adaptor for LuaHashMap
+ Copyright (C) 2011-2012 PlayControl Software, LLC. 
  Eric Wing <ewing . public @ playcontrol.net>
  
  Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -58,12 +58,19 @@ extern "C" {
 #if defined(LUAHASHMAP_DONT_EXPOSE_LUA_HEADER)
 	#if !defined(lua_Number)
 		#define lua_Number double
+		#define __LUAHASHMAP_LUA_NUMBER_DEFINED__	
 	#endif
 	#if !defined(lua_Integer)
 		#define lua_Integer ptrdiff_t
+		#define __LUAHASHMAP_LUA_INTEGER_DEFINED__		
 	#endif
 	#if !defined(lua_State)
 		#define lua_State void
+		#define __LUAHASHMAP_LUA_STATE_DEFINED__			
+	#endif
+	#if !defined(lua_Alloc)
+		typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
+		#define __LUAHASHMAP_LUA_ALLOC_DEFINED__					
 	#endif
 #else
 	#include "lua.h"
@@ -306,6 +313,27 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Numb
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size);
 /* End Experiemental Functions */	
 
+
+
+#if defined(__LUAHASHMAP_LUA_NUMBER_DEFINED__)
+	#undef lua_Number
+	#undef __LUAHASHMAP_LUA_NUMBER_DEFINED__
+#endif
+    
+#if defined(__LUAHASHMAP_LUA_INTEGER_DEFINED__)
+	#undef lua_Integer
+	#undef __LUAHASHMAP_LUA_INTEGER_DEFINED__
+#endif
+    
+#if defined(__LUAHASHMAP_LUA_STATE_DEFINED__)
+	#undef lua_State
+	#undef __LUAHASHMAP_LUA_STATE_DEFINED__
+#endif
+    
+#if defined(__LUAHASHMAP_LUA_ALLOC_DEFINED__)
+	#undef lua_Alloc
+	#undef __LUAHASHMAP_LUA_ALLOC_DEFINED__
+#endif
 
 
 #if defined(__LUAHASHMAP_RESTRICT_KEYWORD_DEFINED__)

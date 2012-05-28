@@ -66,7 +66,7 @@
 		009ADB08136FEBD20027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		009ADB0B136FEBDF0027F0AD /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		00B0CE4515720EF500FF3908 /* lua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = lua.framework; path = Library/Frameworks/lua.framework; sourceTree = SDKROOT; };
-		00B0CE651572123900FF3908 /* luahashtest copy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "luahashtest copy"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00B0CE651572123900FF3908 /* luahashtestshared */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = luahashtestshared; sourceTree = BUILT_PRODUCTS_DIR; };
 		00B0CE671572127100FF3908 /* luahashtestshared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; name = luahashtestshared.c; path = ../luahashtestshared.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 /* End PBXFileReference section */
 
@@ -133,7 +133,7 @@
 			children = (
 				007D0906136D118F00ADDD65 /* luahashtest */,
 				007D092B136D12C500ADDD65 /* luahashtestcpp */,
-				00B0CE651572123900FF3908 /* luahashtest copy */,
+				00B0CE651572123900FF3908 /* luahashtestshared */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -242,7 +242,7 @@
 			);
 			name = luahashtestshared;
 			productName = luahashtest;
-			productReference = 00B0CE651572123900FF3908 /* luahashtest copy */;
+			productReference = 00B0CE651572123900FF3908 /* luahashtestshared */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -389,6 +389,10 @@
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					DEBUG,
+					LUAHASHMAP_DEBUG,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
