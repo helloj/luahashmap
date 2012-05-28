@@ -104,7 +104,6 @@ void TestValueStringNULL()
 	LuaHashMap* hash_map = LuaHashMap_Create();
 	/* Better to declare when you assign it, but you need C99 */
 	LuaHashMapIterator hash_iterator;
-	LuaHashMapIterator hash_iterator_end;
 
 	fprintf(stderr, "TestValueStringNULL start\n");
 	
