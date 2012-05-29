@@ -208,6 +208,14 @@ void TestValuePointerNULL()
 	
 }
 
+#include <stddef.h>
+
+struct dummy
+{
+    char x;
+    LuaHashMapIterator t;
+};
+
 
 #define MAX_ARRAY_SIZE 10
 
@@ -221,6 +229,16 @@ int main(int argc, char* argv[])
 	LuaHashMap* hash_map;
 	LuaHashMapIterator the_iterator;
 
+	size_t test_alignment = offsetof(struct dummy, t);
+	fprintf(stderr, "test_alignment: %zu\n", test_alignment);
+
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, hashMap));
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, whichTable));
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, keyType));
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, atEnd));
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentKey));
+
+	
 	fprintf(stderr, "create\n");
 	hash_map = LuaHashMap_Create();
 //	hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
