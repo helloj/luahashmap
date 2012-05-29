@@ -53,6 +53,22 @@
 	#include <stdbool.h>
 #endif
 
+
+#ifdef LUAHASHMAP_DEBUG
+#define LUAHASHMAP_ASSERT(e) assert(e)
+#else
+#define LUAHASHMAP_ASSERT(e)
+#endif
+
+struct LuaHashMap
+{
+	lua_State* luaState;
+	lua_Alloc memoryAllocator;
+	void* allocatorUserData;
+	lua_Integer uniqueTableNameForSharedState;
+};
+
+
 /* Benchmark:
  
  CFTimeInterval start_time = CACurrentMediaTime();
@@ -80,23 +96,101 @@
 	#define LUAHASHMAP_GETTABLE lua_gettable
 #endif
 
-#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_GLOBALSINDEX, unique_key)
+/* Putting stuff in the global table might be interesting because you could run a Lua script and interact with all the elements added from this API.
+ * But unfortunately, Lua 5.2 removed LUA_GLOBALSINDEX and made global access more cumbersome. 
+ * This means I have to call slightly more commands to do the same thing as before.
+ * This suggests using the LUA_REGISTRYINDEX might have a tiny speed edge in Lua 5.2.
+ * For LUA_REGISTRYINDEX, the code for Lua 5.1 and 5.2 is the same.
+ */
+#ifdef LUA_HASHMAP_USE_GLOBAL_TABLE
 
-#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key)
+	#if LUA_VERSION_NUM <= 501 /* Lua 5.1 or less */
+		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_GLOBALSINDEX, unique_key)
 
-#ifdef LUAHASHMAP_DEBUG
-	#define LUAHASHMAP_ASSERT(e) assert(e)
-#else
-	#define LUAHASHMAP_ASSERT(e)
+		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key)
+
+		#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
+			do { \
+				lua_newtable(hash_map->luaState); \
+				lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key); \
+			} while(0)
+
+		/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
+		static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+		{
+			return luaL_ref(lua_state, LUA_GLOBALSINDEX);
+		}
+		
+		#define LUAHASHMAP_GLOBAL_LUA_UNREF(lua_state, unique_key) \ luaL_unref(lua_state, LUA_GLOBALSINDEX, unique_key)
+
+
+	#else /* assuming 502 (5.2) */
+		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) \
+			do { \
+				lua_pushglobaltable(lua_state); \
+				lua_rawgeti(lua_state, -1, unique_key); \
+				lua_remove(lua_state, -2); \
+			} while(0)
+
+		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) \
+			do { \
+				lua_pushglobaltable(lua_state); \
+				lua_rawseti(lua_state, -1, unique_key); \
+				lua_pop(lua_state, 1); \
+			} while(0)
+
+		#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
+			do { \
+				lua_pushglobaltable(lua_state); \
+				lua_newtable(hash_map->luaState); \
+				lua_rawseti(lua_state, -2, unique_key); \
+				lua_pop(lua_state, 1); \
+			} while(0)
+
+		/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
+		static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+		{
+			/* need to get gloal table under the top stack object that luaL_ref automatically refers to */
+			int ret_val;
+			lua_pushglobaltable(lua_state);
+			lua_insert(lua_state, -2); /* should swap the global table with the element below it making it the top element */
+			ret_val = luaL_ref(lua_state, -2);
+			lua_pop(lua_state, 1);
+			return ret_val;
+		}
+
+		#define LUAHASHMAP_GLOBAL_LUA_UNREF(lua_state, unique_key) \
+			do { \
+				lua_pushglobaltable(lua_state); \
+				luaL_unref(lua_state, -1, unique_key); \
+				lua_pop(lua_state, 1); \
+			} while(0)
+
+	#endif /* end Lua version check */
+
+
+#else /* Using LUA_REGISTRYINDEX used by both 5.1 and 5.2 */
+
+	#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_REGISTRYINDEX, unique_key)
+
+	#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_REGISTRYINDEX, unique_key)
+
+	#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
+		do { \
+			lua_newtable(hash_map->luaState); \
+			lua_rawseti(lua_state, LUA_REGISTRYINDEX, unique_key); \
+		} while(0)
+
+	/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
+	static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+	{
+		return luaL_ref(lua_state, LUA_REGISTRYINDEX);
+	}
+	
+	#define LUAHASHMAP_GLOBAL_LUA_UNREF(lua_state, unique_key) luaL_unref(lua_state, LUA_REGISTRYINDEX, unique_key)
+
+
 #endif
-
-struct LuaHashMap
-{
-	lua_State* luaState;
-	lua_Alloc memoryAllocator;
-	void* allocatorUserData;
-	lua_Integer uniqueTableNameForSharedState;
-};
 
 
 static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
@@ -120,7 +214,7 @@ static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
 	lua_newtable(hash_map->luaState);
 	/* The idea is that every LuaHashMap instance gets a unique reference id so they can share the same lua_State. */
 	/* Even the first/original hash map created gets its own so all hash maps are effectively peers of each other. */
-	hash_map->uniqueTableNameForSharedState = luaL_ref(hash_map->luaState, LUA_GLOBALSINDEX);
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 }
 
 LuaHashMap* LuaHashMap_Create()
@@ -216,7 +310,7 @@ LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int num
 	}
 */
 	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
-	hash_map->uniqueTableNameForSharedState = luaL_ref(hash_map->luaState, LUA_GLOBALSINDEX);
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 	return hash_map;
@@ -270,7 +364,7 @@ LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, 
 	}
 */
 	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
-	hash_map->uniqueTableNameForSharedState = luaL_ref(hash_map->luaState, LUA_GLOBALSINDEX);
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 
 	
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
@@ -327,7 +421,7 @@ LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, i
 	hash_map->allocatorUserData = original_hash_map->allocatorUserData;
 
 	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
-	hash_map->uniqueTableNameForSharedState = luaL_ref(hash_map->luaState, LUA_GLOBALSINDEX);
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 
 	return hash_map;
 }
@@ -342,7 +436,7 @@ void LuaHashMap_FreeShare(LuaHashMap* hash_map)
 	{
 		return;
 	}
-	luaL_unref(hash_map->luaState, LUA_GLOBALSINDEX, hash_map->uniqueTableNameForSharedState);
+	LUAHASHMAP_GLOBAL_LUA_UNREF(hash_map->luaState, hash_map->uniqueTableNameForSharedState);
 	/* Seems like a good time to force the garbage collector */
 	lua_gc(hash_map->luaState, LUA_GCCOLLECT, 0);
 	if(NULL != hash_map->memoryAllocator)
@@ -362,7 +456,7 @@ void LuaHashMap_Free(LuaHashMap* hash_map)
 		return;
 	}
 	/* Since we close the lua_State, we don't need to call luaL_unref */
-/*	luaL_unref(hash_map->luaState, LUA_GLOBALSINDEX, hash_map->uniqueTableNameForSharedState); */
+	/* LUAHASHMAP_GLOBAL_LUA_UNREF(hash_map->luaState, hash_map->uniqueTableNameForSharedState); */
 	lua_close(hash_map->luaState);
 	if(NULL != hash_map->memoryAllocator)
 	{
@@ -1421,8 +1515,8 @@ void LuaHashMap_Purge(LuaHashMap* hash_map)
 	 * This effectively purges the memory since Lua normally doesn't reclaim memory when nil-ing an entry.
 	 * The presumption here is you really want the memory back.
 	 */
-	lua_newtable(hash_map->luaState);
-	lua_rawseti(hash_map->luaState, LUA_GLOBALSINDEX, hash_map->uniqueTableNameForSharedState);
+	LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(hash_map->luaState, hash_map->uniqueTableNameForSharedState);
+
 	/* Now seems to be a reasonable time to invoke garbage collection. */
 	lua_gc(hash_map->luaState, LUA_GCCOLLECT, 0);
 
