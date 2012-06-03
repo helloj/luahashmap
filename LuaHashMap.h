@@ -55,6 +55,10 @@ extern "C" {
 
 #include <stddef.h>
 
+/* This define should generally not be used. 
+ It is here mostly for hacking/experimentation and dirty tricks to get going for non-production code.
+ Make sure these defines match what was actually used in your Lua library.
+ */
 #if defined(LUAHASHMAP_DONT_EXPOSE_LUA_HEADER)
 	#if !defined(lua_Number)
 		#define lua_Number double
@@ -68,7 +72,7 @@ extern "C" {
 		#define lua_State void
 		#define __LUAHASHMAP_LUA_STATE_DEFINED__			
 	#endif
-	#if !defined(lua_Alloc)
+	#if lua_h /* You detect nor undo a typedef */
 		typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 		#define __LUAHASHMAP_LUA_ALLOC_DEFINED__					
 	#endif
@@ -102,7 +106,75 @@ extern "C" {
 	
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
-	
+
+/**
+ * Struct that contains the version information of this library.
+ * This represents the library's version as three levels: major revision
+ * (increments with massive changes, additions, and enhancements),
+ * minor revision (increments with backwards-compatible changes to the
+ * major revision), and patchlevel (increments with fixes to the minor
+ * revision).
+ * @see LUAHASHMAP_GET_COMPILED_VERSION, LuaHashMap_GetLinkedVersion
+ */
+typedef struct LuaHashMapVersion
+{
+	unsigned char major;
+	unsigned char minor;
+	unsigned char patch;
+} LuaHashMapVersion;
+
+/* Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
+ */
+#define LUAHASHMAP_MAJOR_VERSION		0
+#define LUAHASHMAP_MINOR_VERSION		2
+#define LUAHASHMAP_PATCHLEVEL			0
+
+/**
+ * This macro fills in a version structure with the version of the
+ * library you compiled against. This is determined by what header the
+ * compiler uses. Note that if you dynamically linked the library, you might
+ * have a slightly newer or older version at runtime. That version can be
+ * determined with LuaHashMap_GetLinkedVersion(), which, unlike 
+ * LUAHASHMAP_GET_COMPILED_VERSION, is not a macro.
+ *
+ * @note When compiled with SDL, this macro can be used to fill a version structure 
+ * compatible with SDL_version.
+ *
+ * @param X A pointer to a LuaHashMapVersion struct to initialize.
+ *
+ * @see LuaHashMapVersion, LuaHashMap_GetLinkedVersion
+ */
+#define LUAHASHMAP_GET_COMPILED_VERSION(X)		\
+	{											\
+		(X)->major = LUAHASHMAP_MAJOR_VERSION;	\
+		(X)->minor = LUAHASHMAP_MINOR_VERSION;	\
+		(X)->patch = LUAHASHMAP_PATCHLEVEL;		\
+	}
+
+/**
+ * Gets the library version of the dynamically linked library you are using.
+ * This gets the version of the library that is linked against your program.
+ * If you are using a shared library (DLL) version, then it is
+ * possible that it will be different than the version you compiled against.
+ *
+ * This is a real function; the macro LUAHASHMAP_GET_COMPILED_VERSION 
+ * tells you what version of the library you compiled against:
+ *
+ * @code
+ * LuaHashMapVersion compiled;
+ * LuaHashMapVersion linked;
+ *
+ * LUAHASHMAP_GET_COMPILED_VERSION(&compiled);
+ * LuaHashMap_GetLinkedVersion(&linked);
+ * printf("We compiled against version %d.%d.%d ...\n",
+ *           compiled.major, compiled.minor, compiled.patch);
+ * printf("But we linked against version %d.%d.%d.\n",
+ *           linked.major, linked.minor, linked.patch);
+ * @endcode
+ *
+ * @see LuaHashMapVersion, LUAHASHMAP_GET_COMPILED_VERSION
+ */
+LUAHASHMAP_EXPORT const LuaHashMapVersion* LuaHashMap_GetLinkedVersion(void);
 
 typedef struct LuaHashMap LuaHashMap;
 
@@ -127,6 +199,17 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 /*		lua_Integer keyInteger; */
 		void* keyPointer;
 	} currentKey;
+	/* TODO: Consider caching value information when the iterator is created to avoid needing to do another fetch.
+	 * Downside: Iterator data (copy) can become stale much easier since it is an independent copy.
+	 */
+/*	
+	union LuaHashMapValueType
+	{
+		const char* valueString;
+		lua_Number valueNumber;
+		void* valuePointer;
+	} currentValue;
+*/
 };
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;
@@ -165,9 +248,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* or
  */
 LUAHASHMAP_EXPORT void LuaHashMap_Free(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
-
-/* This is only for backdoor access. Most people should never use this */
-LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
+	
 	
 /* string, string */
 /* Note: Inserting NULL values is like deleting a field. */
@@ -304,9 +385,20 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iter
 /* This is O(n). Since it is slow, it should be used sparingly. */
 LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
 
-/* I don't think I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
+/* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
 LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+
+
+/* This is only for backdoor access. This is for very advanced use cases that want to directly interact with the Lua State. */
+LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
+
+/* This is for very advanced use cases that want to directly interact with the Lua State. 
+ An understanding of the implementation details of LuaHashMap is strongly recommended in order to avoid trampling over each other.
+ */	
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaState(lua_State* lua_state);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints(lua_State* lua_state, lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements);
+LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lua_State* lua_state, int number_of_array_elements, int number_of_hash_elements);
 
 /* List Functions */
 /* The iterator functions are much cleaner than these. These are also O(n). 
@@ -336,9 +428,10 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Int
 	#undef lua_State
 	#undef __LUAHASHMAP_LUA_STATE_DEFINED__
 #endif
-    
+
+/* You can't undo a typedef */
 #if defined(__LUAHASHMAP_LUA_ALLOC_DEFINED__)
-	#undef lua_Alloc
+/*	#undef lua_Alloc */
 	#undef __LUAHASHMAP_LUA_ALLOC_DEFINED__
 #endif
 

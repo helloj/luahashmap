@@ -217,6 +217,13 @@ static void Internal_InitializeInternalTables(LuaHashMap* hash_map)
 	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 }
 
+const LuaHashMapVersion* LuaHashMap_GetLinkedVersion()
+{
+	static LuaHashMapVersion linked_version;
+	LUAHASHMAP_GET_COMPILED_VERSION(&linked_version);
+	return(&linked_version);
+}
+
 LuaHashMap* LuaHashMap_Create()
 {
 	LuaHashMap* hash_map;
@@ -375,6 +382,10 @@ LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, 
 LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map)
 {
 	LuaHashMap* hash_map;
+	if(NULL == original_hash_map)
+	{
+		return NULL;
+	}
 	if(NULL == original_hash_map->memoryAllocator)
 	{
 		hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
@@ -402,9 +413,13 @@ LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map)
 LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements)
 {
 	LuaHashMap* hash_map;
+	if(NULL == original_hash_map)
+	{
+		return NULL;
+	}
 	if(NULL == original_hash_map->memoryAllocator)
 	{
-		hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+		hash_map = (LuaHashMap*)malloc(sizeof(LuaHashMap));
 	}	
 	else
 	{
@@ -425,6 +440,86 @@ LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, i
 
 	return hash_map;
 }
+
+
+LuaHashMap* LuaHashMap_CreateShareFromLuaState(lua_State* lua_state)
+{
+	LuaHashMap* hash_map;
+	if(NULL == lua_state)
+	{
+		return NULL;
+	}
+	hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	hash_map->luaState = lua_state;
+	
+	Internal_InitializeInternalTables(hash_map);
+
+	return hash_map;
+}
+
+
+LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints(lua_State* lua_state, lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements)
+{
+	LuaHashMap* hash_map;
+	if(NULL == lua_state)
+	{
+		return NULL;
+	}
+	if(NULL == the_allocator)
+	{
+		hash_map = (LuaHashMap*)malloc(sizeof(LuaHashMap));
+	}	
+	else
+	{
+		hash_map = (LuaHashMap*)(*the_allocator)(user_data, NULL, 0, sizeof(LuaHashMap));
+	}
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	memset(hash_map, 0, sizeof(LuaHashMap));
+
+	hash_map->luaState = lua_state;
+	hash_map->memoryAllocator = the_allocator;
+	hash_map->allocatorUserData = user_data;
+
+	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
+
+	return hash_map;
+}
+
+
+LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lua_State* lua_state, int number_of_array_elements, int number_of_hash_elements)
+{
+	LuaHashMap* hash_map;
+	if(NULL == lua_state)
+	{
+		return NULL;
+	}
+	hash_map = (LuaHashMap*)calloc(1, sizeof(LuaHashMap));
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+
+	hash_map->luaState = lua_state;
+	
+	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
+	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
+	
+	return hash_map;
+}
+
 
 
 
