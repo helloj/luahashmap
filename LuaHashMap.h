@@ -91,7 +91,7 @@ extern "C" {
 	
 	/** Windows needs to know explicitly which functions to export in a DLL. */
 
-#ifdef BUILD_LUAHASHMAP_AS_DLL
+#ifdef LUAHASHMAP_BUILD_AS_DLL
 	#ifdef WIN32
 		#define LUAHASHMAP_EXPORT __declspec(dllexport)
 	#elif defined(__GNUC__) && __GNUC__ >= 4
@@ -101,7 +101,7 @@ extern "C" {
 	#endif
 #else
 	#define LUAHASHMAP_EXPORT
-#endif /* BUILD_LUAHASHMAP_AS_DLL */
+#endif /* LUAHASHMAP_BUILD_AS_DLL */
 	
 	
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */

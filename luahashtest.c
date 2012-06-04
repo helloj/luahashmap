@@ -123,9 +123,9 @@ void TestValueStringNULL()
 
 	/* Lua treats NULL strings as pushing nil which removes an entry. Thus we only have 2. */
 	assert(2 == LuaHashMap_Count(hash_map));
-	assert(false == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 
 	/* Lua treats NULL strings as pushing nil which removes an entry */
 	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "bread");
@@ -139,9 +139,9 @@ void TestValueStringNULL()
 		
 	} while(LuaHashMap_IteratorNext(&hash_iterator));
 	assert(1 == LuaHashMap_Count(hash_map));
-	assert(false == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(false == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
+	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 	
 	LuaHashMap_Free(hash_map);
 	fprintf(stderr, "TestValueStringNULL done\n");
@@ -174,9 +174,9 @@ void TestValuePointerNULL()
 	} while(LuaHashMap_IteratorNext(&hash_iterator));
 	/* Unlike strings, Lua seems to push NULL pointers as 0 which does not remove an entry. Thus we have 3. */
 	assert(3 == LuaHashMap_Count(hash_map));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 	assert((void*)399 == LuaHashMap_GetValuePointerForKeyString(hash_map, "milk"));
 	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "gas"));
 	assert((void*)299 == LuaHashMap_GetValuePointerForKeyString(hash_map, "bread"));
@@ -195,9 +195,9 @@ void TestValuePointerNULL()
 				LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
 		
 	}
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(true == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 	assert((void*)399 == LuaHashMap_GetValuePointerForKeyString(hash_map, "milk"));
 	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "gas"));
 	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "bread"));
