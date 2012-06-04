@@ -72,7 +72,7 @@ extern "C" {
 		#define lua_State void
 		#define __LUAHASHMAP_LUA_STATE_DEFINED__			
 	#endif
-	#if lua_h /* You detect nor undo a typedef */
+	#if !defined(lua_h) /* You detect nor undo a typedef */
 		typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 		#define __LUAHASHMAP_LUA_ALLOC_DEFINED__					
 	#endif
