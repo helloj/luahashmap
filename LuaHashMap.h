@@ -191,7 +191,6 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 	LuaHashMap* hashMap;
 	LuaHashMap_InternalGlobalKeyType whichTable;
 	int keyType;
-	bool atEnd;
 	union LuaHashMapKeyType
 	{
 		const char* keyString;
@@ -199,17 +198,16 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 /*		lua_Integer keyInteger; */
 		void* keyPointer;
 	} currentKey;
-	/* TODO: Consider caching value information when the iterator is created to avoid needing to do another fetch.
-	 * Downside: Iterator data (copy) can become stale much easier since it is an independent copy.
-	 */
-/*	
+
+	int valueType;
 	union LuaHashMapValueType
 	{
 		const char* valueString;
 		lua_Number valueNumber;
 		void* valuePointer;
 	} currentValue;
-*/
+
+	bool atEnd;
 };
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;
@@ -251,14 +249,15 @@ LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
 	
 	
 /* string, string */
-/* Note: Inserting NULL values is like deleting a field. */
-LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
+/* Note: Inserting NULL for string values is like deleting a field, but not for pointer values */
+/* Note: String returned is the Lua internalized pointer for the key string */
+LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string);
 /* string, pointer */
-LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);	
+LUAHASHMAP_EXPORT const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string);	
 /* string, number */
-LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string);
+LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string);
 /* string, integer */
-LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string);
+LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string);
 
 
 /* pointer, string */
@@ -381,13 +380,20 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iter
 
 
 
-/* Experimental Functions: These might be removed */
+/* Experimental Functions: These might be removed or made permanent. */
 /* This is O(n). Since it is slow, it should be used sparingly. */
 LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
 
 /* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
 LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+
+
+LUAHASHMAP_EXPORT int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+LUAHASHMAP_EXPORT const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator);
+LUAHASHMAP_EXPORT void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator);
+LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator);
+LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
 
 
 /* This is only for backdoor access. This is for very advanced use cases that want to directly interact with the Lua State. */
@@ -400,11 +406,11 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaState(lua_State* lua_
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints(lua_State* lua_state, lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements);
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lua_State* lua_state, int number_of_array_elements, int number_of_hash_elements);
 
-/* List Functions */
+/* List Functions (Deprecated) */
 /* The iterator functions are much cleaner than these. These are also O(n). 
  * Also, now that mixing key types in the same hash is no longer explictly forbidden/caught, 
  * these functions are not resilient to mixed keys.
- * Maybe these functions should be removed. 
+ * These functions are now deprecated. 
  */
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
