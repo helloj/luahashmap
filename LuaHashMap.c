@@ -2228,6 +2228,10 @@ void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, cons
 	{
 		return;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
 	
 	/* Early error checking so I can call Internal_PushTableAndKeyInIterator without worrying */
 	switch(hash_iterator->keyType)
@@ -2278,6 +2282,10 @@ void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, voi
 		return;
 	}
 	if(NULL == hash_iterator->hashMap)
+	{
+		return;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return;
 	}
@@ -2334,6 +2342,10 @@ void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_
 	{
 		return;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
 	
 	/* Early error checking so I can call Internal_PushTableAndKeyInIterator without worrying */
 	switch(hash_iterator->keyType)
@@ -2387,6 +2399,10 @@ void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua
 	{
 		return;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
 	
 	/* Early error checking so I can call Internal_PushTableAndKeyInIterator without worrying */
 	switch(hash_iterator->keyType)
@@ -2437,6 +2453,10 @@ const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return NULL;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
@@ -2457,6 +2477,10 @@ void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator)
 		return NULL;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return NULL;
 	}
@@ -2483,6 +2507,10 @@ lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return 0.0;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
 	
 	if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2503,6 +2531,10 @@ lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator
 		return 0;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return 0;
 	}
@@ -2528,6 +2560,10 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 		return NULL;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return NULL;
 	}
@@ -2575,6 +2611,10 @@ void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return NULL;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
@@ -2616,6 +2656,10 @@ lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator
 		return 0.0;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return 0.0;
 	}
@@ -2664,6 +2708,10 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 	{
 		return 0;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
@@ -2707,6 +2755,10 @@ const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_i
 	{
 		return NULL;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
 	if(LUA_TSTRING != hash_iterator->valueType)
 	{
 		return NULL;
@@ -2721,6 +2773,10 @@ void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterat
 		return NULL;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return NULL;
 	}
@@ -2741,6 +2797,10 @@ lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_it
 	{
 		return 0.0;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
 	if(LUA_TNUMBER != hash_iterator->valueType)
 	{
 		return 0.0;
@@ -2755,6 +2815,10 @@ lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_
 		return 0;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return 0;
 	}
@@ -2774,6 +2838,10 @@ bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 		return false;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return false;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return false;
 	}
@@ -3087,6 +3155,10 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return LUA_TNONE;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return LUA_TNONE;
+	}
 	
 	hash_map = hash_iterator->hashMap;
 	if(NULL == hash_map)
@@ -3155,6 +3227,10 @@ int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 		return LUA_TNONE;
 	}
 	if(true == hash_iterator->atEnd)
+	{
+		return LUA_TNONE;
+	}
+	if(true == hash_iterator->isNext)
 	{
 		return LUA_TNONE;
 	}
