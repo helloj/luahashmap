@@ -1846,7 +1846,7 @@ void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_it
 
 }
 
-LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* key_string)
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
 {
 	const char* internalized_key_string = NULL;
 	int value_type;
