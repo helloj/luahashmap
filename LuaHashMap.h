@@ -179,6 +179,14 @@ LUAHASHMAP_EXPORT const LuaHashMapVersion* LuaHashMap_GetLinkedVersion(void);
 typedef struct LuaHashMap LuaHashMap;
 
 typedef int LuaHashMap_InternalGlobalKeyType;
+
+union LuaHashMapKeyValueType
+{
+	const char* theString;
+	lua_Number theNumber;
+/*		lua_Integer theInteger; */
+	void* thePointer;
+};
 	
 /* Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
  * This allows you to use iterators without worrying about leaking.
@@ -188,26 +196,14 @@ LUAHASHMAP_EXPORT struct LuaHashMapIterator
 	/* These are all implementation details.
 	 * You should probably not directly touch.
 	 */
+	union LuaHashMapKeyValueType currentKey;
+	union LuaHashMapKeyValueType currentValue;
 	LuaHashMap* hashMap;
 	LuaHashMap_InternalGlobalKeyType whichTable;
 	int keyType;
-	union LuaHashMapKeyType
-	{
-		const char* keyString;
-		lua_Number keyNumber;
-/*		lua_Integer keyInteger; */
-		void* keyPointer;
-	} currentKey;
-
 	int valueType;
-	union LuaHashMapValueType
-	{
-		const char* valueString;
-		lua_Number valueNumber;
-		void* valuePointer;
-	} currentValue;
-
 	bool atEnd;
+	bool isNext;
 };
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;

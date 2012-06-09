@@ -1509,6 +1509,40 @@ bool LuaHashMap_IsEmpty(LuaHashMap* hash_map)
 	return is_empty;
 }
 
+
+static bool Internal_IteratorIsAlreadyNext(LuaHashMapIterator* hash_iterator)
+{
+	hash_iterator->isNext = false;
+	
+	/* This is my clue as to whether we are at an end iterator or not */
+	if(LUA_TNONE == hash_iterator->keyType)
+	{
+		hash_iterator->atEnd = true;
+		/* Memory should already be set correctly */
+		return false;
+	}
+	/* Assumption: Remove already set the currentKey/Value and types so all we need to do is flip the isNext flag. */
+	/* Note: There is a corner case where the cached values could be stale when the user is expecting them to be fresh.
+	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Removing: Price of %s: %lf\n", 
+			LuaHashMap_GetCachedKeyStringAtIterator(&hash_iterator), 
+			LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+		LuaHashMap_RemoveAtIterator(&hash_iterator);
+		// Change a value in the hash that happens to be the next position.
+		LuaHashMap_SetValue*ForKey*(...);
+		
+	} while(LuaHashMap_IteratorNext(&hash_iterator));
+	
+	 In this case, the value was already cached in RemoveAtIterator so in the next loop, the value is stale.
+	 However, since this technically wasn't using the iterator APIs to set the value, this is one of the cases GetCached is documented to miss.
+	 For performance reasons, I don't really want to re-fetch the value here. I presume the common case is to iterate and remove
+	 so it doesn't make sense to do a double lookup.
+	 */
+	return true;	
+}
+
 static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 {
 	LuaHashMap* hash_map = hash_iterator->hashMap;
@@ -1519,18 +1553,18 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 	 /* first key */
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.keyString);
+		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.theString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-		lua_pushlightuserdata(hash_map->luaState, hash_iterator->currentKey.keyPointer);
+		lua_pushlightuserdata(hash_map->luaState, hash_iterator->currentKey.thePointer);
 	}
 	/* Note: This could be either a number or integer since they are the same to Lua.
 	 * Since this is just for internal use, I don't need to distinguish.
 	 */
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
-		lua_pushnumber(hash_map->luaState, hash_iterator->currentKey.keyNumber);
+		lua_pushnumber(hash_map->luaState, hash_iterator->currentKey.theNumber);
 	}
 	else
 	{
@@ -1548,13 +1582,13 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				hash_iterator->currentKey.keyString = lua_tostring(hash_map->luaState, -2);
+				hash_iterator->currentKey.theString = lua_tostring(hash_map->luaState, -2);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
 			case LUA_TUSERDATA:
 			{
-				hash_iterator->currentKey.keyPointer = lua_touserdata(hash_map->luaState, -2);
+				hash_iterator->currentKey.thePointer = lua_touserdata(hash_map->luaState, -2);
 				break;
 			}
 			case LUA_TNUMBER:
@@ -1562,13 +1596,13 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 				/* Note: Like above, I can't easily distinguish between a number and integer.
 				 * So I will treat things as a number since that is the Lua default and cast later as necessary.
 				 */
-				hash_iterator->currentKey.keyNumber = lua_tonumber(hash_map->luaState, -2);
+				hash_iterator->currentKey.theNumber = lua_tonumber(hash_map->luaState, -2);
 				break;
 			}
 			default:
 			{
 				/* Clear the largest field to make sure every thing is cleared. */
-				memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyType));
+				memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyValueType));
 			}
 		}
 		hash_iterator->valueType = lua_type(hash_map->luaState, -1);
@@ -1576,13 +1610,13 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				hash_iterator->currentValue.valueString = lua_tostring(hash_map->luaState, -1);
+				hash_iterator->currentValue.theString = lua_tostring(hash_map->luaState, -1);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
 			case LUA_TUSERDATA:
 			{
-				hash_iterator->currentValue.valuePointer = lua_touserdata(hash_map->luaState, -1);
+				hash_iterator->currentValue.thePointer = lua_touserdata(hash_map->luaState, -1);
 				break;
 			}
 			case LUA_TNUMBER:
@@ -1590,13 +1624,13 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 				/* Note: Like above, I can't easily distinguish between a number and integer.
 				 * So I will treat things as a number since that is the Lua default and cast later as necessary.
 				 */
-				hash_iterator->currentValue.valueNumber = lua_tonumber(hash_map->luaState, -1);
+				hash_iterator->currentValue.theNumber = lua_tonumber(hash_map->luaState, -1);
 				break;
 			}
 			default:
 			{
 				/* Clear the largest field to make sure every thing is cleared. */
-				memset(&hash_iterator->currentValue, 0, sizeof(union LuaHashMapValueType));
+				memset(&hash_iterator->currentValue, 0, sizeof(union LuaHashMapKeyValueType));
 			}
 		}		
 		/* pop key, value, and table */
@@ -1608,8 +1642,8 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 		hash_iterator->keyType = LUA_TNONE;
 		hash_iterator->valueType = LUA_TNONE;
 		/* Clear the largest field to make sure every thing is cleared. */
-		memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyType));
-		memset(&hash_iterator->currentValue, 0, sizeof(union LuaHashMapValueType));
+		memset(&hash_iterator->currentKey, 0, sizeof(union LuaHashMapKeyValueType));
+		memset(&hash_iterator->currentValue, 0, sizeof(union LuaHashMapKeyValueType));
 
 		/* pop table */
 		lua_pop(hash_map->luaState, 1);
@@ -1622,6 +1656,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = table_name;
 	the_iterator.keyType = LUA_TNONE;
@@ -1638,13 +1673,13 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 		{
 			case LUA_TSTRING:
 			{
-				the_iterator.currentKey.keyString = lua_tostring(hash_map->luaState, -2);
+				the_iterator.currentKey.theString = lua_tostring(hash_map->luaState, -2);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
 			case LUA_TUSERDATA:
 			{
-				the_iterator.currentKey.keyPointer = lua_touserdata(hash_map->luaState, -2);
+				the_iterator.currentKey.thePointer = lua_touserdata(hash_map->luaState, -2);
 				break;
 			}
 			case LUA_TNUMBER:
@@ -1652,12 +1687,12 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 				/* Note: Like above, I can't easily distinguish between a number and integer.
 				 * So I will treat things as a number since that is the Lua default and cast later as necessary.
 				 */
-				the_iterator.currentKey.keyNumber = lua_tonumber(hash_map->luaState, -2);
+				the_iterator.currentKey.theNumber = lua_tonumber(hash_map->luaState, -2);
 				break;
 			}
 			default:
 			{
-				the_iterator.currentKey.keyPointer = NULL;
+				the_iterator.currentKey.thePointer = NULL;
 			}
 		}
 		the_iterator.valueType = lua_type(hash_map->luaState, -1);
@@ -1665,13 +1700,13 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 		{
 			case LUA_TSTRING:
 			{
-				the_iterator.currentValue.valueString = lua_tostring(hash_map->luaState, -1);
+				the_iterator.currentValue.theString = lua_tostring(hash_map->luaState, -1);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
 			case LUA_TUSERDATA:
 			{
-				the_iterator.currentValue.valuePointer = lua_touserdata(hash_map->luaState, -1);
+				the_iterator.currentValue.thePointer = lua_touserdata(hash_map->luaState, -1);
 				break;
 			}
 			case LUA_TNUMBER:
@@ -1679,12 +1714,12 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 				/* Note: Like above, I can't easily distinguish between a number and integer.
 				 * So I will treat things as a number since that is the Lua default and cast later as necessary.
 				 */
-				the_iterator.currentValue.valueNumber = lua_tonumber(hash_map->luaState, -1);
+				the_iterator.currentValue.theNumber = lua_tonumber(hash_map->luaState, -1);
 				break;
 			}
 			default:
 			{
-				the_iterator.currentValue.valuePointer = NULL;
+				the_iterator.currentValue.thePointer = NULL;
 			}
 		}
 
@@ -1694,8 +1729,8 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 	else
 	{
 		the_iterator.atEnd = true;
-		the_iterator.currentKey.keyPointer = NULL;
-		the_iterator.currentValue.valuePointer = NULL;
+		the_iterator.currentKey.thePointer = NULL;
+		the_iterator.currentValue.thePointer = NULL;
 
 		/* pop table */
 		lua_pop(hash_map->luaState, 1);
@@ -1707,14 +1742,15 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 static LuaHashMapIterator Internal_GetIteratorEnd(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = table_name;
 	the_iterator.atEnd = true;
 	the_iterator.keyType = LUA_TNONE;	
 	the_iterator.valueType = LUA_TNONE;	
 	/* Clear the largest field to make sure every thing is cleared. */
-	memset(&the_iterator.currentKey, 0, sizeof(union LuaHashMapKeyType));
-	memset(&the_iterator.currentValue, 0, sizeof(union LuaHashMapValueType));
+	memset(&the_iterator.currentKey, 0, sizeof(union LuaHashMapKeyValueType));
+	memset(&the_iterator.currentValue, 0, sizeof(union LuaHashMapKeyValueType));
 	return the_iterator;
 }
 
@@ -1727,6 +1763,10 @@ bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator)
 	if(true == hash_iterator->atEnd)
 	{
 		return false;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return Internal_IteratorIsAlreadyNext(hash_iterator);
 	}
 	return Internal_IteratorNext(hash_iterator);
 }
@@ -1780,19 +1820,19 @@ void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_it
 	{
 		case LUA_TSTRING:
 		{
-			the_iterator->currentValue.valueString = lua_tostring(the_iterator->hashMap->luaState, stack_index);
+			the_iterator->currentValue.theString = lua_tostring(the_iterator->hashMap->luaState, stack_index);
 			break;			
 		}
 		case LUA_TLIGHTUSERDATA:
 		case LUA_TUSERDATA:
 		{
-			the_iterator->currentValue.valuePointer = lua_touserdata(the_iterator->hashMap->luaState, stack_index);
+			the_iterator->currentValue.thePointer = lua_touserdata(the_iterator->hashMap->luaState, stack_index);
 			break;
 			
 		}
 		case LUA_TNUMBER:
 		{
-			the_iterator->currentValue.valueNumber = lua_tonumber(the_iterator->hashMap->luaState, stack_index);
+			the_iterator->currentValue.theNumber = lua_tonumber(the_iterator->hashMap->luaState, stack_index);
 			break;
 		}
 		default:
@@ -1836,12 +1876,12 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, cons
 	}
 	
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = hash_map->uniqueTableNameForSharedState;
-	the_iterator.atEnd = false;
 	the_iterator.keyType = LUA_TSTRING;
 	/* Make sure to use the Lua internalized string and not the passed in string in case the string passed into this function gets released. */
-	the_iterator.currentKey.keyString = internalized_key_string;
+	the_iterator.currentKey.theString = internalized_key_string;
 
 	switch(value_type)
 	{
@@ -1895,11 +1935,11 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, voi
 	}
 	
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = hash_map->uniqueTableNameForSharedState;
-	the_iterator.atEnd = false;
 	the_iterator.keyType = LUA_TLIGHTUSERDATA;		
-	the_iterator.currentKey.keyPointer = key_pointer;
+	the_iterator.currentKey.thePointer = key_pointer;
 
 	switch(value_type)
 	{
@@ -1952,11 +1992,11 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashMap* hash_map, lua_
 	}
 	
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = hash_map->uniqueTableNameForSharedState;
-	the_iterator.atEnd = false;
 	the_iterator.keyType = LUA_TNUMBER;
-	the_iterator.currentKey.keyNumber = key_number;
+	the_iterator.currentKey.theNumber = key_number;
 
 	switch(value_type)
 	{
@@ -2012,16 +2052,16 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua
 	}
 	
 	LuaHashMapIterator the_iterator;
+	memset(&the_iterator, 0, sizeof(LuaHashMapIterator));
 	the_iterator.hashMap = hash_map;
 	the_iterator.whichTable = hash_map->uniqueTableNameForSharedState;
-	the_iterator.atEnd = false;
 	/* Note: I might be able to benefit from the information that this is an integer,
 	 * but since this is not the only entry point to create an iterator,
 	 * its usefulness is limited.
 	 */
 	the_iterator.keyType = LUA_TNUMBER;
-	the_iterator.currentKey.keyNumber = (lua_Number)key_integer;		
-	/*		the_iterator.currentKey.keyInteger = key_integer; */
+	the_iterator.currentKey.theNumber = (lua_Number)key_integer;		
+	/*		the_iterator.currentKey.theInteger = key_integer; */
 
 	switch(value_type)
 	{
@@ -2109,15 +2149,15 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
 		
 		if(LUA_TSTRING == hash_iterator1->keyType)
 		{
-			return (0 == Internal_safestrcmp(hash_iterator1->currentKey.keyString, hash_iterator2->currentKey.keyString));
+			return (0 == Internal_safestrcmp(hash_iterator1->currentKey.theString, hash_iterator2->currentKey.theString));
 		}
 		else if(LUA_TLIGHTUSERDATA == hash_iterator1->keyType)
 		{
-			return (hash_iterator1->currentKey.keyPointer == hash_iterator2->currentKey.keyPointer);
+			return (hash_iterator1->currentKey.thePointer == hash_iterator2->currentKey.thePointer);
 		}
 		else if(LUA_TNUMBER == hash_iterator1->keyType)
 		{
-			return (hash_iterator1->currentKey.keyNumber == hash_iterator2->currentKey.keyNumber);
+			return (hash_iterator1->currentKey.theNumber == hash_iterator2->currentKey.theNumber);
 		}
 		else
 		{
@@ -2141,13 +2181,13 @@ void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 	{
 		case LUA_TSTRING:
 		{
-			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyString); /* stack: [key_string, table] */
+			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
 			break;
 		}
 		case LUA_TLIGHTUSERDATA:
 		case LUA_TUSERDATA:
 		{
-			lua_pushlightuserdata(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyPointer); /* stack: [key_pointer, table] */
+			lua_pushlightuserdata(hash_iterator->hashMap->luaState, hash_iterator->currentKey.thePointer); /* stack: [key_pointer, table] */
 			break;
 		}
 		case LUA_TNUMBER:
@@ -2160,7 +2200,7 @@ void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 			 * or I need to track the intention using a declaration/hint in creation, 
 			 * or I need to flag the first use of a type and save it.
 			 */
-			lua_pushnumber(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyNumber); /* stack: [key_number, table] */
+			lua_pushnumber(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theNumber); /* stack: [key_number, table] */
 			break;
 		}
 		default:
@@ -2200,7 +2240,7 @@ void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, cons
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.keyString)
+			if(NULL == hash_iterator->currentKey.theString)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2219,7 +2259,7 @@ void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, cons
 	hash_iterator->valueType = LUA_TSTRING;
 	
 	Internal_PushTableAndKeyInIterator(hash_iterator); /* stack: [key, table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_iterator->hashMap->luaState, value_string, hash_iterator->currentValue.valueString); /* stack: [value_string, key, table] */
+	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_iterator->hashMap->luaState, value_string, hash_iterator->currentValue.theString); /* stack: [value_string, key, table] */
 	LUAHASHMAP_SETTABLE(hash_iterator->hashMap->luaState, -3);  /* table[key]=value_string; stack: [table] */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
@@ -2253,7 +2293,7 @@ void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, voi
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.keyString)
+			if(NULL == hash_iterator->currentKey.theString)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2306,7 +2346,7 @@ void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.keyString)
+			if(NULL == hash_iterator->currentKey.theString)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2359,7 +2399,7 @@ void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.keyString)
+			if(NULL == hash_iterator->currentKey.theString)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2400,7 +2440,7 @@ const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        return hash_iterator->currentKey.keyString;
+        return hash_iterator->currentKey.theString;
 	}
 	else
 	{
@@ -2423,7 +2463,7 @@ void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator)
 	
 	if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        return hash_iterator->currentKey.keyPointer;
+        return hash_iterator->currentKey.thePointer;
 	}
 	else
 	{
@@ -2446,7 +2486,7 @@ lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator)
 	
 	if(LUA_TNUMBER == hash_iterator->keyType)
 	{
-        return hash_iterator->currentKey.keyNumber;
+        return hash_iterator->currentKey.theNumber;
 	}
 	else
 	{
@@ -2469,7 +2509,7 @@ lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator
 	
 	if(LUA_TNUMBER == hash_iterator->keyType)
 	{
-        return (lua_Integer)hash_iterator->currentKey.keyNumber;
+        return (lua_Integer)hash_iterator->currentKey.theNumber;
 	}
 	else
 	{
@@ -2494,11 +2534,11 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+        ret_val = LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueStringForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+        ret_val = LuaHashMap_GetValueStringForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.thePointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2510,8 +2550,8 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-        ret_val = LuaHashMap_GetValueStringForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
-        /* return LuaHashMap_GetValueStringForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger); */
+        ret_val = LuaHashMap_GetValueStringForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.theNumber);
+        /* return LuaHashMap_GetValueStringForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.theInteger); */
 	}
 	else
 	{
@@ -2519,7 +2559,7 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 		LUAHASHMAP_ASSERT(false);
 		return NULL;
 	}
-	hash_iterator->currentValue.valueString = ret_val;
+	hash_iterator->currentValue.theString = ret_val;
 	hash_iterator->valueType = LUA_TSTRING;
 	return ret_val;
 }
@@ -2538,11 +2578,11 @@ void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValuePointerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+        ret_val = LuaHashMap_GetValuePointerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValuePointerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+        ret_val = LuaHashMap_GetValuePointerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.thePointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2554,8 +2594,8 @@ void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-        ret_val = LuaHashMap_GetValuePointerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
-        /* return LuaHashMap_GetValuePointerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger); */
+        ret_val = LuaHashMap_GetValuePointerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.theNumber);
+        /* return LuaHashMap_GetValuePointerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.theInteger); */
 	}
 	else
 	{
@@ -2563,7 +2603,7 @@ void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 		LUAHASHMAP_ASSERT(false);
 		return NULL;
 	}
-	hash_iterator->currentValue.valuePointer = ret_val;
+	hash_iterator->currentValue.thePointer = ret_val;
 	hash_iterator->valueType = LUA_TLIGHTUSERDATA;
 	return ret_val;
 }
@@ -2582,11 +2622,11 @@ lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueNumberForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+        ret_val = LuaHashMap_GetValueNumberForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueNumberForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+        ret_val = LuaHashMap_GetValueNumberForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.thePointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2598,8 +2638,8 @@ lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-        ret_val = LuaHashMap_GetValueNumberForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
-        /* return LuaHashMap_GetValueNumberForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger); */
+        ret_val = LuaHashMap_GetValueNumberForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.theNumber);
+        /* return LuaHashMap_GetValueNumberForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.theInteger); */
 	}
 	else
 	{
@@ -2607,7 +2647,7 @@ lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator
 		LUAHASHMAP_ASSERT(false);
 		return 0.0;
 	}
-	hash_iterator->currentValue.valueNumber = ret_val;
+	hash_iterator->currentValue.theNumber = ret_val;
 	hash_iterator->valueType = LUA_TNUMBER;
 	return ret_val;
 }
@@ -2627,11 +2667,11 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueIntegerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+        ret_val = LuaHashMap_GetValueIntegerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueIntegerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+        ret_val = LuaHashMap_GetValueIntegerForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.thePointer);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2643,8 +2683,8 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-        ret_val = LuaHashMap_GetValueIntegerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
-        /* return LuaHashMap_GetValueIntegerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger); */
+        ret_val = LuaHashMap_GetValueIntegerForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.theNumber);
+        /* return LuaHashMap_GetValueIntegerForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.theInteger); */
 	}
 	else
 	{
@@ -2652,7 +2692,7 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 		LUAHASHMAP_ASSERT(false);
 		return 0;
 	}
-	hash_iterator->currentValue.valueNumber = (lua_Number)ret_val;
+	hash_iterator->currentValue.theNumber = (lua_Number)ret_val;
 	hash_iterator->valueType = LUA_TNUMBER;
 	return ret_val;
 }
@@ -2671,7 +2711,7 @@ const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_i
 	{
 		return NULL;
 	}
-	return hash_iterator->currentValue.valueString;
+	return hash_iterator->currentValue.theString;
 }
 
 void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
@@ -2688,7 +2728,7 @@ void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterat
 	{
 		return NULL;
 	}
-	return hash_iterator->currentValue.valuePointer;
+	return hash_iterator->currentValue.thePointer;
 }
 
 lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator)
@@ -2705,7 +2745,7 @@ lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_it
 	{
 		return 0.0;
 	}
-	return hash_iterator->currentValue.valueNumber;
+	return hash_iterator->currentValue.theNumber;
 }
 
 lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator)
@@ -2722,7 +2762,7 @@ lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_
 	{
 		return 0;
 	}
-	return (lua_Integer)hash_iterator->currentValue.valueNumber;
+	return (lua_Integer)hash_iterator->currentValue.theNumber;
 }
 
 
@@ -2769,21 +2809,21 @@ bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		case LUA_TSTRING:
 		{
-			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyString); /* stack: [key_string, table] */
+			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
 			break;
 
 		}
 		case LUA_TLIGHTUSERDATA:
 		case LUA_TUSERDATA:
 		{
-			lua_pushlightuserdata(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyPointer); /* stack: [key_pointer, table] */
+			lua_pushlightuserdata(hash_iterator->hashMap->luaState, hash_iterator->currentKey.thePointer); /* stack: [key_pointer, table] */
 
 			break;
 
 		}
 		case LUA_TNUMBER:
 		{
-			lua_pushnumber(hash_iterator->hashMap->luaState, hash_iterator->currentKey.keyNumber); /* stack: [key_number, table] */
+			lua_pushnumber(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theNumber); /* stack: [key_number, table] */
 			break;
 		}
 		default:
@@ -2829,6 +2869,11 @@ bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 
 void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
 {
+	union LuaHashMapKeyValueType next_key;
+	union LuaHashMapKeyValueType next_value;
+	int next_key_type = LUA_TNONE;
+	int next_value_type = LUA_TNONE;
+	
 	if(NULL == hash_iterator)
 	{
 		return;
@@ -2837,28 +2882,158 @@ void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return;
 	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
 	
-	if(LUA_TSTRING == hash_iterator->whichTable)
+	switch(hash_iterator->keyType)
 	{
-		LuaHashMap_RemoveKeyString(hash_iterator->hashMap, hash_iterator->currentKey.keyString);
+		case LUA_TSTRING:
+		case LUA_TLIGHTUSERDATA:
+		case LUA_TUSERDATA:
+		case LUA_TNUMBER:
+		{
+			break;
+		}
+		default:
+		{
+			return;
+		}
 	}
-	else if(LUA_TLIGHTUSERDATA == hash_iterator->whichTable)
+
+	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_iterator->hashMap->luaState, hash_iterator->hashMap->uniqueTableNameForSharedState); /* stack: [table] */
+	switch(hash_iterator->keyType)
 	{
-		LuaHashMap_RemoveKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.keyPointer);
+		case LUA_TSTRING:
+		{
+			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key table] */
+			break;
+		}
+		case LUA_TLIGHTUSERDATA:
+		case LUA_TUSERDATA:
+		{
+			lua_pushlightuserdata(hash_iterator->hashMap->luaState, hash_iterator->currentKey.thePointer); /* stack: [key table] */
+			break;
+		}
+		case LUA_TNUMBER:
+		{
+			lua_pushnumber(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theNumber); /* stack: [key table] */
+			break;
+		}
+		default:
+		{
+			/* shouldn't get here */
+			LUAHASHMAP_ASSERT(false);
+			/* pop LUAHASHMAP_GETGLOBAL_UNIQUESTRING */
+			lua_pop(hash_iterator->hashMap->luaState, 1);
+			LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);
+			return;
+		}
 	}
-	else if(LUA_TNUMBER == hash_iterator->whichTable)
+	
+	/* Before setting the value to nil, we want to fetch/save the next key so iterating while removing can be done. */
+	
+	/* For performance, duplicate the just pushed key on the stack because we'll need to come back to it when we remove the value */
+	/* This will avoid re-inserting from the C-side which may hopefully skip some strlen() and string comparisons in the string case. */
+	/* It also saves us from needing to figure out what type the key is again. */
+	lua_pushvalue(hash_iterator->hashMap->luaState, -1); /* stack: [key key table] */
+
+	/* Using the duplicated key on top of the stack, use lua_next to find the next key/value pair. */
+	if(lua_next(hash_iterator->hashMap->luaState, -3) != 0)
 	{
-		/* Warning: This might be a problem. I can't easily distinguish between a number and integer.
-		 */
-		LuaHashMap_RemoveKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.keyNumber);
-		/* LuaHashMap_RemoveKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.keyInteger); */
+		/* stack: [next_value next_key key table] */
+		next_key_type = lua_type(hash_iterator->hashMap->luaState, -2); 
+		next_value_type = lua_type(hash_iterator->hashMap->luaState, -1);
+		
+		/* Save the next key in a temporary variable */
+		switch(next_key_type)
+		{
+			case LUA_TSTRING:
+			{
+				next_key.theString = lua_tostring(hash_iterator->hashMap->luaState, -2);
+				break;
+			}
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TUSERDATA:
+			{
+				next_key.thePointer = lua_touserdata(hash_iterator->hashMap->luaState, -2);
+				break;
+			}
+			case LUA_TNUMBER:
+			{
+				next_key.theNumber = lua_tonumber(hash_iterator->hashMap->luaState, -2);
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		
+		/* Save the next value in a temporary variable */
+		switch(next_value_type)
+		{
+			case LUA_TSTRING:
+			{
+				next_value.theString = lua_tostring(hash_iterator->hashMap->luaState, -1);
+				break;
+			}
+			case LUA_TLIGHTUSERDATA:
+			case LUA_TUSERDATA:
+			{
+				next_value.thePointer = lua_touserdata(hash_iterator->hashMap->luaState, -1);
+				break;
+			}
+			case LUA_TNUMBER:
+			{
+				next_value.theNumber = lua_tonumber(hash_iterator->hashMap->luaState, -1);
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+
+		/* Now pop the next key/value and go back to our regularly scheduled program. */
+		lua_pop(hash_iterator->hashMap->luaState, 2); /* stack: [key table] */
 	}
 	else
 	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return;
+		/* No next, so we are at the end of the hash. */
+		/* stack: [key table] */
+		
+		memset(&next_key, 0, sizeof(union LuaHashMapKeyValueType));
+		memset(&next_value, 0, sizeof(union LuaHashMapKeyValueType));
+		next_key_type = LUA_TNONE;
+		next_value_type = LUA_TNONE;
 	}
+	
+	
+	/* Now back to the regularly scheduled program of removing the key/value */
+	/* stack: [key table] */
+	lua_pushnil(hash_iterator->hashMap->luaState); /* stack: [nil, key, table] */
+	LUAHASHMAP_SETTABLE(hash_iterator->hashMap->luaState, -3);  /* table[key_string]=nil; stack: [table] */
+
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_iterator->hashMap->luaState, 1);
+	LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);
+	
+	/* Now that we've removed the key/value pair, the current iterator is invalid.
+	 * In the worst case, Lua will collect the key so when we try to use IteratorNext which has a stale key,
+	 * it will fail when it tries to use lua_next with that stale key.
+	 * To get around this, we mark this iterator as 'invalid' and save the next key so IteratorNext knows it needs to
+	 * do something special because the normal current key has been invalidated/destroyed.
+	 * I will use an isNext flag to denote this special case and reuse the currentKey and currentValue fields to store the next values.
+	 * If there is no next, I will use the type LUA_TNONE to infer that there is no next in the IteratorNext implementation.
+	 */
+	hash_iterator->isNext = true;
+	hash_iterator->keyType = next_key_type;
+	hash_iterator->valueType = next_value_type;
+	hash_iterator->currentKey = next_key;
+	hash_iterator->currentValue = next_value;
 }
 
 static size_t Internal_Count(LuaHashMap* hash_map)
@@ -2922,20 +3097,20 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
 		LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.keyString); /* stack: [key_string, table] */
+		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
 		LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_string, table] */
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
 		LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-		lua_pushlightuserdata(hash_map->luaState, hash_iterator->currentKey.keyPointer); /* stack: [key_string, table] */
+		lua_pushlightuserdata(hash_map->luaState, hash_iterator->currentKey.thePointer); /* stack: [key_string, table] */
 		LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_string, table] */
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
 		/* Warning: This might be a problem. I can't distinguish between a number and integer. */		
 		LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-		lua_pushnumber(hash_map->luaState, hash_iterator->currentKey.keyNumber); /* stack: [key_string, table] */
+		lua_pushnumber(hash_map->luaState, hash_iterator->currentKey.theNumber); /* stack: [key_string, table] */
 		LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_string, table] */
 	}
 	else
@@ -2950,15 +3125,15 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	/* Cache the value in the iterator */
 	if(LUA_TSTRING == hash_iterator->valueType)
 	{
-		hash_iterator->currentValue.valueString = lua_tostring(hash_map->luaState, -1);
+		hash_iterator->currentValue.theString = lua_tostring(hash_map->luaState, -1);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->valueType)
 	{
-		hash_iterator->currentValue.valuePointer = lua_touserdata(hash_map->luaState, -1);
+		hash_iterator->currentValue.thePointer = lua_touserdata(hash_map->luaState, -1);
 	}
 	else if(LUA_TNUMBER == hash_iterator->valueType)
 	{
-		hash_iterator->currentValue.valueNumber = lua_tonumber(hash_map->luaState, -1);
+		hash_iterator->currentValue.theNumber = lua_tonumber(hash_map->luaState, -1);
 	}
 	else
 	{

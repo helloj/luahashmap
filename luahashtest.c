@@ -66,8 +66,23 @@ void TestSimpleKeyStringNumberValue()
 
 }
 
+// http://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c
+void gen_random_string(char *s, const int len) {
+    static const char alphanum[] =
+	"0123456789"
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	"abcdefghijklmnopqrstuvwxyz";
+	
+    for (int i = 0; i < len; ++i) {
+        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+	
+    s[len] = 0;
+}
+
 void TestSimpleKeyStringNumberValueWithIterator()
 {	
+	int i;
 	LuaHashMap* hash_map = LuaHashMap_Create();
 	/* Better to declare when you assign it, but you need C99 */
 	LuaHashMapIterator hash_iterator;
@@ -92,6 +107,48 @@ void TestSimpleKeyStringNumberValueWithIterator()
 	assert(2.99 == LuaHashMap_GetValueNumberForKeyString(hash_map, "bread"));
 	assert(3 == LuaHashMap_Count(hash_map));
 
+	
+	
+	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Removing: Price of %s: %lf\n", 
+				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
+				LuaHashMap_GetValueNumberAtIterator(&hash_iterator));
+		LuaHashMap_RemoveAtIterator(&hash_iterator);
+		
+	} while(LuaHashMap_IteratorNext(&hash_iterator));
+	assert(0 == LuaHashMap_Count(hash_map));
+
+	
+	
+	
+	LuaHashMap_Clear(hash_map);
+	
+	srand(1); // for consistency
+	for(i=0; i<1024*64; i++)
+	{	
+		static char str_buffer[1024];
+		int str_length = rand()%1024;
+		gen_random_string(str_buffer, str_length);
+		LuaHashMap_SetValueNumberForKeyString(hash_map, i, str_buffer);
+	}
+//	assert(1000000 == LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	
+	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+//		fprintf(stderr, "Removing: Price of %s: %lf\n", 
+//				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
+//				LuaHashMap_GetValueNumberAtIterator(&hash_iterator));
+		LuaHashMap_RemoveAtIterator(&hash_iterator);
+		
+	} while(LuaHashMap_IteratorNext(&hash_iterator));
+	assert(0 == LuaHashMap_Count(hash_map));
+	
+	
+	
 	LuaHashMap_Free(hash_map);
 	
 	fprintf(stderr, "TestSimpleKeyStringNumberValueWithIterator done\n");
@@ -143,10 +200,9 @@ void TestValueStringNULL()
 	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
 	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 	
-	LuaHashMap_Free(hash_map);
-	fprintf(stderr, "TestValueStringNULL done\n");
 
-	
+	LuaHashMap_Free(hash_map);
+	fprintf(stderr, "TestValueStringNULL done\n");	
 }
 
 
@@ -201,6 +257,16 @@ void TestValuePointerNULL()
 	assert((void*)399 == LuaHashMap_GetValuePointerForKeyString(hash_map, "milk"));
 	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "gas"));
 	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "bread"));
+	
+	
+	
+	
+	/* Lua will also accept NULL for both keys and values when used as pointers (userdata) */
+	LuaHashMap_SetValuePointerForKeyPointer(hash_map, NULL, NULL);
+	assert(4 == LuaHashMap_Count(hash_map));
+	 
+	 
+	 
 	
 	LuaHashMap_Free(hash_map);
 	fprintf(stderr, "TestValuePointerNULL done\n");
@@ -301,8 +367,10 @@ int main(int argc, char* argv[])
 	
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
+	/* Lua does not allow NULL string keys. LuaHashMap gracefully returns early instead of letting Lua throw an error. */
 	LuaHashMap_SetValueStringForKeyString(hash_map, "value3", NULL);
-	
+	fprintf(stderr, "LuaHashMap did not throw an error for a NULL key string (this is good)\n");
+
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 	CFTimeInterval start_time = CACurrentMediaTime();
 
@@ -316,6 +384,16 @@ int main(int argc, char* argv[])
 //		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
 	}
 	fprintf(stderr, "num keys= %d\n", LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
+
+	{
+		LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+		do
+		{
+			LuaHashMap_RemoveAtIterator(&hash_iterator);
+			
+		} while(LuaHashMap_IteratorNext(&hash_iterator));
+		assert(0 == LuaHashMap_Count(hash_map));
+	}
 	
 	LuaHashMap_Clear(hash_map);
 	CFTimeInterval end_time = CACurrentMediaTime();
