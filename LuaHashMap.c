@@ -585,7 +585,7 @@ lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map)
 	return hash_map->luaState;
 }
 
-const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict value_string, const char* restrict key_string)
+const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string)
 {
 	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
@@ -609,7 +609,7 @@ const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* hash_map, const ch
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* restrict key_string)
+const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* key_string)
 {
 	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
@@ -633,7 +633,7 @@ const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* v
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Number value_number, const char* restrict key_string)
+const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string)
 {
 	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
@@ -657,7 +657,7 @@ const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* hash_map, lua_Numb
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Integer value_integer, const char* restrict key_string)
+const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string)
 {
 	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
@@ -685,7 +685,7 @@ const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* hash_map, lua_Int
 
 
 
-void LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* restrict value_string, void* key_pointer)
+void LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* value_string, void* key_pointer)
 {
 	if(NULL == hash_map)
 	{
@@ -755,7 +755,7 @@ void LuaHashMap_SetValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer v
 }
 
 
-void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* hash_map, const char* restrict value_string, lua_Number key_number)
+void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number)
 {
 	if(NULL == hash_map)
 	{
@@ -826,7 +826,7 @@ void LuaHashMap_SetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer va
 }
 
 
-void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* hash_map, const char* restrict value_string, lua_Integer key_integer)
+void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer)
 {
 	if(NULL == hash_map)
 	{
@@ -897,7 +897,7 @@ void LuaHashMap_SetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer v
 
 
 
-const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	const char* ret_val;
 	if(NULL == hash_map)
@@ -921,7 +921,7 @@ const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* hash_map, const ch
 	return ret_val;
 }
 
-void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	void* ret_val;
 	if(NULL == hash_map)
@@ -945,7 +945,7 @@ void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* hash_map, const char* r
 	return ret_val;
 }
 
-lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	lua_Number ret_val;
 	if(NULL == hash_map)
@@ -968,7 +968,7 @@ lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* hash_map, const cha
 	return ret_val;
 }
 
-lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	lua_Integer ret_val;
 	if(NULL == hash_map)
@@ -1226,7 +1226,7 @@ lua_Integer LuaHashMap_GetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_In
 
 
 
-void LuaHashMap_RemoveKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+void LuaHashMap_RemoveKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
@@ -1298,7 +1298,7 @@ void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-bool LuaHashMap_ExistsKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+bool LuaHashMap_ExistsKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	bool ret_val;
 	if(NULL == hash_map)
@@ -1846,7 +1846,7 @@ void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_it
 
 }
 
-LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* hash_map, const char* restrict key_string)
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
 	const char* internalized_key_string = NULL;
 	int value_type;
@@ -2214,7 +2214,7 @@ void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 	}
 }
 
-void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* hash_iterator, const char* restrict value_string)
+void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string)
 {
 	if(NULL == hash_iterator)
 	{
