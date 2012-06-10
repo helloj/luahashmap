@@ -73,11 +73,11 @@ void gen_random_string(char *s, const int len) {
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"abcdefghijklmnopqrstuvwxyz";
 	
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < len-1; ++i) {
         s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
     }
 	
-    s[len] = 0;
+    s[len-1] = 0;
 }
 
 void TestSimpleKeyStringNumberValueWithIterator()
@@ -274,6 +274,200 @@ void TestValuePointerNULL()
 	
 }
 
+void BenchMarkSameStringPointer()
+{
+	fprintf(stderr, "BenchMarkSameStringPointer start\n");
+
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	const size_t NUM_OF_LOOPS = 2;
+	char str_buffer[1024];
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	size_t i,j;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		gen_random_string(str_buffer, 1024);	
+		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
+	}
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	CFTimeInterval start_time = CACurrentMediaTime();
+
+	for(j=0; j<NUM_OF_LOOPS; j++)
+	{
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			bool ret_flag;
+			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
+			if(false == ret_flag)
+			{
+				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
+			}
+		}
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+#endif
+	LuaHashMap_Free(hash_map);
+	free(array_of_strings);
+	fprintf(stderr, "BenchMarkSameStringPointer done\n");
+
+}
+
+
+void BenchMarkDifferentStringPointer()
+{
+	fprintf(stderr, "BenchMarkDifferentStringPointer start\n");
+
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	const size_t NUM_OF_LOOPS = 2;
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	size_t i,j;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
+		gen_random_string(array_of_strings[i], 1024);	
+		LuaHashMap_SetValueIntegerForKeyString(hash_map, i, array_of_strings[i]);
+	}
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	CFTimeInterval start_time = CACurrentMediaTime();
+
+	for(j=0; j<NUM_OF_LOOPS; j++)
+	{
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			bool ret_flag;
+			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
+			if(false == ret_flag)
+			{
+				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
+			}
+		}
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+#endif
+	LuaHashMap_Free(hash_map);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		free(array_of_strings[i]);
+	}
+	fprintf(stderr, "BenchMarkDifferentStringPointer done\n");
+	free(array_of_strings);
+
+}
+
+
+void BenchMarkExistsGetLookup()
+{
+	fprintf(stderr, "BenchMarkExistsGetLookup start\n");
+
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	const size_t NUM_OF_LOOPS = 2;
+	char str_buffer[1024];
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	size_t i,j;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		gen_random_string(str_buffer, 1024);	
+		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
+	}
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	CFTimeInterval start_time = CACurrentMediaTime();
+
+	for(j=0; j<NUM_OF_LOOPS; j++)
+	{
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			bool ret_flag;
+			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
+			if(false == ret_flag)
+			{
+				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
+			}
+			else
+			{
+				lua_Number ret_val = LuaHashMap_GetValueIntegerForKeyString(hash_map, array_of_strings[i]);
+				/* Just so the compiler doesn't throw away code, use the value */
+				if(ret_val > NUMBER_OF_ELEMENTS)
+				{
+					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
+				}
+			}
+		}
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+#endif
+	LuaHashMap_Free(hash_map);
+	free(array_of_strings);
+	fprintf(stderr, "BenchMarkExistsGetLookup done\n");
+
+}
+
+
+void BenchMarkIteratorGetLookup()
+{
+	fprintf(stderr, "BenchMarkIteratorGetLookup start\n");
+
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	const size_t NUM_OF_LOOPS = 2;
+	char str_buffer[1024];
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	size_t i,j;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		gen_random_string(str_buffer, 1024);	
+		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
+	}
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	CFTimeInterval start_time = CACurrentMediaTime();
+
+	for(j=0; j<NUM_OF_LOOPS; j++)
+	{
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			bool ret_flag;
+			LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorForKeyString(hash_map, array_of_strings[i]);
+			if(LuaHashMap_IteratorIsNotFound(&the_iterator))
+			{
+				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
+			}
+			else
+			{
+				lua_Number ret_val = LuaHashMap_GetCachedValueIntegerAtIterator(&the_iterator);
+				/* Just so the compiler doesn't throw away code, use the value */
+				if(ret_val > NUMBER_OF_ELEMENTS)
+				{
+					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
+				}
+			}
+		}
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+#endif
+	LuaHashMap_Free(hash_map);
+	free(array_of_strings);
+	fprintf(stderr, "BenchMarkIteratorGetLookup done\n");
+
+}
+
+
 #include <stddef.h>
 
 struct dummy
@@ -399,6 +593,32 @@ int main(int argc, char* argv[])
 	CFTimeInterval end_time = CACurrentMediaTime();
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
+	
+	
+	/* Results on iMac i3 64-bit release, Lua 5.2.1rc2 as framework 
+	 BenchMarkDifferentStringPointer start
+	 count: 1000000
+	 diff time: 4.626600
+	 BenchMarkDifferentStringPointer done
+	 BenchMarkSameStringPointer start
+	 count: 1000000
+	 diff time: 4.379855
+	 BenchMarkSameStringPointer done
+	 BenchMarkExistsGetLookup start
+	 count: 1000000
+	 diff time: 7.361952
+	 BenchMarkExistsGetLookup done
+	 BenchMarkIteratorGetLookup start
+	 count: 1000000
+	 diff time: 4.441443
+	 BenchMarkIteratorGetLookup done
+	 */
+	 
+	BenchMarkDifferentStringPointer();
+	BenchMarkSameStringPointer();
+	
+	BenchMarkExistsGetLookup();
+	BenchMarkIteratorGetLookup();
 #endif
 
 
