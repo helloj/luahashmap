@@ -496,7 +496,9 @@ void BenchMarkStringInsertionDifferentPointer()
 	CFTimeInterval end_time = CACurrentMediaTime();
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}	
-	
+	{
+		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
+	}
 	{
 	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer insertion into map2\n");
 	CFTimeInterval start_time = CACurrentMediaTime();
@@ -551,7 +553,9 @@ void BenchMarkStringInsertionSamePointer()
 		CFTimeInterval end_time = CACurrentMediaTime();
 		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}	
-	
+	{
+		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
+	}
 	{
 		fprintf(stderr, "BenchMarkStringInsertionSamePointer insertion into map2\n");
 		CFTimeInterval start_time = CACurrentMediaTime();
@@ -706,7 +710,7 @@ int main(int argc, char* argv[])
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
 	
 	
-	/* Results on iMac i3 64-bit release, Lua 5.2.1rc2 as framework 
+	/* Results on iMac i3 64-bit release (Os), Lua 5.2.1rc2 as framework (O3?)
 	 BenchMarkDifferentStringPointer start
 	 count: 1000000
 	 diff time: 4.626600
@@ -723,6 +727,38 @@ int main(int argc, char* argv[])
 	 count: 1000000
 	 diff time: 4.441443
 	 BenchMarkIteratorGetLookup done
+	 
+	 (O2), added GC to BenchMarkStringInsertionDifferentPointer,BenchMarkStringInsertionSamePointer
+	 BenchMarkDifferentStringPointer start
+	 count: 1000000
+	 diff time: 5.855453
+	 BenchMarkDifferentStringPointer done
+	 BenchMarkSameStringPointer start
+	 count: 1000000
+	 diff time: 4.460006
+	 BenchMarkSameStringPointer done
+	 BenchMarkExistsGetLookup start
+	 count: 1000000
+	 diff time: 7.389991
+	 BenchMarkExistsGetLookup done
+	 BenchMarkIteratorGetLookup start
+	 count: 1000000
+	 diff time: 4.491826
+	 BenchMarkIteratorGetLookup done
+	 BenchMarkStringInsertionDifferentPointer start
+	 BenchMarkStringInsertionDifferentPointer insertion into map1
+	 diff time: 1.861852
+	 BenchMarkStringInsertionDifferentPointer insertion into map2
+	 diff time: 1.770649
+	 count: 1000000
+	 BenchMarkStringInsertionDifferentPointer done
+	 BenchMarkStringInsertionSamePointer start
+	 BenchMarkStringInsertionSamePointer insertion into map1
+	 diff time: 1.877305
+	 BenchMarkStringInsertionSamePointer insertion into map2
+	 diff time: 1.829054
+	 count: 1000000
+	 BenchMarkStringInsertionSamePointer done
 	 */
 	 
 	BenchMarkDifferentStringPointer();
