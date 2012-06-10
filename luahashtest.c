@@ -468,6 +468,116 @@ void BenchMarkIteratorGetLookup()
 }
 
 
+
+void BenchMarkStringInsertionDifferentPointer()
+{
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer start\n");
+	
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
+	size_t i;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
+		gen_random_string(array_of_strings[i], 1024);	
+	}
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	{
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer insertion into map1\n");
+	CFTimeInterval start_time = CACurrentMediaTime();
+
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		LuaHashMap_SetValueIntegerForKeyString(hash_map1, i, array_of_strings[i]);
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+	}	
+	
+	{
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer insertion into map2\n");
+	CFTimeInterval start_time = CACurrentMediaTime();
+	
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		LuaHashMap_SetValueIntegerForKeyString(hash_map2, i, array_of_strings[i]);
+	}
+	CFTimeInterval end_time = CACurrentMediaTime();
+	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+	}
+#endif
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	
+	LuaHashMap_FreeShare(hash_map2);
+	LuaHashMap_Free(hash_map1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		free(array_of_strings[i]);
+	}
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer done\n");
+	free(array_of_strings);
+	
+}
+
+
+void BenchMarkStringInsertionSamePointer()
+{
+	fprintf(stderr, "BenchMarkStringInsertionSamePointer start\n");
+	
+	const size_t NUMBER_OF_ELEMENTS = 1000000;
+	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	char** array_of_internal_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
+	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
+	size_t i;
+	srand(1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
+		gen_random_string(array_of_strings[i], 1024);	
+	}
+#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	{
+		fprintf(stderr, "BenchMarkStringInsertionSamePointer insertion into map1\n");
+		CFTimeInterval start_time = CACurrentMediaTime();
+		
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			array_of_internal_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map1, i, array_of_strings[i]);
+		}
+		CFTimeInterval end_time = CACurrentMediaTime();
+		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+	}	
+	
+	{
+		fprintf(stderr, "BenchMarkStringInsertionSamePointer insertion into map2\n");
+		CFTimeInterval start_time = CACurrentMediaTime();
+		
+		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+		{
+			array_of_internal_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map2, i, array_of_internal_strings[i]);
+		}
+		CFTimeInterval end_time = CACurrentMediaTime();
+		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
+	}
+#endif
+	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	
+	LuaHashMap_FreeShare(hash_map2);
+	LuaHashMap_Free(hash_map1);
+	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
+	{
+		free(array_of_strings[i]);
+	}
+	fprintf(stderr, "BenchMarkStringInsertionSamePointer done\n");
+	free(array_of_strings);
+	free(array_of_internal_strings);
+
+}
+
 #include <stddef.h>
 
 struct dummy
@@ -492,12 +602,13 @@ int main(int argc, char* argv[])
 	size_t test_alignment = offsetof(struct dummy, t);
 	fprintf(stderr, "test_alignment: %zu\n", test_alignment);
 
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentKey));
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentValue));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, hashMap));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, whichTable));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, keyType));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, atEnd));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentKey));
-
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, isNext));
 	
 	fprintf(stderr, "create\n");
 	hash_map = LuaHashMap_Create();
@@ -619,6 +730,9 @@ int main(int argc, char* argv[])
 	
 	BenchMarkExistsGetLookup();
 	BenchMarkIteratorGetLookup();
+	
+	BenchMarkStringInsertionDifferentPointer();
+	BenchMarkStringInsertionSamePointer();
 #endif
 
 
