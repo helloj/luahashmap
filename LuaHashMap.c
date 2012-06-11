@@ -115,7 +115,7 @@ struct LuaHashMap
  * This suggests using the LUA_REGISTRYINDEX might have a tiny speed edge in Lua 5.2.
  * For LUA_REGISTRYINDEX, the code for Lua 5.1 and 5.2 is the same.
  */
-#ifdef LUA_HASHMAP_USE_GLOBAL_TABLE
+#ifdef LUAHASHMAP_USE_GLOBAL_TABLE
 
 	#if LUA_VERSION_NUM <= 501 /* Lua 5.1 or less */
 		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_GLOBALSINDEX, unique_key)
