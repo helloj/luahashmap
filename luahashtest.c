@@ -179,12 +179,16 @@ void TestValueStringNULL()
 	} while(LuaHashMap_IteratorNext(&hash_iterator));
 
 	/* Lua treats NULL strings as pushing nil which removes an entry. Thus we only have 2. */
-	assert(2 == LuaHashMap_Count(hash_map));
-	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	/* Internal change: I now use lua_pushlstring and pass an explict 0 length. This causes Lua to push an empty string and create a key/value pair. So the count is 3. */
+//	assert(2 == LuaHashMap_Count(hash_map));
+	assert(3 == LuaHashMap_Count(hash_map));
+//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
 	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
 	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 
 	/* Lua treats NULL strings as pushing nil which removes an entry */
+	/* Internal change: lua_pushlstring causes the value to be set to an empty string so the entry remains. */
 	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "bread");
 
 	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);	
@@ -195,10 +199,13 @@ void TestValueStringNULL()
 			   LuaHashMap_GetValueStringAtIterator(&hash_iterator));
 		
 	} while(LuaHashMap_IteratorNext(&hash_iterator));
-	assert(1 == LuaHashMap_Count(hash_map));
-	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+//	assert(1 == LuaHashMap_Count(hash_map));
+	assert(3 == LuaHashMap_Count(hash_map));
+//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
 	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
+	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
 	
 
 	LuaHashMap_Free(hash_map);

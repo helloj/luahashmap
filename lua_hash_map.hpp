@@ -182,7 +182,7 @@ public:
 		pair_type operator*()
 		{
 			// User needs to be very careful about the pointer to the strings
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString.stringPointer), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -335,7 +335,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString.stringPointer), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -486,7 +486,7 @@ public:
 		
 		std::pair<_TKey, lua_Number> operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString.stringPointer), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -636,7 +636,7 @@ public:
 		
 		std::pair<_TKey, lua_Integer> operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString.stringPointer), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -2598,7 +2598,7 @@ public:
 		pair_type operator*()
 		{
 			// User needs to be very careful about the pointer to the strings
-			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString)), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString.stringPointer)), static_cast<_TValue>(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -2751,7 +2751,7 @@ public:
 		pair_type operator*()
 		{
 			// User needs to be very careful about the pointer to the strings
-			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
+			return std::make_pair(static_cast<_TKey>(luaHashMapIterator.currentKey.theString.stringPointer), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -2904,7 +2904,7 @@ public:
 		pair_type operator*()
 		{
 			// User needs to be very careful about the pointer to the strings
-			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString)), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
+			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString.stringPointer)), static_cast<_TValue>(std::string(LuaHashMap_GetValueStringAtIterator(&luaHashMapIterator))));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -3054,7 +3054,7 @@ public:
 		
 		pair_type operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString)), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString.stringPointer)), static_cast<_TValue*>(LuaHashMap_GetValuePointerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -3205,7 +3205,7 @@ public:
 		
 		std::pair<_TKey, lua_Number> operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString)), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString.stringPointer)), static_cast<_TValue>(LuaHashMap_GetValueNumberAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const
@@ -3355,7 +3355,7 @@ public:
 		
 		std::pair<_TKey, lua_Integer> operator*()
 		{
-			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString)), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
+			return std::make_pair(static_cast<_TKey>(std::string(luaHashMapIterator.currentKey.theString.stringPointer)), static_cast<_TValue>(LuaHashMap_GetValueIntegerAtIterator(&luaHashMapIterator)));
 		}
 		
 		bool operator==(const iterator& the_other) const

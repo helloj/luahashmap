@@ -100,13 +100,13 @@ struct LuaHashMap
  * This is useful to me in a few places so I'm creating a macro.
  */
 #if LUA_VERSION_NUM <= 501 /* Lua 5.1 or less */
-	#define LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(lua_state, push_string, return_internal_string) \
+	#define LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(lua_state, push_string, length, return_internal_string) \
 		do { \
-			lua_pushstring(lua_state, push_string); \
+			lua_pushlstring(lua_state, push_string, length); \
 			return_internal_string = lua_tostring(lua_state, -1); \
 		} while(0)
 #else /* assuming 502 (5.2) */
-	#define LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(lua_state, push_string, return_internal_string) return_internal_string = lua_pushstring(lua_state, push_string);
+	#define LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(lua_state, push_string, length, return_internal_string) return_internal_string = lua_pushlstring(lua_state, push_string, length);
 #endif
 
 /* Putting stuff in the global table might be interesting because you could run a Lua script and interact with all the elements added from this API.
@@ -585,21 +585,13 @@ lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map)
 	return hash_map->luaState;
 }
 
-const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string)
+static const char* Internal_SetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string, size_t value_string_length, size_t key_string_length)
 {
 	const char* internalized_key_string = NULL;
-	if(NULL == hash_map)
-	{
-		return NULL;
-	}
-	if(NULL == key_string)
-	{
-		return NULL;
-	}
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, internalized_key_string); /* stack: [key_string, table] */
-	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_string, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, key_string_length, internalized_key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, value_string, value_string_length); /* stack: [value_string, key_string, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=value_string; stack: [table] */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
@@ -609,9 +601,8 @@ const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* restrict hash_map,
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* key_string)
+const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string)
 {
-	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
 	{
 		return NULL;
@@ -620,9 +611,36 @@ const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* v
 	{
 		return NULL;
 	}
+	if(NULL == value_string)
+	{
+		return Internal_SetValueStringForKeyStringWithLength(hash_map, value_string, key_string, 0, strlen(key_string));	
+	}
+	else
+	{
+		return Internal_SetValueStringForKeyStringWithLength(hash_map, value_string, key_string, strlen(value_string), strlen(key_string));
+	}
+
+}
+
+const char* LuaHashMap_SetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string, size_t value_string_length, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_SetValueStringForKeyStringWithLength(hash_map, value_string, key_string, value_string_length, key_string_length);	
+}
+
+static const char* Internal_SetValuePointerForKeyStringWithLength(LuaHashMap* hash_map, void* value_pointer, const char* key_string, size_t key_string_length)
+{
+	const char* internalized_key_string = NULL;
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, internalized_key_string); /* stack: [key_string, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, key_string_length, internalized_key_string); /* stack: [key_string, table] */
 	lua_pushlightuserdata(hash_map->luaState, value_pointer); /* stack: [value_pointer, key_string, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=value_pointer; stack: [table] */
 	
@@ -633,9 +651,8 @@ const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* v
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string)
+const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* key_string)
 {
-	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
 	{
 		return NULL;
@@ -644,9 +661,28 @@ const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map,
 	{
 		return NULL;
 	}
+	return Internal_SetValuePointerForKeyStringWithLength(hash_map, value_pointer, key_string, strlen(key_string));
+}
+
+const char* LuaHashMap_SetValuePointerForKeyStringWithLength(LuaHashMap* hash_map, void* value_pointer, const char* key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_SetValuePointerForKeyStringWithLength(hash_map, value_pointer, key_string, key_string_length);
+}
+
+static const char* Internal_SetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string, size_t key_string_length)
+{
+	const char* internalized_key_string = NULL;
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, internalized_key_string); /* stack: [key_string, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, key_string_length, internalized_key_string); /* stack: [key_string, table] */
 	lua_pushnumber(hash_map->luaState, value_number); /* stack: [value_number, key_string, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=value_number; stack: [table] */
 	
@@ -657,9 +693,8 @@ const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map,
 	return internalized_key_string;
 }
 
-const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string)
+const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string)
 {
-	const char* internalized_key_string = NULL;
 	if(NULL == hash_map)
 	{
 		return NULL;
@@ -668,9 +703,28 @@ const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map
 	{
 		return NULL;
 	}
+	return Internal_SetValueNumberForKeyStringWithLength(hash_map, value_number, key_string, strlen(key_string));
+}
+
+const char* LuaHashMap_SetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_SetValueNumberForKeyStringWithLength(hash_map, value_number, key_string, key_string_length);
+}
+
+static const char* Internal_SetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string, size_t key_string_length)
+{
+	const char* internalized_key_string = NULL;
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, internalized_key_string); /* stack: [key_string, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, key_string_length, internalized_key_string); /* stack: [key_string, table] */
 	lua_pushinteger(hash_map->luaState, value_integer); /* stack: [value_integer, key_string, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=value_integer; stack: [table] */
 
@@ -682,19 +736,37 @@ const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map
 }
 
 
-
-
-
-void LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* value_string, void* key_pointer)
+const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string)
 {
 	if(NULL == hash_map)
 	{
-		return;
+		return NULL;
 	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_SetValueIntegerForKeyStringWithLength(hash_map, value_integer, key_string, strlen(key_string));
+}
 
+const char* LuaHashMap_SetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_SetValueIntegerForKeyStringWithLength(hash_map, value_integer, key_string, key_string_length);
+}
+
+static void Internal_SetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, const char* value_string, void* key_pointer, size_t value_string_length)
+{
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
-	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_pointer, table] */
+	lua_pushlstring(hash_map->luaState, value_string, value_string_length); /* stack: [value_string, key_pointer, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_pointer]=value_string; stack: [table] */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
@@ -719,6 +791,31 @@ void LuaHashMap_SetValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_p
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
+void LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* value_string, void* key_pointer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == value_string)
+	{
+		return Internal_SetValueStringForKeyPointerWithLength(hash_map, value_string, key_pointer, 0);
+	}
+	else
+	{
+		return Internal_SetValueStringForKeyPointerWithLength(hash_map, value_string, key_pointer, strlen(value_string));
+	}
+}
+
+void LuaHashMap_SetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, const char* value_string, void* key_pointer, size_t value_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	return Internal_SetValueStringForKeyPointerWithLength(hash_map, value_string, key_pointer, value_string_length);
+
+}
 
 void LuaHashMap_SetValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer)
 {
@@ -754,17 +851,11 @@ void LuaHashMap_SetValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer v
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-
-void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number)
+static void Internal_SetValueStringForKeyNumberWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number, size_t value_string_length)
 {
-	if(NULL == hash_map)
-	{
-		return;
-	}
-
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushnumber(hash_map->luaState, key_number); /* stack: [key_number, table] */
-	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_number, table] */
+	lua_pushlstring(hash_map->luaState, value_string, value_string_length); /* stack: [value_string, key_number, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_number]=value_string; stack: [table] */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
@@ -772,6 +863,30 @@ void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* restrict hash_map, const 
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
+void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == value_string)
+	{
+		return Internal_SetValueStringForKeyNumberWithLength(hash_map, value_string, key_number, 0);
+	}
+	else
+	{
+		return Internal_SetValueStringForKeyNumberWithLength(hash_map, value_string, key_number, strlen(value_string));
+	}
+}
+
+void LuaHashMap_SetValueStringForKeyNumberWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number, size_t value_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	return Internal_SetValueStringForKeyNumberWithLength(hash_map, value_string, key_number, value_string_length);
+}
 
 void LuaHashMap_SetValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number)
 {
@@ -825,8 +940,7 @@ void LuaHashMap_SetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer va
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-
-void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer)
+static void Internal_SetValueStringForKeyIntegerWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer, size_t value_string_length)
 {
 	if(NULL == hash_map)
 	{
@@ -835,12 +949,37 @@ void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* restrict hash_map, const
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushinteger(hash_map->luaState, key_integer); /* stack: [key_integer, table] */
-	lua_pushstring(hash_map->luaState, value_string); /* stack: [value_string, key_integer, table] */
+	lua_pushlstring(hash_map->luaState, value_string, value_string_length); /* stack: [value_string, key_integer, table] */
 	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_integer]=value_string; stack: [table] */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 1);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
+}
+
+void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == value_string)
+	{
+		return Internal_SetValueStringForKeyIntegerWithLength(hash_map, value_string, key_integer, 0);
+	}
+	else
+	{
+		return Internal_SetValueStringForKeyIntegerWithLength(hash_map, value_string, key_integer, strlen(value_string));
+	}
+}
+
+void LuaHashMap_SetValueStringForKeyIntegerWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer, size_t value_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	return Internal_SetValueStringForKeyIntegerWithLength(hash_map, value_string, key_integer, value_string_length);
 }
 
 void LuaHashMap_SetValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer)
@@ -894,26 +1033,15 @@ void LuaHashMap_SetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer v
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-
-
-
-const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+static const char* Internal_GetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t* value_string_length_return, size_t key_string_length)
 {
 	const char* ret_val;
-	if(NULL == hash_map)
-	{
-		return NULL;
-	}
-	if(NULL == key_string)
-	{
-		return NULL;
-	}
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_string, table] */
 	
-	ret_val = lua_tostring(hash_map->luaState, -1);
+	ret_val = lua_tolstring(hash_map->luaState, -1, value_string_length_return);
 
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
@@ -921,9 +1049,8 @@ const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* restrict hash_map,
 	return ret_val;
 }
 
-void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
-	void* ret_val;
 	if(NULL == hash_map)
 	{
 		return NULL;
@@ -932,9 +1059,28 @@ void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, cons
 	{
 		return NULL;
 	}
+	return Internal_GetValueStringForKeyStringWithLength(hash_map, key_string, NULL, strlen(key_string));
+}
+
+const char* LuaHashMap_GetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t* value_string_length_return, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyStringWithLength(hash_map, key_string, value_string_length_return, key_string_length);
+}
+
+static void* Internal_GetValuePointerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	void* ret_val;
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_pointer, table] */
 
 	ret_val = lua_touserdata(hash_map->luaState, -1);
@@ -945,20 +1091,38 @@ void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, cons
 	return ret_val;
 }
 
-lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
-	lua_Number ret_val;
 	if(NULL == hash_map)
 	{
-		return (lua_Number)0.0;
+		return NULL;
 	}
 	if(NULL == key_string)
 	{
-		return (lua_Number)0.0;
+		return NULL;
 	}
+	return Internal_GetValuePointerForKeyStringWithLength(hash_map, key_string, strlen(key_string));
+}
+
+void* LuaHashMap_GetValuePointerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	if(NULL == key_string)
+	{
+		return NULL;
+	}
+	return Internal_GetValuePointerForKeyStringWithLength(hash_map, key_string, key_string_length);
+}
+
+static lua_Number Internal_GetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	lua_Number ret_val;
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_number, table] */
 	ret_val = lua_tonumber(hash_map->luaState, -1);
 	
@@ -968,20 +1132,38 @@ lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* restrict hash_map, 
 	return ret_val;
 }
 
-lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
-	lua_Integer ret_val;
 	if(NULL == hash_map)
 	{
-		return 0;
+		return (lua_Number)0.0;
 	}
 	if(NULL == key_string)
 	{
-		return 0;
+		return (lua_Number)0.0;
 	}
-	
+	return Internal_GetValueNumberForKeyStringWithLength(hash_map, key_string, strlen(key_string));	
+}
+
+lua_Number LuaHashMap_GetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return (lua_Number)0.0;
+	}
+	if(NULL == key_string)
+	{
+		return (lua_Number)0.0;
+	}
+	return Internal_GetValueNumberForKeyStringWithLength(hash_map, key_string, key_string_length);
+}
+
+static lua_Integer Internal_GetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	lua_Integer ret_val;
+
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_integer, table] */
 	ret_val = lua_tointeger(hash_map->luaState, -1);
 	
@@ -991,24 +1173,63 @@ lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* restrict hash_map
 	return ret_val;
 }
 
-
-const char* LuaHashMap_GetValueStringForKeyPointer(LuaHashMap* hash_map, void* key_pointer)
+lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
-	const char* ret_val;
 	if(NULL == hash_map)
 	{
-		return NULL;
+		return 0;
 	}
+	if(NULL == key_string)
+	{
+		return 0;
+	}
+	return Internal_GetValueIntegerForKeyStringWithLength(hash_map, key_string, strlen(key_string));
+}
+
+lua_Integer LuaHashMap_GetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return 0;
+	}
+	if(NULL == key_string)
+	{
+		return 0;
+	}
+	return Internal_GetValueIntegerForKeyStringWithLength(hash_map, key_string, key_string_length);
+}
+
+static const char* Internal_GetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, void* key_pointer, size_t* value_string_length_return)
+{
+	const char* ret_val;
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushlightuserdata(hash_map->luaState, key_pointer); /* stack: [key_pointer, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_pointer]; stack: [value_pointer, table] */
-	ret_val = lua_tostring(hash_map->luaState, -1);
+	ret_val = lua_tolstring(hash_map->luaState, -1, value_string_length_return);
 	
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 	return ret_val;
+}
+
+const char* LuaHashMap_GetValueStringForKeyPointer(LuaHashMap* hash_map, void* key_pointer)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyPointerWithLength(hash_map, key_pointer, NULL);
+}
+
+const char* LuaHashMap_GetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, void* key_pointer, size_t* value_string_length_return)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyPointerWithLength(hash_map, key_pointer, value_string_length_return);
 }
 
 void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_pointer)
@@ -1068,24 +1289,37 @@ lua_Integer LuaHashMap_GetValueIntegerForKeyPointer(LuaHashMap* hash_map, void* 
 	return ret_val;
 }
 
-
-const char* LuaHashMap_GetValueStringForKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
+static const char* Internal_GetValueStringForKeyNumberWithLength(LuaHashMap* hash_map, lua_Number key_number, size_t* value_string_length_return)
 {
 	const char* ret_val;
-	if(NULL == hash_map)
-	{
-		return NULL;
-	}
-	
+
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushnumber(hash_map->luaState, key_number); /* stack: [key_number, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_number]; stack: [value_pointer, table] */
-	ret_val = lua_tostring(hash_map->luaState, -1);
+	ret_val = lua_tolstring(hash_map->luaState, -1, value_string_length_return);
 	
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 	return ret_val;
+}
+
+const char* LuaHashMap_GetValueStringForKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyNumberWithLength(hash_map, key_number, NULL);
+}
+
+const char* LuaHashMap_GetValueStringForKeyNumberWithLength(LuaHashMap* hash_map, lua_Number key_number, size_t* value_string_length_return)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyNumberWithLength(hash_map, key_number, value_string_length_return);
 }
 
 void* LuaHashMap_GetValuePointerForKeyNumber(LuaHashMap* hash_map, lua_Number key_number)
@@ -1145,24 +1379,37 @@ lua_Integer LuaHashMap_GetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Num
 	return ret_val;
 }
 
-
-const char* LuaHashMap_GetValueStringForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
+static const char* Internal_GetValueStringForKeyIntegerWithLength(LuaHashMap* hash_map, lua_Integer key_integer, size_t* value_string_length_return)
 {
 	const char* ret_val;
-	if(NULL == hash_map)
-	{
-		return NULL;
-	}
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	lua_pushinteger(hash_map->luaState, key_integer); /* stack: [key_integer, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_number]; stack: [value_string, table] */
-	ret_val = lua_tostring(hash_map->luaState, -1);
+	ret_val = lua_tolstring(hash_map->luaState, -1, value_string_length_return);
 	
 	/* return value and table are still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_map->luaState, 2);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 	return ret_val;
+}
+
+const char* LuaHashMap_GetValueStringForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyIntegerWithLength(hash_map, key_integer, NULL);
+}
+
+const char* LuaHashMap_GetValueStringForKeyIntegerWithLength(LuaHashMap* hash_map, lua_Integer key_integer, size_t* value_string_length_return)
+{
+	if(NULL == hash_map)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringForKeyIntegerWithLength(hash_map, key_integer, value_string_length_return);
 }
 
 void* LuaHashMap_GetValuePointerForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
@@ -1224,7 +1471,17 @@ lua_Integer LuaHashMap_GetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_In
 
 
 
-
+static void Internal_RemoveKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
+	lua_pushnil(hash_map->luaState); /* stack: [nil, key_string, table] */
+	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=nil; stack: [table] */
+	
+	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
+	lua_pop(hash_map->luaState, 1);
+	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
+}
 
 void LuaHashMap_RemoveKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
 {
@@ -1236,15 +1493,20 @@ void LuaHashMap_RemoveKeyString(LuaHashMap* restrict hash_map, const char* restr
 	{
 		return;
 	}
+	return Internal_RemoveKeyStringWithLength(hash_map, key_string, strlen(key_string));
+}
 
-	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
-	lua_pushnil(hash_map->luaState); /* stack: [nil, key_string, table] */
-	LUAHASHMAP_SETTABLE(hash_map->luaState, -3);  /* table[key_string]=nil; stack: [table] */
-	
-	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
-	lua_pop(hash_map->luaState, 1);
-	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
+void LuaHashMap_RemoveKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return;
+	}
+	if(NULL == key_string)
+	{
+		return;
+	}
+	return Internal_RemoveKeyStringWithLength(hash_map, key_string, key_string_length);
 }
 
 void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer)
@@ -1298,20 +1560,12 @@ void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);
 }
 
-bool LuaHashMap_ExistsKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+static bool Internal_ExistsKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
 {
 	bool ret_val;
-	if(NULL == hash_map)
-	{
-		return false;
-	}
-	if(NULL == key_string)
-	{
-		return false;
-	}
 
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-	lua_pushstring(hash_map->luaState, key_string); /* stack: [key_string, table] */
+	lua_pushlstring(hash_map->luaState, key_string, key_string_length); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value, table] */
 	
 	if(LUA_TNIL==lua_type(hash_map->luaState, -1))
@@ -1327,6 +1581,32 @@ bool LuaHashMap_ExistsKeyString(LuaHashMap* restrict hash_map, const char* restr
 	lua_pop(hash_map->luaState, 2);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
 	return ret_val;
+}
+
+bool LuaHashMap_ExistsKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+{
+	if(NULL == hash_map)
+	{
+		return false;
+	}
+	if(NULL == key_string)
+	{
+		return false;
+	}
+	return Internal_ExistsKeyStringWithLength(hash_map, key_string, strlen(key_string));	
+}
+
+bool LuaHashMap_ExistsKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return false;
+	}
+	if(NULL == key_string)
+	{
+		return false;
+	}
+	return Internal_ExistsKeyStringWithLength(hash_map, key_string, key_string_length);
 }
 
 bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer)
@@ -1553,7 +1833,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 	 /* first key */
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.theString);
+		lua_pushlstring(hash_map->luaState, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
@@ -1582,7 +1862,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				hash_iterator->currentKey.theString = lua_tostring(hash_map->luaState, -2);
+				hash_iterator->currentKey.theString.stringPointer = lua_tolstring(hash_map->luaState, -2, &hash_iterator->currentKey.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -1610,7 +1890,7 @@ static bool Internal_IteratorNext(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				hash_iterator->currentValue.theString = lua_tostring(hash_map->luaState, -1);
+				hash_iterator->currentValue.theString.stringPointer = lua_tolstring(hash_map->luaState, -1, &hash_iterator->currentValue.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -1673,7 +1953,7 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 		{
 			case LUA_TSTRING:
 			{
-				the_iterator.currentKey.theString = lua_tostring(hash_map->luaState, -2);
+				the_iterator.currentKey.theString.stringPointer = lua_tolstring(hash_map->luaState, -2, &the_iterator.currentKey.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -1700,7 +1980,7 @@ static LuaHashMapIterator Internal_GetIteratorBegin(LuaHashMap* hash_map, LuaHas
 		{
 			case LUA_TSTRING:
 			{
-				the_iterator.currentValue.theString = lua_tostring(hash_map->luaState, -1);
+				the_iterator.currentValue.theString.stringPointer = lua_tolstring(hash_map->luaState, -1, &the_iterator.currentValue.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -1820,7 +2100,7 @@ void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_it
 	{
 		case LUA_TSTRING:
 		{
-			the_iterator->currentValue.theString = lua_tostring(the_iterator->hashMap->luaState, stack_index);
+			the_iterator->currentValue.theString.stringPointer = lua_tolstring(the_iterator->hashMap->luaState, stack_index, &the_iterator->currentValue.theString.stringLength);
 			break;			
 		}
 		case LUA_TLIGHTUSERDATA:
@@ -1846,23 +2126,14 @@ void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_it
 
 }
 
-LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+static LuaHashMapIterator Internal_GetIteratorForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
 {
 	const char* internalized_key_string = NULL;
 	int value_type;
-	if(NULL == hash_map)
-	{
-		return Internal_CreateBadIterator();
-	}
-	if(NULL == key_string)
-	{
-		return Internal_CreateBadIterator();
-	}
-	
 	
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
 	/* pushes the string on the stack and sets internalized_key_string to the internalized Lua string pointer. */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, internalized_key_string); /* stack: [key_string, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_map->luaState, key_string, key_string_length, internalized_key_string); /* stack: [key_string, table] */
 	LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value, table] */
 	
 	
@@ -1881,7 +2152,8 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_
 	the_iterator.whichTable = hash_map->uniqueTableNameForSharedState;
 	the_iterator.keyType = LUA_TSTRING;
 	/* Make sure to use the Lua internalized string and not the passed in string in case the string passed into this function gets released. */
-	the_iterator.currentKey.theString = internalized_key_string;
+	the_iterator.currentKey.theString.stringPointer = internalized_key_string;
+	the_iterator.currentKey.theString.stringLength = key_string_length;
 
 	switch(value_type)
 	{
@@ -1911,6 +2183,32 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_
 	LUAHASHMAP_ASSERT(lua_gettop(hash_map->luaState) == 0);	
 		
 	return the_iterator;
+}
+
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string)
+{
+	if(NULL == hash_map)
+	{
+		return Internal_CreateBadIterator();
+	}
+	if(NULL == key_string)
+	{
+		return Internal_CreateBadIterator();
+	}
+	return Internal_GetIteratorForKeyStringWithLength(hash_map, key_string, strlen(key_string));
+}
+
+LuaHashMapIterator LuaHashMap_GetIteratorForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length)
+{
+	if(NULL == hash_map)
+	{
+		return Internal_CreateBadIterator();
+	}
+	if(NULL == key_string)
+	{
+		return Internal_CreateBadIterator();
+	}
+	return Internal_GetIteratorForKeyStringWithLength(hash_map, key_string, key_string_length);
 }
 
 LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, void* key_pointer)
@@ -2093,8 +2391,7 @@ LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua
 	return the_iterator;
 }
 
-
-
+/*
 static int Internal_safestrcmp(const char* str1, const char* str2)
 {
 	if(NULL == str1 && NULL == str2)
@@ -2112,6 +2409,32 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 	else
 	{
 		return strcmp(str1, str2);
+	}
+}
+*/
+
+/* Can be faster than safestrcmp since it can use the string length to compare and doesn't need to return greater-than/less-than. */
+static bool Internal_safestrequal(const char* str1, size_t length1, const char* str2, size_t length2)
+{
+	if(NULL == str1 && NULL == str2)
+	{
+		return true;
+	}
+	else if(length1 != length2)
+	{
+		return false;
+	}
+	else if(NULL == str1)
+	{
+		return false;
+	}
+	else if(NULL == str2)
+	{
+		return false;
+	}
+	else
+	{
+		return (0 == strcmp(str1, str2));
 	}
 }
 
@@ -2149,7 +2472,7 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
 		
 		if(LUA_TSTRING == hash_iterator1->keyType)
 		{
-			return (0 == Internal_safestrcmp(hash_iterator1->currentKey.theString, hash_iterator2->currentKey.theString));
+			return (0 == Internal_safestrequal(hash_iterator1->currentKey.theString.stringPointer, hash_iterator1->currentKey.theString.stringLength, hash_iterator2->currentKey.theString.stringPointer, hash_iterator2->currentKey.theString.stringLength));
 		}
 		else if(LUA_TLIGHTUSERDATA == hash_iterator1->keyType)
 		{
@@ -2181,7 +2504,7 @@ void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 	{
 		case LUA_TSTRING:
 		{
-			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
+			lua_pushlstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength); /* stack: [key_string, table] */
 			break;
 		}
 		case LUA_TLIGHTUSERDATA:
@@ -2214,25 +2537,8 @@ void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 	}
 }
 
-void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string)
+static void Internal_SetValueStringAtIteratorWithLength(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string, size_t value_string_length)
 {
-	if(NULL == hash_iterator)
-	{
-		return;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return;
-	}
-	if(NULL == hash_iterator->hashMap)
-	{
-		return;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return;
-	}
-	
 	/* Early error checking so I can call Internal_PushTableAndKeyInIterator without worrying */
 	switch(hash_iterator->keyType)
 	{
@@ -2244,7 +2550,7 @@ void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_itera
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.theString)
+			if(NULL == hash_iterator->currentKey.theString.stringPointer)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2263,13 +2569,58 @@ void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_itera
 	hash_iterator->valueType = LUA_TSTRING;
 	
 	Internal_PushTableAndKeyInIterator(hash_iterator); /* stack: [key, table] */
-	LUAHASHMAP_PUSHSTRING_AND_ASSIGNINTERNALSTRING(hash_iterator->hashMap->luaState, value_string, hash_iterator->currentValue.theString); /* stack: [value_string, key, table] */
+	LUAHASHMAP_PUSHLSTRING_AND_ASSIGNINTERNALSTRING(hash_iterator->hashMap->luaState, value_string, value_string_length, hash_iterator->currentValue.theString.stringPointer); /* stack: [value_string, key, table] */
 	LUAHASHMAP_SETTABLE(hash_iterator->hashMap->luaState, -3);  /* table[key]=value_string; stack: [table] */
+	
+	hash_iterator->currentValue.theString.stringLength = value_string_length; /* Don't forget to save the length */
 	
 	/* table is still on top of stack. Don't forget to pop it now that we are done with it */
 	lua_pop(hash_iterator->hashMap->luaState, 1);
 	LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);
 }
+
+void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string)
+{
+	if(NULL == hash_iterator)
+	{
+		return;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return;
+	}
+	if(NULL == hash_iterator->hashMap)
+	{
+		return;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
+	return Internal_SetValueStringAtIteratorWithLength(hash_iterator, value_string, strlen(value_string));
+}
+
+void LuaHashMap_SetValueStringAtIteratorWithLength(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string, size_t value_string_length)
+{
+	if(NULL == hash_iterator)
+	{
+		return;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return;
+	}
+	if(NULL == hash_iterator->hashMap)
+	{
+		return;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return;
+	}
+	return Internal_SetValueStringAtIteratorWithLength(hash_iterator, value_string, value_string_length);
+}
+
 
 void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer)
 {
@@ -2301,7 +2652,7 @@ void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, voi
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.theString)
+			if(NULL == hash_iterator->currentKey.theString.stringPointer)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2358,7 +2709,7 @@ void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.theString)
+			if(NULL == hash_iterator->currentKey.theString.stringPointer)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2415,7 +2766,7 @@ void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua
 		}
 		case LUA_TSTRING:
 		{
-			if(NULL == hash_iterator->currentKey.theString)
+			if(NULL == hash_iterator->currentKey.theString.stringPointer)
 			{
 				LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);			
 				return;
@@ -2457,16 +2808,86 @@ const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		return NULL;
 	}
-	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        return hash_iterator->currentKey.theString;
+        return hash_iterator->currentKey.theString.stringPointer;
 	}
 	else
 	{
 		/* shouldn't get here */
 		LUAHASHMAP_ASSERT(false);
 		return NULL;
+	}
+}
+
+const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != key_string_length_return)
+	{
+		*key_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringPointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
+}
+
+size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringLength;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0;
 	}
 }
 
@@ -2551,10 +2972,10 @@ lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator
 	}
 }
 
-
-const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator)
+static const char* Internal_GetValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
 {
 	const char* ret_val = NULL;
+	size_t ret_string_length = 0;
 	if(NULL == hash_iterator)
 	{
 		return NULL;
@@ -2570,11 +2991,11 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueStringForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
+        ret_val = LuaHashMap_GetValueStringForKeyStringWithLength(hash_iterator->hashMap, hash_iterator->currentKey.theString.stringPointer, &ret_string_length, hash_iterator->currentKey.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueStringForKeyPointer(hash_iterator->hashMap, hash_iterator->currentKey.thePointer);
+        ret_val = LuaHashMap_GetValueStringForKeyPointerWithLength(hash_iterator->hashMap, hash_iterator->currentKey.thePointer, &ret_string_length);
 	}
 	else if(LUA_TNUMBER == hash_iterator->keyType)
 	{
@@ -2586,18 +3007,62 @@ const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterato
 		 * or I need to track the intention using a declaration/hint in creation, 
 		 * or I need to flag the first use of a type and save it.
 		 */
-        ret_val = LuaHashMap_GetValueStringForKeyNumber(hash_iterator->hashMap, hash_iterator->currentKey.theNumber);
+        ret_val = LuaHashMap_GetValueStringForKeyNumberWithLength(hash_iterator->hashMap, hash_iterator->currentKey.theNumber, &ret_string_length);
         /* return LuaHashMap_GetValueStringForKeyInteger(hash_iterator->hashMap, hash_iterator->currentKey.theInteger); */
 	}
 	else
 	{
 		/* shouldn't get here */
 		LUAHASHMAP_ASSERT(false);
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
 		return NULL;
 	}
-	hash_iterator->currentValue.theString = ret_val;
+	hash_iterator->currentValue.theString.stringPointer = ret_val;
+	hash_iterator->currentValue.theString.stringLength = ret_string_length;
+	if(NULL != value_string_length_return)
+	{
+		*value_string_length_return = ret_string_length;
+	}
 	hash_iterator->valueType = LUA_TSTRING;
 	return ret_val;
+}
+
+
+const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringAtIteratorWithLength(hash_iterator, NULL);
+}
+
+const char* LuaHashMap_GetValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	return Internal_GetValueStringAtIteratorWithLength(hash_iterator, value_string_length_return);
 }
 
 void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
@@ -2618,7 +3083,7 @@ void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValuePointerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
+        ret_val = LuaHashMap_GetValuePointerForKeyStringWithLength(hash_iterator->hashMap, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
@@ -2666,7 +3131,7 @@ lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueNumberForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
+        ret_val = LuaHashMap_GetValueNumberForKeyStringWithLength(hash_iterator->hashMap, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
@@ -2715,7 +3180,7 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 	
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
-        ret_val = LuaHashMap_GetValueIntegerForKeyString(hash_iterator->hashMap, hash_iterator->currentKey.theString);
+        ret_val = LuaHashMap_GetValueIntegerForKeyStringWithLength(hash_iterator->hashMap, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
 	{
@@ -2763,8 +3228,73 @@ const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_i
 	{
 		return NULL;
 	}
-	return hash_iterator->currentValue.theString;
+	return hash_iterator->currentValue.theString.stringPointer;
 }
+
+const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != value_string_length_return)
+	{
+		*value_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	return hash_iterator->currentValue.theString.stringPointer;
+}
+
+size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		return 0;
+	}
+	return hash_iterator->currentValue.theString.stringLength;
+}
+
 
 void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
 {
@@ -2877,7 +3407,7 @@ bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		case LUA_TSTRING:
 		{
-			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
+			lua_pushlstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength); /* stack: [key_string, table] */
 			break;
 
 		}
@@ -2975,7 +3505,7 @@ void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
 	{
 		case LUA_TSTRING:
 		{
-			lua_pushstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString); /* stack: [key table] */
+			lua_pushlstring(hash_iterator->hashMap->luaState, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength); /* stack: [key table] */
 			break;
 		}
 		case LUA_TLIGHTUSERDATA:
@@ -3019,7 +3549,7 @@ void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				next_key.theString = lua_tostring(hash_iterator->hashMap->luaState, -2);
+				next_key.theString.stringPointer = lua_tolstring(hash_iterator->hashMap->luaState, -2, &next_key.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -3044,7 +3574,7 @@ void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator)
 		{
 			case LUA_TSTRING:
 			{
-				next_value.theString = lua_tostring(hash_iterator->hashMap->luaState, -1);
+				next_value.theString.stringPointer = lua_tolstring(hash_iterator->hashMap->luaState, -1, &next_value.theString.stringLength);
 				break;
 			}
 			case LUA_TLIGHTUSERDATA:
@@ -3169,7 +3699,7 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	if(LUA_TSTRING == hash_iterator->keyType)
 	{
 		LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, hash_map->uniqueTableNameForSharedState); /* stack: [table] */
-		lua_pushstring(hash_map->luaState, hash_iterator->currentKey.theString); /* stack: [key_string, table] */
+		lua_pushlstring(hash_map->luaState, hash_iterator->currentKey.theString.stringPointer, hash_iterator->currentKey.theString.stringLength); /* stack: [key_string, table] */
 		LUAHASHMAP_GETTABLE(hash_map->luaState, -2);  /* table[key_string]; stack: [value_string, table] */
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
@@ -3197,7 +3727,7 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	/* Cache the value in the iterator */
 	if(LUA_TSTRING == hash_iterator->valueType)
 	{
-		hash_iterator->currentValue.theString = lua_tostring(hash_map->luaState, -1);
+		hash_iterator->currentValue.theString.stringPointer = lua_tolstring(hash_map->luaState, -1, &hash_iterator->currentValue.theString.stringLength);
 	}
 	else if(LUA_TLIGHTUSERDATA == hash_iterator->valueType)
 	{
