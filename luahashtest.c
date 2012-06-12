@@ -931,6 +931,7 @@ struct dummy
 {
     char x;
     LuaHashMapIterator t;
+	char y;
 };
 
 
@@ -956,6 +957,9 @@ int main(int argc, char* argv[])
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, keyType));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, atEnd));
 	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, isNext));
+	
+	fprintf(stderr, "test_alignment: %zu\n", offsetof(struct dummy, y));
+
 	
 	fprintf(stderr, "create\n");
 	hash_map = LuaHashMap_Create();
