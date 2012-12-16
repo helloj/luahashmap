@@ -753,6 +753,697 @@ int DoKeyPointerValueInteger()
 	return 0;
 }
 
+
+
+lua_Number s_keyNumber1 = 1.0;
+lua_Number s_keyNumber2 = 2.2;
+lua_Number s_keyNumber3 = 3.3;
+
+
+int DoKeyNumberValueString()
+{
+	fprintf(stderr, "DoKeyNumberValueString()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	const char* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), s_keyNumber1);
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value2"), s_keyNumber2);
+	LuaHashMap_SetValueForKey(hash_map, (char*)("value3"), s_keyNumber3);
+	
+
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyNumber1);
+	assert(0 == Internal_safestrcmp("value1", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyNumber2);
+	assert(0 == Internal_safestrcmp("value2", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyNumber3);
+	assert(0 == Internal_safestrcmp("value3", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyNumber2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, (const char*)("value4"));
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	assert(0 == Internal_safestrcmp("value4", ret_val));
+	
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+
+
+int DoKeyNumberValuePointer()
+{
+	fprintf(stderr, "DoKeyNumberValuePointer()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	void* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, s_keyNumber1);
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer2, s_keyNumber2);
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer3, s_keyNumber3);
+	
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyNumber1);
+	assert(s_valuePointer1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyNumber2);
+	assert(s_valuePointer2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyNumber2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, s_valuePointer4);
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyNumberValueNumber()
+{
+	fprintf(stderr, "DoKeyNumberValueNumber()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Number ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, 1.0, s_keyNumber1);
+	LuaHashMap_SetValueForKey(hash_map, 2.2, s_keyNumber2);
+	LuaHashMap_SetValueForKey(hash_map, 3.3, s_keyNumber3);
+	
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyNumber1);
+	assert(1.0 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyNumber2);
+	assert(2.2 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(3.3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyNumber2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4.4);
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(4.4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyNumberValueInteger()
+{
+	fprintf(stderr, "DoKeyNumberValueInteger()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Integer ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, 1, s_keyNumber1);
+	LuaHashMap_SetValueForKey(hash_map, 2, s_keyNumber2);
+	LuaHashMap_SetValueForKey(hash_map, 3, s_keyNumber3);
+	
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyNumber1);
+	assert(1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyNumber2);
+	assert(2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyNumber2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4);
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyNumber3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(4 == ret_val);
+	
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+
+
+
+lua_Number s_keyInteger1 = 1;
+lua_Number s_keyInteger2 = 2;
+lua_Number s_keyInteger3 = 3;
+
+
+int DoKeyIntegerValueString()
+{
+	fprintf(stderr, "DoKeyIntegerValueString()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	const char* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), s_keyInteger1);
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value2"), s_keyInteger2);
+	LuaHashMap_SetValueForKey(hash_map, (char*)("value3"), s_keyInteger3);
+	
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyInteger1);
+	assert(0 == Internal_safestrcmp("value1", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyInteger2);
+	assert(0 == Internal_safestrcmp("value2", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyInteger3);
+	assert(0 == Internal_safestrcmp("value3", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyInteger2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, (const char*)("value4"));
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	assert(0 == Internal_safestrcmp("value4", ret_val));
+	
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+
+
+int DoKeyIntegerValuePointer()
+{
+	fprintf(stderr, "DoKeyIntegerValuePointer()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	void* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, s_keyInteger1);
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer2, s_keyInteger2);
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer3, s_keyInteger3);
+	
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyInteger1);
+	assert(s_valuePointer1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyInteger2);
+	assert(s_valuePointer2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyInteger2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, s_valuePointer4);
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyIntegerValueNumber()
+{
+	fprintf(stderr, "DoKeyIntegerValueNumber()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Number ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, 1.0, s_keyInteger1);
+	LuaHashMap_SetValueForKey(hash_map, 2.2, s_keyInteger2);
+	LuaHashMap_SetValueForKey(hash_map, 3.3, s_keyInteger3);
+	
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyInteger1);
+	assert(1.0 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyInteger2);
+	assert(2.2 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(3.3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyInteger2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4.4);
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(4.4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyIntegerValueInteger()
+{
+	fprintf(stderr, "DoKeyIntegerValueInteger()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Integer ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	LuaHashMap_SetValueForKey(hash_map, 1, s_keyInteger1);
+	LuaHashMap_SetValueForKey(hash_map, 2, s_keyInteger2);
+	LuaHashMap_SetValueForKey(hash_map, 3, s_keyInteger3);
+	
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyInteger1);
+	assert(1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyInteger2);
+	assert(2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, s_keyInteger2);
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger2);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4);
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, s_keyInteger3);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(4 == ret_val);
+	
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
 #endif
 
 
@@ -780,6 +1471,16 @@ int main(int argc, char* argv[])
 	DoKeyPointerValueNumber();
 	DoKeyPointerValueInteger();
 
+	DoKeyNumberValueString();
+	DoKeyNumberValuePointer();
+	DoKeyNumberValueNumber();
+	DoKeyNumberValueInteger();
+	
+	DoKeyIntegerValueString();
+	DoKeyIntegerValuePointer();
+	DoKeyIntegerValueNumber();
+	DoKeyIntegerValueInteger();
+	
 	
 #endif
 	
