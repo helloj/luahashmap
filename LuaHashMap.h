@@ -454,22 +454,6 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
  */
 #define LuaHashMap_SetValueForKey(hash_map, value, key) \
 	_Generic((hash_map), LuaHashMap*: _Generic((value), \
-		char*: _Generic((key), \
-			const char*: LuaHashMap_SetValueStringForKeyString, \
-			char*: LuaHashMap_SetValueStringForKeyString, \
-			void*: LuaHashMap_SetValueStringForKeyPointer, \
-			float: LuaHashMap_SetValueStringForKeyNumber, \
-			double: LuaHashMap_SetValueStringForKeyNumber, \
-			long double: LuaHashMap_SetValueStringForKeyNumber, \
-			char: LuaHashMap_SetValueStringForKeyInteger, \
-			unsigned char: LuaHashMap_SetValueStringForKeyInteger, \
-			short: LuaHashMap_SetValueStringForKeyInteger, \
-			unsigned short: LuaHashMap_SetValueStringForKeyInteger, \
-			int: LuaHashMap_SetValueStringForKeyInteger, \
-			unsigned int: LuaHashMap_SetValueStringForKeyInteger, \
-			long: LuaHashMap_SetValueStringForKeyInteger, \
-			unsigned long: LuaHashMap_SetValueStringForKeyInteger, \
-			default: LuaHashMap_SetValueStringForKeyPointer),\
 		const char*: _Generic((key), \
 			const char*: LuaHashMap_SetValueStringForKeyString, \
 			char*: LuaHashMap_SetValueStringForKeyString, \
@@ -486,7 +470,24 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			long: LuaHashMap_SetValueStringForKeyInteger, \
 			unsigned long: LuaHashMap_SetValueStringForKeyInteger, \
 			default: LuaHashMap_SetValueStringForKeyPointer),\
+		char*: _Generic((key), \
+			const char*: LuaHashMap_SetValueStringForKeyString, \
+			char*: LuaHashMap_SetValueStringForKeyString, \
+			void*: LuaHashMap_SetValueStringForKeyPointer, \
+			float: LuaHashMap_SetValueStringForKeyNumber, \
+			double: LuaHashMap_SetValueStringForKeyNumber, \
+			long double: LuaHashMap_SetValueStringForKeyNumber, \
+			char: LuaHashMap_SetValueStringForKeyInteger, \
+			unsigned char: LuaHashMap_SetValueStringForKeyInteger, \
+			short: LuaHashMap_SetValueStringForKeyInteger, \
+			unsigned short: LuaHashMap_SetValueStringForKeyInteger, \
+			int: LuaHashMap_SetValueStringForKeyInteger, \
+			unsigned int: LuaHashMap_SetValueStringForKeyInteger, \
+			long: LuaHashMap_SetValueStringForKeyInteger, \
+			unsigned long: LuaHashMap_SetValueStringForKeyInteger, \
+			default: LuaHashMap_SetValueStringForKeyPointer),\
     	void*: _Generic((key), \
+			const char*: LuaHashMap_SetValuePointerForKeyString, \
 			char*: LuaHashMap_SetValuePointerForKeyString, \
 			void*: LuaHashMap_SetValuePointerForKeyPointer, \
 			float: LuaHashMap_SetValuePointerForKeyNumber, \
@@ -502,6 +503,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValuePointerForKeyInteger, \
 			default: LuaHashMap_SetValuePointerForKeyPointer),\
     	float: _Generic((key), \
+			const char*: LuaHashMap_SetValueNumberForKeyString, \
 			char*: LuaHashMap_SetValueNumberForKeyString, \
 			void*: LuaHashMap_SetValueNumberForKeyPointer, \
 			float: LuaHashMap_SetValueNumberForKeyNumber, \
@@ -517,6 +519,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
 			default: LuaHashMap_SetValueNumberForKeyPointer),\
     	double: _Generic((key), \
+			const char*: LuaHashMap_SetValueNumberForKeyString, \
 			char*: LuaHashMap_SetValueNumberForKeyString, \
 			void*: LuaHashMap_SetValueNumberForKeyPointer, \
 			float: LuaHashMap_SetValueNumberForKeyNumber, \
@@ -532,6 +535,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
 			default: LuaHashMap_SetValueNumberForKeyPointer),\
     	long double: _Generic((key), \
+			const char*: LuaHashMap_SetValueNumberForKeyString, \
 			char*: LuaHashMap_SetValueNumberForKeyString, \
 			void*: LuaHashMap_SetValueNumberForKeyPointer, \
 			float: LuaHashMap_SetValueNumberForKeyNumber, \
@@ -547,6 +551,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
 			default: LuaHashMap_SetValueNumberForKeyPointer),\
     	char: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -562,6 +567,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	unsigned char: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -577,6 +583,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	short: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -592,6 +599,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	unsigned short: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -607,6 +615,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	int: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -622,6 +631,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	unsigned int: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -637,6 +647,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	long: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -652,6 +663,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
     	unsigned long: _Generic((key), \
+			const char*: LuaHashMap_SetValueIntegerForKeyString, \
 			char*: LuaHashMap_SetValueIntegerForKeyString, \
 			void*: LuaHashMap_SetValueIntegerForKeyPointer, \
 			float: LuaHashMap_SetValueIntegerForKeyNumber, \
@@ -669,6 +681,124 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_SetValuePointerForKeyPointer) \
 	) \
 	(hash_map, value, key)
+
+
+/**
+ * LuaHashMap_GetValueStringForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter GetValueStringForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueStringForKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_GetValueStringForKeyString, \
+		char*: LuaHashMap_GetValueStringForKeyString, \
+		void*: LuaHashMap_GetValueStringForKeyPointer, \
+		float: LuaHashMap_GetValueStringForKeyNumber, \
+		double: LuaHashMap_GetValueStringForKeyNumber, \
+		long double: LuaHashMap_GetValueStringForKeyNumber, \
+		char: LuaHashMap_GetValueStringForKeyInteger, \
+		unsigned char: LuaHashMap_GetValueStringForKeyInteger, \
+		short: LuaHashMap_GetValueStringForKeyInteger, \
+		unsigned short: LuaHashMap_GetValueStringForKeyInteger, \
+		int: LuaHashMap_GetValueStringForKeyInteger, \
+		unsigned int: LuaHashMap_GetValueStringForKeyInteger, \
+		long: LuaHashMap_GetValueStringForKeyInteger, \
+		unsigned long: LuaHashMap_GetValueStringForKeyInteger, \
+		default: LuaHashMap_GetValueStringForKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_GetValuePointerForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter GetValuePointerForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValuePointerForKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_GetValuePointerForKeyString, \
+		char*: LuaHashMap_GetValuePointerForKeyString, \
+		void*: LuaHashMap_GetValuePointerForKeyPointer, \
+		float: LuaHashMap_GetValuePointerForKeyNumber, \
+		double: LuaHashMap_GetValuePointerForKeyNumber, \
+		long double: LuaHashMap_GetValuePointerForKeyNumber, \
+		char: LuaHashMap_GetValuePointerForKeyInteger, \
+		unsigned char: LuaHashMap_GetValuePointerForKeyInteger, \
+		short: LuaHashMap_GetValuePointerForKeyInteger, \
+		unsigned short: LuaHashMap_GetValuePointerForKeyInteger, \
+		int: LuaHashMap_GetValuePointerForKeyInteger, \
+		unsigned int: LuaHashMap_GetValuePointerForKeyInteger, \
+		long: LuaHashMap_GetValuePointerForKeyInteger, \
+		unsigned long: LuaHashMap_GetValuePointerForKeyInteger, \
+		default: LuaHashMap_GetValuePointerForKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_GetValueNumberForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter GetValueNumberForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueNumberForKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_GetValueNumberForKeyString, \
+		char*: LuaHashMap_GetValueNumberForKeyString, \
+		void*: LuaHashMap_GetValueNumberForKeyPointer, \
+		float: LuaHashMap_GetValueNumberForKeyNumber, \
+		double: LuaHashMap_GetValueNumberForKeyNumber, \
+		long double: LuaHashMap_GetValueNumberForKeyNumber, \
+		char: LuaHashMap_GetValueNumberForKeyInteger, \
+		unsigned char: LuaHashMap_GetValueNumberForKeyInteger, \
+		short: LuaHashMap_GetValueNumberForKeyInteger, \
+		unsigned short: LuaHashMap_GetValueNumberForKeyInteger, \
+		int: LuaHashMap_GetValueNumberForKeyInteger, \
+		unsigned int: LuaHashMap_GetValueNumberForKeyInteger, \
+		long: LuaHashMap_GetValueNumberForKeyInteger, \
+		unsigned long: LuaHashMap_GetValueNumberForKeyInteger, \
+		default: LuaHashMap_GetValueNumberForKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_GetValueIntegerForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter GetValueIntegerForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueIntegerForKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_GetValueIntegerForKeyString, \
+		char*: LuaHashMap_GetValueIntegerForKeyString, \
+		void*: LuaHashMap_GetValueIntegerForKeyPointer, \
+		float: LuaHashMap_GetValueIntegerForKeyNumber, \
+		double: LuaHashMap_GetValueIntegerForKeyNumber, \
+		long double: LuaHashMap_GetValueIntegerForKeyNumber, \
+		char: LuaHashMap_GetValueIntegerForKeyInteger, \
+		unsigned char: LuaHashMap_GetValueIntegerForKeyInteger, \
+		short: LuaHashMap_GetValueIntegerForKeyInteger, \
+		unsigned short: LuaHashMap_GetValueIntegerForKeyInteger, \
+		int: LuaHashMap_GetValueIntegerForKeyInteger, \
+		unsigned int: LuaHashMap_GetValueIntegerForKeyInteger, \
+		long: LuaHashMap_GetValueIntegerForKeyInteger, \
+		unsigned long: LuaHashMap_GetValueIntegerForKeyInteger, \
+		default: LuaHashMap_GetValueIntegerForKeyPointer) \
+	) \
+	(hash_map, key)
+
 
 #endif
 

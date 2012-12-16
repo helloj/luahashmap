@@ -979,26 +979,20 @@ int main(int argc, char* argv[])
 
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
-	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key1");
+	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key1"));
 	assert(0 == Internal_safestrcmp("value1", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
-	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key2");
+	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key2"));
 	assert(0 == Internal_safestrcmp("value2", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
-	ret_string = LuaHashMap_GetValueStringForKeyString(hash_map, "key3");
+	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key3"));
 	assert(0 == Internal_safestrcmp("value3", ret_string));
 	fprintf(stderr, "ret_string=%s\n", ret_string);
 
-	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
-	assert(3 == ret_size);
-	for(i=0; i<ret_size; i++)
-	{
-		fprintf(stderr, "Key[%zd] is %s\n", i, key_array[i]);
-	}
 
 	assert(0 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
