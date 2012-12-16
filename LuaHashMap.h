@@ -799,6 +799,131 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 	) \
 	(hash_map, key)
 
+/**
+ * LuaHashMap_ExistsKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_ExistsKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_ExistsKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_ExistsKeyString, \
+		char*: LuaHashMap_ExistsKeyString, \
+		void*: LuaHashMap_ExistsKeyPointer, \
+		float: LuaHashMap_ExistsKeyNumber, \
+		double: LuaHashMap_ExistsKeyNumber, \
+		long double: LuaHashMap_ExistsKeyNumber, \
+		char: LuaHashMap_ExistsKeyInteger, \
+		unsigned char: LuaHashMap_ExistsKeyInteger, \
+		short: LuaHashMap_ExistsKeyInteger, \
+		unsigned short: LuaHashMap_ExistsKeyInteger, \
+		int: LuaHashMap_ExistsKeyInteger, \
+		unsigned int: LuaHashMap_ExistsKeyInteger, \
+		long: LuaHashMap_ExistsKeyInteger, \
+		unsigned long: LuaHashMap_ExistsKeyInteger, \
+		default: LuaHashMap_ExistsKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_RemoveKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_RemoveKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_RemoveKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_RemoveKeyString, \
+		char*: LuaHashMap_RemoveKeyString, \
+		void*: LuaHashMap_RemoveKeyPointer, \
+		float: LuaHashMap_RemoveKeyNumber, \
+		double: LuaHashMap_RemoveKeyNumber, \
+		long double: LuaHashMap_RemoveKeyNumber, \
+		char: LuaHashMap_RemoveKeyInteger, \
+		unsigned char: LuaHashMap_RemoveKeyInteger, \
+		short: LuaHashMap_RemoveKeyInteger, \
+		unsigned short: LuaHashMap_RemoveKeyInteger, \
+		int: LuaHashMap_RemoveKeyInteger, \
+		unsigned int: LuaHashMap_RemoveKeyInteger, \
+		long: LuaHashMap_RemoveKeyInteger, \
+		unsigned long: LuaHashMap_RemoveKeyInteger, \
+		default: LuaHashMap_RemoveKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_GetIteratorForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_GetIteratorForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetIteratorForKey(hash_map, key) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		const char*: LuaHashMap_GetIteratorForKeyString, \
+		char*: LuaHashMap_GetIteratorForKeyString, \
+		void*: LuaHashMap_GetIteratorForKeyPointer, \
+		float: LuaHashMap_GetIteratorForKeyNumber, \
+		double: LuaHashMap_GetIteratorForKeyNumber, \
+		long double: LuaHashMap_GetIteratorForKeyNumber, \
+		char: LuaHashMap_GetIteratorForKeyInteger, \
+		unsigned char: LuaHashMap_GetIteratorForKeyInteger, \
+		short: LuaHashMap_GetIteratorForKeyInteger, \
+		unsigned short: LuaHashMap_GetIteratorForKeyInteger, \
+		int: LuaHashMap_GetIteratorForKeyInteger, \
+		unsigned int: LuaHashMap_GetIteratorForKeyInteger, \
+		long: LuaHashMap_GetIteratorForKeyInteger, \
+		unsigned long: LuaHashMap_GetIteratorForKeyInteger, \
+		default: LuaHashMap_GetIteratorForKeyPointer) \
+	) \
+	(hash_map, key)
+
+/**
+ * LuaHashMap_SetValueAtIterator
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_SetValue<T>AtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_SetValueAtIterator(hash_iterator, value) \
+	_Generic((hash_iterator), LuaHashMapIterator*: _Generic((value), \
+		const char*: LuaHashMap_SetValueStringAtIterator, \
+		char*: LuaHashMap_SetValueStringAtIterator, \
+		void*: LuaHashMap_SetValuePointerAtIterator, \
+		float: LuaHashMap_SetValueNumberAtIterator, \
+		double: LuaHashMap_SetValueNumberAtIterator, \
+		long double: LuaHashMap_SetValueNumberAtIterator, \
+		char: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned char: LuaHashMap_SetValueIntegerAtIterator, \
+		short: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned short: LuaHashMap_SetValueIntegerAtIterator, \
+		int: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned int: LuaHashMap_SetValueIntegerAtIterator, \
+		long: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned long: LuaHashMap_SetValueIntegerAtIterator, \
+		default: LuaHashMap_SetValuePointerAtIterator) \
+	) \
+	(hash_map, key)
+	
+
+
+LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string);
+LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIteratorWithLength(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string, size_t value_string_length);
+LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer);
+LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number);
+LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer);
+
+	
 
 #endif
 
