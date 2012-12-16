@@ -441,8 +441,6 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 /* C11 introduces _Generic which presents some interesting possibilities. */
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 
-
-#warning "Found C11"
 /**
  * LuaHashMap_SetValueForKey
  *
