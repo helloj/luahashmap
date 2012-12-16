@@ -180,7 +180,7 @@ typedef struct LuaHashMap LuaHashMap;
 
 typedef int LuaHashMap_InternalGlobalKeyType;
 
-LUAHASHMAP_EXPORT struct LuaHashMapStringContainer
+struct LUAHASHMAP_EXPORT LuaHashMapStringContainer
 {
 	size_t stringLength;
 	const char* stringPointer;
@@ -203,7 +203,7 @@ union LuaHashMapKeyValueType
 /* Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
  * This allows you to use iterators without worrying about leaking.
  */
-LUAHASHMAP_EXPORT struct LuaHashMapIterator
+struct LUAHASHMAP_EXPORT LuaHashMapIterator
 {
 	/* These are all implementation details.
 	 * You should probably not directly touch.
