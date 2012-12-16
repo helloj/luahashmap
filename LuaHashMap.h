@@ -410,7 +410,7 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iter
 
 
 
-/* Experimental Functions: These might be removed or made permanent. */
+/* Experimental Functions: These might be removed, modified, or made permanent. */
 /* This is O(n). Since it is slow, it should be used sparingly. */
 LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
 
@@ -418,7 +418,10 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
-
+/* Gets the value contained (copied) in the iterator as opposed to doing an actual hash map lookup.
+ * If you have just retrieved the iterator and have not altered anything in the hash map behind the back of the iterator,
+ * then this value should be the same as what is in the actual hash map.
+ */
 LUAHASHMAP_EXPORT int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return);
@@ -911,7 +914,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		unsigned long: LuaHashMap_SetValueIntegerAtIterator, \
 		default: LuaHashMap_SetValuePointerAtIterator) \
 	) \
-	(hash_map, key)
+	(hash_iterator, value)
 	
 
 #endif

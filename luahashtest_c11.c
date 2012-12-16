@@ -5,11 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#define ENABLE_BENCHMARK
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-#include <QuartzCore/QuartzCore.h>
-#endif
 
 static int Internal_safestrcmp(const char* str1, const char* str2)
 {
@@ -31,1170 +26,1760 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 	}
 }
 
-#if 0
 
-
-static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
-	(void)ud;
-	(void)osize;
-	if (nsize == 0) {
-		free(ptr);
-		return NULL;
-	}
-	else
-		return realloc(ptr, nsize);
-}
-
-void TestSimpleKeyStringNumberValue()
-{
-	LuaHashMap* hash_map = LuaHashMap_Create();
-	
-	fprintf(stderr, "TestSimpleKeyStringNumberValue start\n");
-	
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 3.99, "milk");
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 4.349, "gas");
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 2.99, "bread");
-	
-	
-	fprintf(stderr, "Price of gas: %lf\n", LuaHashMap_GetValueNumberForKeyString(hash_map, "gas"));
-	assert(3.99 == LuaHashMap_GetValueNumberForKeyString(hash_map, "milk"));
-	assert(4.349 == LuaHashMap_GetValueNumberForKeyString(hash_map, "gas"));
-	assert(2.99 == LuaHashMap_GetValueNumberForKeyString(hash_map, "bread"));
-	assert(3 == LuaHashMap_Count(hash_map));
-	LuaHashMap_Free(hash_map);
-	
-	fprintf(stderr, "TestSimpleKeyStringNumberValue done\n");
-
-}
-
-// http://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c
-void gen_random_string(char *s, const int len) {
-    static const char alphanum[] =
-	"0123456789"
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	"abcdefghijklmnopqrstuvwxyz";
-	int i;
-	
-    for (i = 0; i < len-1; ++i) {
-        s[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
-    }
-	
-    s[len-1] = 0;
-}
-
-void TestSimpleKeyStringNumberValueWithIterator()
-{	
-	int i;
-	LuaHashMap* hash_map = LuaHashMap_Create();
-	/* Better to declare when you assign it, but you need C99 */
-	LuaHashMapIterator hash_iterator;
-	
-	fprintf(stderr, "TestSimpleKeyStringNumberValueWithIterator start\n");
-
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 3.99, "milk");
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 4.349, "gas");
-	LuaHashMap_SetValueNumberForKeyString(hash_map, 2.99, "bread");
-	
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-		fprintf(stderr, "Price of %s: %lf\n", 
-			   LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-			   LuaHashMap_GetValueNumberAtIterator(&hash_iterator));
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-
-	assert(3.99 == LuaHashMap_GetValueNumberForKeyString(hash_map, "milk"));
-	assert(4.349 == LuaHashMap_GetValueNumberForKeyString(hash_map, "gas"));
-	assert(2.99 == LuaHashMap_GetValueNumberForKeyString(hash_map, "bread"));
-	assert(3 == LuaHashMap_Count(hash_map));
-
-	
-	
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-		fprintf(stderr, "Removing: Price of %s: %lf\n", 
-				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-				LuaHashMap_GetValueNumberAtIterator(&hash_iterator));
-		LuaHashMap_RemoveAtIterator(&hash_iterator);
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-	assert(0 == LuaHashMap_Count(hash_map));
-
-	
-	
-	
-	LuaHashMap_Clear(hash_map);
-	
-	srand(1); // for consistency
-	for(i=0; i<1024*64; i++)
-	{	
-		static char str_buffer[1024];
-		int str_length = rand()%1024;
-		gen_random_string(str_buffer, str_length);
-		LuaHashMap_SetValueNumberForKeyString(hash_map, i, str_buffer);
-	}
-//	assert(1000000 == LuaHashMap_Count(hash_map));
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-	
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-//		fprintf(stderr, "Removing: Price of %s: %lf\n", 
-//				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-//				LuaHashMap_GetValueNumberAtIterator(&hash_iterator));
-		LuaHashMap_RemoveAtIterator(&hash_iterator);
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-	assert(0 == LuaHashMap_Count(hash_map));
-	
-	
-	
-	LuaHashMap_Free(hash_map);
-	
-	fprintf(stderr, "TestSimpleKeyStringNumberValueWithIterator done\n");
-
-}
-
-
-void TestValueStringNULL()
-{	
-	LuaHashMap* hash_map = LuaHashMap_Create();
-	/* Better to declare when you assign it, but you need C99 */
-	LuaHashMapIterator hash_iterator;
-
-	fprintf(stderr, "TestValueStringNULL start\n");
-	
-	LuaHashMap_SetValueStringForKeyString(hash_map, "$3.99", "milk");
-	/* Lua treats NULL strings as pushing nil which removes an entry */
-	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "gas");
-	LuaHashMap_SetValueStringForKeyString(hash_map, "$2.99", "bread");
-	
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-		fprintf(stderr, "Price of %s: %s\n", 
-			   LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-			   LuaHashMap_GetValueStringAtIterator(&hash_iterator));
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-
-	/* Lua treats NULL strings as pushing nil which removes an entry. Thus we only have 2. */
-	/* Internal change: I now use lua_pushlstring and pass an explict 0 length. This causes Lua to push an empty string and create a key/value pair. So the count is 3. */
-//	assert(2 == LuaHashMap_Count(hash_map));
-	assert(3 == LuaHashMap_Count(hash_map));
-//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
-
-	/* Lua treats NULL strings as pushing nil which removes an entry */
-	/* Internal change: lua_pushlstring causes the value to be set to an empty string so the entry remains. */
-	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "bread");
-
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);	
-	do
-	{
-		fprintf(stderr, "Price of %s: %s\n", 
-			   LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-			   LuaHashMap_GetValueStringAtIterator(&hash_iterator));
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-//	assert(1 == LuaHashMap_Count(hash_map));
-	assert(3 == LuaHashMap_Count(hash_map));
-//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-//	assert(0 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
-	
-
-	LuaHashMap_Free(hash_map);
-	fprintf(stderr, "TestValueStringNULL done\n");	
-}
-
-
-void TestValuePointerNULL()
-{	
-	LuaHashMap* hash_map = LuaHashMap_Create();
-	/* Better to declare when you assign it, but you need C99 */
-	LuaHashMapIterator hash_iterator;
-	LuaHashMapIterator hash_iterator_end;
-
-	fprintf(stderr, "TestValuePointerNULL start\n");
-	
-	LuaHashMap_SetValuePointerForKeyString(hash_map, (void*)399, "milk");
-	/* Unlike strings, Lua seems to push NULL pointers as 0 which does not remove an entry. */
-	LuaHashMap_SetValuePointerForKeyString(hash_map, NULL, "gas");
-	LuaHashMap_SetValuePointerForKeyString(hash_map, (void*)299, "bread");
-	
-	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-		fprintf(stderr, "Price of %s: %zd\n", 
-				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-				LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
-		
-	} while(LuaHashMap_IteratorNext(&hash_iterator));
-	/* Unlike strings, Lua seems to push NULL pointers as 0 which does not remove an entry. Thus we have 3. */
-	assert(3 == LuaHashMap_Count(hash_map));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
-	assert((void*)399 == LuaHashMap_GetValuePointerForKeyString(hash_map, "milk"));
-	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "gas"));
-	assert((void*)299 == LuaHashMap_GetValuePointerForKeyString(hash_map, "bread"));
-
-	
-	LuaHashMap_SetValuePointerForKeyString(hash_map, NULL, "bread");
-
-	/* Showing a different way to loop */
-	for(hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
-		! LuaHashMap_IteratorIsEqual(&hash_iterator, &hash_iterator_end);
-		LuaHashMap_IteratorNext(&hash_iterator)
-	)
-	{
-		fprintf(stderr, "Price of %s: %zd\n", 
-				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-				LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
-		
-	}
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "milk"));
-	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "bread"));
-	assert((void*)399 == LuaHashMap_GetValuePointerForKeyString(hash_map, "milk"));
-	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "gas"));
-	assert(NULL == LuaHashMap_GetValuePointerForKeyString(hash_map, "bread"));
-	
-	
-	
-	
-	/* Lua will also accept NULL for both keys and values when used as pointers (userdata) */
-	LuaHashMap_SetValuePointerForKeyPointer(hash_map, NULL, NULL);
-	assert(4 == LuaHashMap_Count(hash_map));
-	 
-	 
-	 
-	
-	LuaHashMap_Free(hash_map);
-	fprintf(stderr, "TestValuePointerNULL done\n");
-	
-	
-}
-
-void BenchMarkSameStringPointer()
-{
-	fprintf(stderr, "BenchMarkSameStringPointer start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		gen_random_string(str_buffer, 1024);	
-		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkSameStringPointer done\n");
-
-}
-
-
-void BenchMarkDifferentStringPointer()
-{
-	fprintf(stderr, "BenchMarkDifferentStringPointer start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i], 1024);	
-		LuaHashMap_SetValueIntegerForKeyString(hash_map, i, array_of_strings[i]);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkDifferentStringPointer done\n");
-	free(array_of_strings);
-
-}
-
-
-void BenchMarkSameStringPointerWithLength()
-{
-	fprintf(stderr, "BenchMarkSameStringPointerWithLength start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
-		gen_random_string(str_buffer, 1024);
-		array_of_strings[i]->stringLength = strlen(str_buffer);
-		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyStringWithLength(hash_map, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkSameStringPointerWithLength done\n");
-
-}
-
-
-void BenchMarkDifferentStringPointerWithLength()
-{
-	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
-		array_of_strings[i]->stringPointer = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i]->stringPointer, 1024);
-		array_of_strings[i]->stringLength = strlen(array_of_strings[i]->stringPointer);
-		LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyStringWithLength(hash_map, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]->stringPointer);
-		free(array_of_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength done\n");
-	free(array_of_strings);
-
-}
-
-void BenchMarkExistsGetLookup()
-{
-	fprintf(stderr, "BenchMarkExistsGetLookup start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		gen_random_string(str_buffer, 1024);	
-		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyString(hash_map, array_of_strings[i]);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-			else
-			{
-				lua_Number ret_val = LuaHashMap_GetValueIntegerForKeyString(hash_map, array_of_strings[i]);
-				/* Just so the compiler doesn't throw away code, use the value */
-				if(ret_val > NUMBER_OF_ELEMENTS)
-				{
-					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
-				}
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkExistsGetLookup done\n");
-
-}
-
-
-void BenchMarkIteratorGetLookup()
-{
-	fprintf(stderr, "BenchMarkIteratorGetLookup start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		gen_random_string(str_buffer, 1024);	
-		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorForKeyString(hash_map, array_of_strings[i]);
-			if(LuaHashMap_IteratorIsNotFound(&the_iterator))
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-			else
-			{
-				lua_Number ret_val = LuaHashMap_GetCachedValueIntegerAtIterator(&the_iterator);
-				/* Just so the compiler doesn't throw away code, use the value */
-				if(ret_val > NUMBER_OF_ELEMENTS)
-				{
-					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
-				}
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkIteratorGetLookup done\n");
-
-}
-
-
-void BenchMarkExistsGetLookupWithLength()
-{
-	fprintf(stderr, "BenchMarkExistsGetLookupWithLength start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
-
-		gen_random_string(str_buffer, 1024);
-		array_of_strings[i]->stringLength = strlen(str_buffer);
-		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			ret_flag = LuaHashMap_ExistsKeyStringWithLength(hash_map, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-			if(false == ret_flag)
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-			else
-			{
-				lua_Number ret_val = LuaHashMap_GetValueIntegerForKeyStringWithLength(hash_map, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-				/* Just so the compiler doesn't throw away code, use the value */
-				if(ret_val > NUMBER_OF_ELEMENTS)
-				{
-					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
-				}
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkExistsGetLookupWithLength done\n");
-
-}
-
-
-void BenchMarkIteratorGetLookupWithLength()
-{
-	fprintf(stderr, "BenchMarkIteratorGetLookupWithLength start\n");
-
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
-	char str_buffer[1024];
-	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
-		gen_random_string(str_buffer, 1024);
-		array_of_strings[i]->stringLength = strlen(str_buffer);
-		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
-	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(j=0; j<NUM_OF_LOOPS; j++)
-	{
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			bool ret_flag;
-			LuaHashMapIterator the_iterator = LuaHashMap_GetIteratorForKeyStringWithLength(hash_map, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-			if(LuaHashMap_IteratorIsNotFound(&the_iterator))
-			{
-				fprintf(stderr, "Assertion failure. keystring: %s not in hash\n",  array_of_strings[i]);
-			}
-			else
-			{
-				lua_Number ret_val = LuaHashMap_GetCachedValueIntegerAtIterator(&the_iterator);
-				/* Just so the compiler doesn't throw away code, use the value */
-				if(ret_val > NUMBER_OF_ELEMENTS)
-				{
-					fprintf(stderr, "Assertion failure. value: %d exceeds NUMBER_OF_ELEMENTS\n", ret_val);
-				}
-			}
-		}
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-#endif
-	LuaHashMap_Free(hash_map);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	free(array_of_strings);
-	fprintf(stderr, "BenchMarkIteratorGetLookupWithLength done\n");
-
-}
-
-
-void BenchMarkStringInsertionDifferentPointer()
-{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer start\n");
-	
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
-	size_t i;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i], 1024);	
-	}
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer insertion into map1\n");
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		LuaHashMap_SetValueIntegerForKeyString(hash_map1, i, array_of_strings[i]);
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}	
-	{
-		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
-	}
-	{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer insertion into map2\n");
-	CFTimeInterval start_time = CACurrentMediaTime();
-	
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		LuaHashMap_SetValueIntegerForKeyString(hash_map2, i, array_of_strings[i]);
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}
-#endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
-	
-	LuaHashMap_FreeShare(hash_map2);
-	LuaHashMap_Free(hash_map1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer done\n");
-	free(array_of_strings);
-	
-}
-
-
-void BenchMarkStringInsertionSamePointer()
-{
-	fprintf(stderr, "BenchMarkStringInsertionSamePointer start\n");
-	
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	char** array_of_internal_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
-	size_t i;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i], 1024);	
-	}
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	{
-		fprintf(stderr, "BenchMarkStringInsertionSamePointer insertion into map1\n");
-		CFTimeInterval start_time = CACurrentMediaTime();
-		
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			array_of_internal_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map1, i, array_of_strings[i]);
-		}
-		CFTimeInterval end_time = CACurrentMediaTime();
-		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}	
-	{
-		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
-	}
-	{
-		fprintf(stderr, "BenchMarkStringInsertionSamePointer insertion into map2\n");
-		CFTimeInterval start_time = CACurrentMediaTime();
-		
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			array_of_internal_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map2, i, array_of_internal_strings[i]);
-		}
-		CFTimeInterval end_time = CACurrentMediaTime();
-		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}
-#endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
-	
-	LuaHashMap_FreeShare(hash_map2);
-	LuaHashMap_Free(hash_map1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkStringInsertionSamePointer done\n");
-	free(array_of_strings);
-	free(array_of_internal_strings);
-
-}
-
-
-
-void BenchMarkStringInsertionDifferentPointerWithLength()
-{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength start\n");
-	
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
-	size_t i;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (LuaHashMapStringContainer*)calloc(1,sizeof(LuaHashMapStringContainer));
-		array_of_strings[i]->stringPointer = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i]->stringPointer, 1024);
-		array_of_strings[i]->stringLength = strlen(array_of_strings[i]->stringPointer);
-	}
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength insertion into map1\n");
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map1, i, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}	
-	{
-		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
-	}
-	{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength insertion into map2\n");
-	CFTimeInterval start_time = CACurrentMediaTime();
-	
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map2, i, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
-	}
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}
-#endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
-	
-	LuaHashMap_FreeShare(hash_map2);
-	LuaHashMap_Free(hash_map1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]->stringPointer);
-		free(array_of_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength done\n");
-	free(array_of_strings);
-	
-}
-
-
-void BenchMarkStringInsertionSamePointerWithLength()
-{
-	fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength start\n");
-	
-	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
-	LuaHashMapStringContainer** array_of_internal_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
-	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
-	size_t i;
-	srand(1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
-		array_of_internal_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
-		gen_random_string(array_of_strings[i], 1024);
-		array_of_internal_strings[i]->stringLength = strlen(array_of_strings[i]);
-	}
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	{
-		fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength insertion into map1\n");
-		CFTimeInterval start_time = CACurrentMediaTime();
-		
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			array_of_internal_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map1, i, array_of_strings[i], array_of_internal_strings[i]->stringLength);
-		}
-		CFTimeInterval end_time = CACurrentMediaTime();
-		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}	
-	{
-		lua_gc(LuaHashMap_GetLuaState(hash_map1), LUA_GCCOLLECT, 0);
-	}
-	{
-		fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength insertion into map2\n");
-		CFTimeInterval start_time = CACurrentMediaTime();
-		
-		for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-		{
-			array_of_internal_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map2, i, array_of_internal_strings[i]->stringPointer, array_of_internal_strings[i]->stringLength);
-		}
-		CFTimeInterval end_time = CACurrentMediaTime();
-		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	}
-#endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
-	
-	LuaHashMap_FreeShare(hash_map2);
-	LuaHashMap_Free(hash_map1);
-	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
-	{
-		free(array_of_strings[i]);
-		free(array_of_internal_strings[i]);
-	}
-	fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength done\n");
-	free(array_of_strings);
-	free(array_of_internal_strings);
-
-}
 
 
 #include <stddef.h>
 
-struct dummy
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+
+int DoKeyStringValueString()
 {
-    char x;
-    LuaHashMapIterator t;
-	char y;
+	fprintf(stderr, "DoKeyStringValueString()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	const char* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	const char* somekey = "key1";
+	char* somekey_nonconst = (char*)somekey; // testing non-const
+	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), somekey_nonconst);
+
+	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
+	
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value2"), (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
+	
+	LuaHashMap_SetValueForKey(hash_map, (char*)("value3"), (char*)("key3"));
+
+	
+
+	
+	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key1"));
+	assert(0 == Internal_safestrcmp("value1", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key2"));
+	assert(0 == Internal_safestrcmp("value2", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
+	
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key3"));
+	assert(0 == Internal_safestrcmp("value3", ret_val));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, (const char*)("key2"));
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+
+	LuaHashMap_SetValueAtIterator(&the_iterator, (const char*)("value4"));
+
+	ret_val = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%s\n", ret_val);
+	assert(0 == Internal_safestrcmp("value4", ret_val));
+
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+static void* s_valuePointer1 = (void*)0x1;
+static void* s_valuePointer2 = (void*)0x2;
+static void* s_valuePointer3 = (void*)0x3;
+static void* s_valuePointer4 = (void*)0x4;
+
+
+int DoKeyStringValuePointer()
+{
+	fprintf(stderr, "DoKeyStringValuePointer()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	void* ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	const char* somekey = "key1";
+	char* somekey_nonconst = (char*)somekey; // testing non-const
+
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, somekey_nonconst);
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer2, (const char*)("key2"));
+	LuaHashMap_SetValueForKey(hash_map, s_valuePointer3, (char*)("key3"));
+
+
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, (const char*)("key1"));
+	assert(s_valuePointer1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, (const char*)("key2"));
+	assert(s_valuePointer2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, (const char*)("key2"));
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValuePointerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, s_valuePointer4);
+	ret_val = LuaHashMap_GetValuePointerForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(s_valuePointer4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyStringValueNumber()
+{
+	fprintf(stderr, "DoKeyStringValueNumber()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Number ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	const char* somekey = "key1";
+	char* somekey_nonconst = (char*)somekey; // testing non-const
+	
+	LuaHashMap_SetValueForKey(hash_map, 1.0, somekey_nonconst);
+	LuaHashMap_SetValueForKey(hash_map, 2.2, (const char*)("key2"));
+	LuaHashMap_SetValueForKey(hash_map, 3.3, (char*)("key3"));
+	
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, (const char*)("key1"));
+	assert(1.0 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, (const char*)("key2"));
+	assert(2.2 == ret_val);
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(3.3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, (const char*)("key2"));
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %f\n", LuaHashMap_GetValueNumberAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4.4);
+	ret_val = LuaHashMap_GetValueNumberForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%f\n", ret_val);
+	assert(4.4 == ret_val);
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+int DoKeyStringValueInteger()
+{
+	fprintf(stderr, "DoKeyStringValueInteger()\n");
+	LuaHashMap* hash_map = LuaHashMap_Create();
+	LuaHashMapIterator the_iterator;
+	lua_Integer ret_val;
+	size_t ret_count;
+	bool exists;
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	const char* somekey = "key1";
+	char* somekey_nonconst = (char*)somekey; // testing non-const
+	
+	LuaHashMap_SetValueForKey(hash_map, 1, somekey_nonconst);
+	LuaHashMap_SetValueForKey(hash_map, 2, (const char*)("key2"));
+	LuaHashMap_SetValueForKey(hash_map, 3, (char*)("key3"));
+	
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, (const char*)("key1"));
+	assert(1 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, (const char*)("key2"));
+	assert(2 == ret_val);
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(3 == ret_val);
+	
+	
+	assert(0 == LuaHashMap_IsEmpty(hash_map));
+	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
+	
+	
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 3=%d\n", ret_count);
+	assert(3 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be true (1): %d\n", exists);
+	assert(true == exists);
+	
+	
+	fprintf(stderr, "removing key2\n");
+	LuaHashMap_RemoveKey(hash_map, (const char*)("key2"));
+	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Using iterator: %d\n", LuaHashMap_GetValueIntegerAtIterator(&the_iterator));
+	} while(LuaHashMap_IteratorNext(&the_iterator));
+	
+	ret_count = LuaHashMap_Count(hash_map);
+	fprintf(stderr, "LuaHashMap_Count() should be 2=%d\n", ret_count);
+	assert(2 == ret_count);
+	
+	exists = LuaHashMap_ExistsKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_ExistsKey for key2 should be false (0): %d\n", exists);
+	assert(false == exists);
+	
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key2"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key2 should not be found\n");
+	assert(true == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	the_iterator = LuaHashMap_GetIteratorForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "LuaHashMap_GetIteratorForKey for key3 should be found\n");
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	
+	LuaHashMap_SetValueAtIterator(&the_iterator, 4);
+	ret_val = LuaHashMap_GetValueIntegerForKey(hash_map, (const char*)("key3"));
+	fprintf(stderr, "ret_val=%d\n", ret_val);
+	assert(4 == ret_val);
+	
+	
+	LuaHashMap_Free(hash_map);
+	
+	return 0;
+}
+
+#if 0
+
+
+static void* s_keyPointer1 = (void*)0x1;
+static void* s_keyPointer2 = (void*)0x2;
+static void* s_keyPointer3 = (void*)0x3;
+static void* s_keyPointer4 = (void*)0x4;
+
+int DoKeyPointerValuePointer()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, void*> hash_map;
+	
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, void*>(s_keyPointer1, s_valuePointer1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, void*>(s_keyPointer2, s_valuePointer2));
+	
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, void*>(s_keyPointer3, s_valuePointer3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, void*>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert((void*)0x1 == (void*)(*iter).second);
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x2 == (void*)(*iter).second);
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x3 == (void*)(*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, void*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, void*>(s_keyPointer2, s_valuePointer2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, void*>(s_keyPointer4, s_valuePointer4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+struct SomeClass
+{
+	int someInt;
 };
 
 
+static SomeClass* s_keyPointerS1 = (SomeClass*)0x1;
+static SomeClass* s_keyPointerS2 = (SomeClass*)0x2;
+static SomeClass* s_keyPointerS3 = (SomeClass*)0x3;
+static SomeClass* s_keyPointerS4 = (SomeClass*)0x4;
+
+static SomeClass* s_valuePointerS1 = (SomeClass*)0x1;
+static SomeClass* s_valuePointerS2 = (SomeClass*)0x2;
+static SomeClass* s_valuePointerS3 = (SomeClass*)0x3;
+static SomeClass* s_valuePointerS4 = (SomeClass*)0x4;
+
+
+int DoKeyPointer2ValuePointer2()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<SomeClass*, SomeClass*> hash_map;
+	
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<SomeClass*, SomeClass*>(s_keyPointerS1, s_valuePointerS1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<SomeClass*, SomeClass*>(s_keyPointerS2, s_valuePointerS2));
+	
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<SomeClass*, SomeClass*>(s_keyPointerS3, s_valuePointerS3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<SomeClass*, SomeClass*>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointerS1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert((void*)0x1 == (void*)(*iter).second);
+	
+	iter = hash_map.find(s_keyPointerS2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x2 == (void*)(*iter).second);
+	
+	iter = hash_map.find(s_keyPointerS3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x3 == (void*)(*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointerS3);
+	
+	std::pair<void*, void*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointerS3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointerS2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<SomeClass*, SomeClass*>(s_keyPointerS2, s_valuePointerS2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<SomeClass*, SomeClass*>(s_keyPointerS4, s_valuePointerS4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyPointerValueString()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, const char*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, const char*>(s_keyPointer1, "key1"));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, const char*>(s_keyPointer2, "key2"));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, const char*>(s_keyPointer3, "key3"));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, const char*>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+    assert(0 == Internal_safestrcmp("key1", (*iter).second));
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+    assert(0 == Internal_safestrcmp("key2", (*iter).second));
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+    assert(0 == Internal_safestrcmp("key3", (*iter).second));
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, const char*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, const char*>(s_keyPointer2, "key2"));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, const char*>(s_keyPointer4, "key4"));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyPointerValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer2, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, lua_Number>(s_keyPointer4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyPointerValueInteger()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<void*, lua_Integer> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer1, 1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer2, 2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer3, 3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<void*, lua_Integer>::iterator iter;
+	
+	iter = hash_map.find(s_keyPointer1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2 == (*iter).second);
+	
+	iter = hash_map.find(s_keyPointer3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3 == (*iter).second);
+	
+	
+	iter = hash_map.find(s_keyPointer3);
+	
+	std::pair<void*, lua_Integer> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(s_keyPointer3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(s_keyPointer2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer2, 2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<void*, lua_Integer>(s_keyPointer4, 4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+
+
+
+
+int DoKeyIntegerValuePointer()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Integer, void*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Integer, void*>(1, s_valuePointer1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Integer, void*>(2, s_valuePointer2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Integer, void*>(3, s_valuePointer3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Integer, void*>::iterator iter;
+	
+	iter = hash_map.find(1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert((void*)0x1 == (void*)(*iter).second);
+	
+	iter = hash_map.find(2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x2 == (void*)(*iter).second);
+	
+	iter = hash_map.find(3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x3 == (void*)(*iter).second);
+	
+	
+	iter = hash_map.find(3);
+	
+	std::pair<lua_Integer, void*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Integer, void*>(2, s_valuePointer2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Integer, void*>(4, s_valuePointer4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyIntegerValueString()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Integer, const char*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Integer, const char*>(1, "value1"));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Integer, const char*>(2, "value2"));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Integer, const char*>(3, "value3"));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Integer, const char*>::iterator iter;
+	
+	iter = hash_map.find(1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(0 == Internal_safestrcmp("value1", (*iter).second));
+	
+	iter = hash_map.find(2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value2", (*iter).second));
+	
+	iter = hash_map.find(3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value3", (*iter).second));
+	
+	
+	iter = hash_map.find(3);
+	
+	std::pair<lua_Integer, const char*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Integer, const char*>(2, "value2"));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Integer, const char*>(4, "value4"));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+int DoKeyIntegerValueInteger()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Integer, lua_Integer> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Integer>(1, 1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Integer>(2, 2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Integer>(3, 3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Integer, lua_Integer>::iterator iter;
+	
+	iter = hash_map.find(1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1 == (*iter).second);
+	
+	iter = hash_map.find(2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2 == (*iter).second);
+	
+	iter = hash_map.find(3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3);
+	
+	std::pair<lua_Integer, lua_Integer> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Integer>(2, 2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Integer>(4, 4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+int DoKeyIntegerValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Integer, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Integer, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3);
+	
+	std::pair<lua_Integer, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(2, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Integer, lua_Number>(4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int DoKeyNumberValuePointer()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, void*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, void*>(1.1, s_valuePointer1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, void*>(2.2, s_valuePointer2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, void*>(3.3, s_valuePointer3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, void*>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert((void*)0x1 == (void*)(*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x2 == (void*)(*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert((void*)0x3 == (void*)(*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, void*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, void*>(2.5, s_valuePointer2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, void*>(4.4, s_valuePointer4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+int DoKeyNumberValueString()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, const char*> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(1.1, "value1"));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(2.2, "value2"));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, const char*>(3.3, "value3"));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, const char*>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(0 == Internal_safestrcmp("value1", (*iter).second));
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value2", (*iter).second));
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(0 == Internal_safestrcmp("value3", (*iter).second));
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, const char*> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, const char*>(2.5, "value2"));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, const char*>(4.4, "value4"));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+
+
+int DoKeyNumberValueInteger()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, lua_Integer> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(1.1, 1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(2.2, 2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(3.3, 3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, lua_Integer>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1 == (*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2 == (*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, lua_Integer> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(2.5, 2));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, lua_Integer>(4.4, 4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
+int DoKeyNumberValueNumber()
+{
+	size_t ret_val;
+	
+	std::cerr << "create\n";
+	
+	lhm::lua_hash_map<lua_Number, lua_Number> hash_map;
+    
+	std::cerr << "insert1\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(1.1, 1.1));
+	
+	std::cerr << "insert2\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(2.2, 2.2));
+    
+	std::cerr << "insert3\n";
+	hash_map.insert(std::pair<lua_Number, lua_Number>(3.3, 3.3));
+	
+	
+	
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	
+	lhm::lua_hash_map<lua_Number, lua_Number>::iterator iter;
+	
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	
+	assert(1.1 == (*iter).second);
+	
+	iter = hash_map.find(2.2);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(2.2 == (*iter).second);
+	
+	iter = hash_map.find(3.3);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(3.3 == (*iter).second);
+	
+	
+	iter = hash_map.find(3.3);
+	
+	std::pair<lua_Number, lua_Number> ret_pair = *iter;
+	std::cerr << "*iter (pair)=" << ret_pair.first << ", " << ret_pair.second << std::endl;
+	
+	
+	
+	
+	std::cerr << "erasing key3\n";
+	
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	std::cerr << "size=" << ret_val << std::endl;
+	
+	std::cerr << "erasing key3 again\n";
+	ret_val = hash_map.erase(3.3);
+	assert(0 == ret_val);
+	
+	
+	std::cerr << "erasing key2\n";
+	ret_val = hash_map.erase(2.2);
+	assert(1 == ret_val);
+	
+	
+	hash_map.insert(std::pair<lua_Number, lua_Number>(2.5, 2.5));
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	hash_map.insert(std::pair<lua_Number, lua_Number>(4.4, 4.4));
+	ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	for(iter=hash_map.begin(); iter!=hash_map.end(); ++iter)
+	{
+		std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	}
+	
+	
+	assert(false == hash_map.empty());
+	std::cerr << "IsEmpty should be no: " << hash_map.empty() << std::endl;
+	
+	
+	hash_map.clear();
+	ret_val = hash_map.size();
+	assert(0 == ret_val);
+	
+	assert(true == hash_map.empty());
+	std::cerr << "IsEmpty should be yes: " << hash_map.empty() << std::endl;
+	
+	
+	
+	return 0;
+}
+
 #endif
-#define MAX_ARRAY_SIZE 10
+#endif
+
+
+
+
 int main(int argc, char* argv[])
 {
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L)
 	#warning "C11 test did not find a C11 compiler. The test will be skipped."
 	fprintf(stderr, "This test must be compiled with a C11 compiler.");
 	return 0;
+		
+	
+	
+#else
+	
+
+	DoKeyStringValueString();
+	DoKeyStringValuePointer();
+	DoKeyStringValueNumber();
+	DoKeyStringValueInteger();
+
+	
 #endif
-
-	const char* ret_string = NULL;
-	const char* key_array[MAX_ARRAY_SIZE];
-	size_t ret_size;
-	size_t i;
-	LuaHashMap* hash_map;
-	LuaHashMapIterator the_iterator;
-
-	fprintf(stderr, "create\n");
-	hash_map = LuaHashMap_Create();
-//	hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
-//	hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 	
-	// String literals are a problem because the type is char[] and not char*.
-	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
-	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
-	const char* somekey = "key1";
-	char* somekey_nonconst = somekey;
-	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
-	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), somekey_nonconst);
-//	LuaHashMap_SetValueForKey(hash_map, 20.0, "key1");
-	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
 
-	LuaHashMap_SetValueForKey(hash_map, (const char*)("value2"), (const char*)("key2"));
-	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
-
-	LuaHashMap_SetValueForKey(hash_map, (char*)("value3"), (char*)("key3"));
-//	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
-
-#if 1
-
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-
-	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key1"));
-	assert(0 == Internal_safestrcmp("value1", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-
-	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key2"));
-	assert(0 == Internal_safestrcmp("value2", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
-
-	ret_string = LuaHashMap_GetValueStringForKey(hash_map, (const char*)("key3"));
-	assert(0 == Internal_safestrcmp("value3", ret_string));
-	fprintf(stderr, "ret_string=%s\n", ret_string);
-
-
-	assert(0 == LuaHashMap_IsEmpty(hash_map));
-	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
-#endif
-
-/*
-	the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
- */
-	the_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-	do
-	{
-		fprintf(stderr, "Using iterator: %s\n", LuaHashMap_GetValueStringAtIterator(&the_iterator));		
-	} while(LuaHashMap_IteratorNext(&the_iterator));
-
-
-#if 0
-	LuaHashMap_Clear(hash_map);
-	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
-	assert(0 == ret_size);
-	
-	
-	assert(1 == LuaHashMap_IsEmpty(hash_map));
-	fprintf(stderr, "IsEmpty should be yes: %d\n", LuaHashMap_IsEmpty(hash_map));
-	/* Lua does not allow NULL string keys. LuaHashMap gracefully returns early instead of letting Lua throw an error. */
-	LuaHashMap_SetValueStringForKeyString(hash_map, "value3", NULL);
-	fprintf(stderr, "LuaHashMap did not throw an error for a NULL key string (this is good)\n");
-
-#if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
-	CFTimeInterval start_time = CACurrentMediaTime();
-
-	void* ret_ptr = NULL;	
-	for(i=0; i<400000; i++)
-	{
-		// Mixed types not really supported. Don't do this.
-		LuaHashMap_SetValuePointerForKeyPointer(hash_map, (void*)i, (void*)rand());
-		LuaHashMap_SetValueIntegerForKeyInteger(hash_map, rand(), rand());
-		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
-//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
-	}
-	fprintf(stderr, "num keys= %d\n", LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
-
-	{
-		LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
-		do
-		{
-			LuaHashMap_RemoveAtIterator(&hash_iterator);
-			
-		} while(LuaHashMap_IteratorNext(&hash_iterator));
-		assert(0 == LuaHashMap_Count(hash_map));
-	}
-	
-	LuaHashMap_Clear(hash_map);
-	CFTimeInterval end_time = CACurrentMediaTime();
-	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
-	assert(1 == LuaHashMap_IsEmpty(hash_map));
-#endif	
-	
-	/* Results on iMac i3 64-bit release (Os), Lua 5.2.1rc2 as framework (O3?)
-	 BenchMarkDifferentStringPointer start
-	 count: 1000000
-	 diff time: 4.626600
-	 BenchMarkDifferentStringPointer done
-	 BenchMarkSameStringPointer start
-	 count: 1000000
-	 diff time: 4.379855
-	 BenchMarkSameStringPointer done
-	 BenchMarkExistsGetLookup start
-	 count: 1000000
-	 diff time: 7.361952
-	 BenchMarkExistsGetLookup done
-	 BenchMarkIteratorGetLookup start
-	 count: 1000000
-	 diff time: 4.441443
-	 BenchMarkIteratorGetLookup done
-	 
-	 (O2), added GC to BenchMarkStringInsertionDifferentPointer,BenchMarkStringInsertionSamePointer
-	 BenchMarkDifferentStringPointer start
-	 count: 1000000
-	 diff time: 5.855453
-	 BenchMarkDifferentStringPointer done
-	 BenchMarkSameStringPointer start
-	 count: 1000000
-	 diff time: 4.460006
-	 BenchMarkSameStringPointer done
-	 BenchMarkExistsGetLookup start
-	 count: 1000000
-	 diff time: 7.389991
-	 BenchMarkExistsGetLookup done
-	 BenchMarkIteratorGetLookup start
-	 count: 1000000
-	 diff time: 4.491826
-	 BenchMarkIteratorGetLookup done
-	 BenchMarkStringInsertionDifferentPointer start
-	 BenchMarkStringInsertionDifferentPointer insertion into map1
-	 diff time: 1.861852
-	 BenchMarkStringInsertionDifferentPointer insertion into map2
-	 diff time: 1.770649
-	 count: 1000000
-	 BenchMarkStringInsertionDifferentPointer done
-	 BenchMarkStringInsertionSamePointer start
-	 BenchMarkStringInsertionSamePointer insertion into map1
-	 diff time: 1.877305
-	 BenchMarkStringInsertionSamePointer insertion into map2
-	 diff time: 1.829054
-	 count: 1000000
-	 BenchMarkStringInsertionSamePointer done
-	 
-	 
-	 (02) Rerun with additional WithLength APIs.
-	 
-	 BenchMarkDifferentStringPointer start
-	 count: 1000000
-	 diff time: 4.405813
-	 BenchMarkDifferentStringPointer done
-	 BenchMarkSameStringPointer start
-	 count: 1000000
-	 diff time: 4.213511
-	 BenchMarkSameStringPointer done
-	 BenchMarkDifferentStringPointerWithLength start
-	 count: 1000000
-	 diff time: 4.309061
-	 BenchMarkDifferentStringPointerWithLength done
-	 BenchMarkSameStringPointerWithLength start
-	 count: 1000000
-	 diff time: 4.025509
-	 BenchMarkSameStringPointerWithLength done
-	 BenchMarkExistsGetLookup start
-	 count: 1000000
-	 diff time: 7.044242
-	 BenchMarkExistsGetLookup done
-	 BenchMarkIteratorGetLookup start
-	 count: 1000000
-	 diff time: 4.350098
-	 BenchMarkIteratorGetLookup done
-	 BenchMarkExistsGetLookupWithLength start
-	 count: 1000000
-	 diff time: 6.729568
-	 BenchMarkExistsGetLookupWithLength done
-	 BenchMarkIteratorGetLookupWithLength start
-	 count: 1000000
-	 diff time: 4.191972
-	 BenchMarkIteratorGetLookupWithLength done
-	 BenchMarkStringInsertionDifferentPointer start
-	 BenchMarkStringInsertionDifferentPointer insertion into map1
-	 diff time: 1.744476
-	 BenchMarkStringInsertionDifferentPointer insertion into map2
-	 diff time: 1.649793
-	 count: 1000000
-	 BenchMarkStringInsertionDifferentPointer done
-	 BenchMarkStringInsertionSamePointer start
-	 BenchMarkStringInsertionSamePointer insertion into map1
-	 diff time: 1.777968
-	 BenchMarkStringInsertionSamePointer insertion into map2
-	 diff time: 1.782678
-	 count: 1000000
-	 BenchMarkStringInsertionSamePointer done
-	 BenchMarkStringInsertionDifferentPointerWithLength start
-	 BenchMarkStringInsertionDifferentPointerWithLength insertion into map1
-	 diff time: 1.725302
-	 BenchMarkStringInsertionDifferentPointerWithLength insertion into map2
-	 diff time: 1.654158
-	 count: 1000000
-	 BenchMarkStringInsertionDifferentPointerWithLength done
-	 BenchMarkStringInsertionSamePointerWithLength start
-	 BenchMarkStringInsertionSamePointerWithLength insertion into map1
-	 diff time: 1.824345
-	 BenchMarkStringInsertionSamePointerWithLength insertion into map2
-	 diff time: 1.656639
-	 count: 1000000
-	 BenchMarkStringInsertionSamePointerWithLength done
-	 
-	 */
-	 
-	BenchMarkDifferentStringPointer();
-	BenchMarkSameStringPointer();
-
-	BenchMarkDifferentStringPointerWithLength();
-	BenchMarkSameStringPointerWithLength();
-
-	
-	BenchMarkExistsGetLookup();
-	BenchMarkIteratorGetLookup();
-	
-	BenchMarkExistsGetLookupWithLength();
-	BenchMarkIteratorGetLookupWithLength();
-
-	
-	BenchMarkStringInsertionDifferentPointer();
-	BenchMarkStringInsertionSamePointer();
-
-	BenchMarkStringInsertionDifferentPointerWithLength();
-	BenchMarkStringInsertionSamePointerWithLength();
-
-#endif
-
-/*
-	TestSimpleKeyStringNumberValue();
-	TestSimpleKeyStringNumberValueWithIterator();
-	TestValuePointerNULL();
-	TestValueStringNULL();
-*/	
-	LuaHashMap_Free(hash_map);
 	fprintf(stderr, "Program passed all tests!\n");
 	return 0;
 }
