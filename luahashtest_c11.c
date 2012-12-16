@@ -31,6 +31,7 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 	}
 }
 
+#if 0
 
 
 static void *l_alloc (void *ud, void *ptr, size_t osize, size_t nsize) {
@@ -936,10 +937,15 @@ struct dummy
 };
 
 
+#endif
 #define MAX_ARRAY_SIZE 10
-
 int main(int argc, char* argv[])
 {
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L)
+	#warning "C11 test did not find a C11 compiler. The test will be skipped."
+	fprintf(stderr, "This test must be compiled with a C11 compiler.");
+	return 0;
+#endif
 
 	const char* ret_string = NULL;
 	const char* key_array[MAX_ARRAY_SIZE];
@@ -948,36 +954,28 @@ int main(int argc, char* argv[])
 	LuaHashMap* hash_map;
 	LuaHashMapIterator the_iterator;
 
-	size_t test_alignment = offsetof(struct dummy, t);
-	fprintf(stderr, "test_alignment: %zu\n", test_alignment);
-
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentKey));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, currentValue));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, hashMap));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, whichTable));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, keyType));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, atEnd));
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(LuaHashMapIterator, isNext));
-	
-	fprintf(stderr, "test_alignment: %zu\n", offsetof(struct dummy, y));
-
-	
 	fprintf(stderr, "create\n");
 	hash_map = LuaHashMap_Create();
 //	hash_map = LuaHashMap_CreateWithSizeHints(0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
 //	hash_map = LuaHashMap_CreateWithAllocatorAndSizeHints(l_alloc, NULL, 0, 600000, LUAHASHMAP_KEYSTRING_TYPE, LUAHASHMAP_VALUESTRING_TYPE);
-
+	
+	// String literals are a problem because the type is char[] and not char*.
+	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
+	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
+	const char* somekey = "key1";
+	char* somekey_nonconst = somekey;
 	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
-	LuaHashMap_SetValueStringForKeyString(hash_map, "value1", "key1");
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), somekey_nonconst);
+//	LuaHashMap_SetValueForKey(hash_map, 20.0, "key1");
 	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
 
-	LuaHashMap_SetValueStringForKeyString(hash_map, "value2", "key2");
+	LuaHashMap_SetValueForKey(hash_map, (const char*)("value2"), (const char*)("key2"));
 	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
 
-	LuaHashMap_SetValueStringForKeyString(hash_map, "value3", "key3");
+	LuaHashMap_SetValueForKey(hash_map, (char*)("value3"), (char*)("key3"));
 //	LuaHashMap_SetValueStringForKeyString(hash_map, NULL, "key3");
 
-
+#if 1
 
 	fprintf(stderr, "LuaHashMap_GetValueStringForKeyString\n");
 
@@ -1004,7 +1002,7 @@ int main(int argc, char* argv[])
 
 	assert(0 == LuaHashMap_IsEmpty(hash_map));
 	fprintf(stderr, "IsEmpty should be no: %d\n", LuaHashMap_IsEmpty(hash_map));
-
+#endif
 
 /*
 	the_iterator = LuaHashMap_GetIteratorAtBeginForKeyString(hash_map);
@@ -1016,7 +1014,7 @@ int main(int argc, char* argv[])
 	} while(LuaHashMap_IteratorNext(&the_iterator));
 
 
-
+#if 0
 	LuaHashMap_Clear(hash_map);
 	ret_size = LuaHashMap_GetKeysString(hash_map, key_array, MAX_ARRAY_SIZE);
 	assert(0 == ret_size);
@@ -1056,7 +1054,7 @@ int main(int argc, char* argv[])
 	CFTimeInterval end_time = CACurrentMediaTime();
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	assert(1 == LuaHashMap_IsEmpty(hash_map));
-	
+#endif	
 	
 	/* Results on iMac i3 64-bit release (Os), Lua 5.2.1rc2 as framework (O3?)
 	 BenchMarkDifferentStringPointer start
@@ -1196,12 +1194,12 @@ int main(int argc, char* argv[])
 
 #endif
 
-
+/*
 	TestSimpleKeyStringNumberValue();
 	TestSimpleKeyStringNumberValueWithIterator();
 	TestValuePointerNULL();
 	TestValueStringNULL();
-	
+*/	
 	LuaHashMap_Free(hash_map);
 	fprintf(stderr, "Program passed all tests!\n");
 	return 0;

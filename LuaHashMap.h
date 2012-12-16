@@ -443,7 +443,15 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 
 
 #warning "Found C11"
-
+/**
+ * LuaHashMap_SetValueForKey
+ *
+ * This C11 _Generic macro essentially overloads all the 3 parameter SetValue<T>ForKey<T> functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
 #define LuaHashMap_SetValueForKey(hash_map, value, key) \
 	_Generic((hash_map), LuaHashMap*: _Generic((value), \
 		char*: _Generic((key), \

@@ -270,6 +270,9 @@ ADD_EXECUTABLE(luahashtestshared
 ADD_EXECUTABLE(luahashtestcpp
 	luahashtest.cpp
 )
+ADD_EXECUTABLE(luahashtest_c11
+	luahashtest_c11.c
+)
 # This tells the build system that the executable must
 # be linked against which libraries.
 TARGET_LINK_LIBRARIES(luahashtest
@@ -284,6 +287,11 @@ TARGET_LINK_LIBRARIES(luahashtestcpp
 	luahashmap_library_static
 	${LUA_LIBRARIES}
 )
+TARGET_LINK_LIBRARIES(luahashtest_c11
+	luahashmap_library_static
+	${LUA_LIBRARIES}
+)
+
 
 
 # To build the documention, you will have to enable it
