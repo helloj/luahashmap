@@ -65,7 +65,7 @@ struct LuaHashMap
 	lua_State* luaState;
 	lua_Alloc memoryAllocator;
 	void* allocatorUserData;
-	lua_Integer uniqueTableNameForSharedState;
+	int uniqueTableNameForSharedState;
 };
 
 
