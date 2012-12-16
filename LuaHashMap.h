@@ -444,10 +444,9 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 
 #warning "Found C11"
 
-			// lua_Integer: LuaHashMap_SetValueStringForKeyInteger, 
 #define LuaHashMap_SetValueForKey(hash_map, value, key) \
 	_Generic((hash_map), LuaHashMap*: _Generic((value), \
-    	const char*: _Generic((key), \
+		const char*: _Generic((key), \
 			const char*: LuaHashMap_SetValueStringForKeyString, \
 			void*: LuaHashMap_SetValueStringForKeyPointer, \
 			float: LuaHashMap_SetValueStringForKeyNumber, \
@@ -507,8 +506,8 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 			long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
 			default: LuaHashMap_SetValueIntegerForKeyPointer), \
-		default: LuaHashMap_SetValuePointerForKeyPointer), \
-	default: LuaHashMap_SetValuePointerForKeyPointer) \
+		default: LuaHashMap_SetValuePointerForKeyPointer) \
+	) \
 	(hash_map, value, key)
 
 #endif
