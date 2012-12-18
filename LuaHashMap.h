@@ -887,6 +887,98 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 	) \
 	(hash_map, key)
 
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUESTRING_2(A,B) LuaHashMap_GetValueStringForKey(A,B)
+	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_GetValueString
+ *
+ * This C11 _Generic macro essentially overloads all LuaHashMap_GetValueStringForKey and LuaHashMap_GetValueStringAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueString(...) \
+	LUAHASHMAP_GETVALUESTRING_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUESTRING_2(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUESTRING_1(__VA_ARGS__), \
+	)
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUEPOINTER_2(A,B) LuaHashMap_GetValuePointerForKey(A,B)
+	#define LUAHASHMAP_GETVALUEPOINTER_1(A) LuaHashMap_GetValuePointerAtIterator(A)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_GETVALUEPOINTER_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_GetValuePointer
+ *
+ * This C11 _Generic macro essentially overloads all LuaHashMap_GetValuePointerForKey and LuaHashMap_GetValuePointerAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValuePointer(...) \
+	LUAHASHMAP_GETVALUEPOINTER_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUEPOINTER_2(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUEPOINTER_1(__VA_ARGS__), \
+	)
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUENUMBER_2(A,B) LuaHashMap_GetValueNumberForKey(A,B)
+	#define LUAHASHMAP_GETVALUENUMBER_1(A) LuaHashMap_GetValueNumberAtIterator(A)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_GETVALUENUMBER_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_GetValueNumber
+ *
+ * This C11 _Generic macro essentially overloads all LuaHashMap_GetValueNumberForKey and LuaHashMap_GetValueNumberAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueNumber(...) \
+	LUAHASHMAP_GETVALUENUMBER_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUENUMBER_2(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUENUMBER_1(__VA_ARGS__), \
+	)
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUEINTEGER_2(A,B) LuaHashMap_GetValueIntegerForKey(A,B)
+	#define LUAHASHMAP_GETVALUEINTEGER_1(A) LuaHashMap_GetValueIntegerAtIterator(A)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_GETVALUEINTEGER_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_GetValueInteger
+ *
+ * This C11 _Generic macro essentially overloads all LuaHashMap_GetValueIntegerForKey and LuaHashMap_GetValueIntegerAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueInteger(...) \
+	LUAHASHMAP_GETVALUEINTEGER_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUEINTEGER_2(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUEINTEGER_1(__VA_ARGS__), \
+	)
+
+
+
+
 /**
  * LuaHashMap_ExistsKey
  *
@@ -916,6 +1008,29 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 	) \
 	(hash_map, key)
 
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_EXISTS_1(A) LuaHashMap_ExistsAtIterator(A)
+	#define LUAHASHMAP_EXISTS_2(A,B) LuaHashMap_ExistsKey(A,B)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_EXISTS_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_Exists
+ *
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_Exists(...) \
+	LUAHASHMAP_EXISTS_N(,##__VA_ARGS__, \
+		LUAHASHMAP_EXISTS_2(__VA_ARGS__), \
+		LUAHASHMAP_EXISTS_1(__VA_ARGS__), \
+	)
+
+
 /**
  * LuaHashMap_RemoveKey
  *
@@ -944,6 +1059,29 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_RemoveKeyPointer) \
 	) \
 	(hash_map, key)
+
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_REMOVE_1(A) LuaHashMap_RemoveAtIterator(A)
+	#define LUAHASHMAP_REMOVE_2(A,B) LuaHashMap_RemoveKey(A,B)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_REMOVE_N(x,A,B,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_Remove
+ *
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_Remove(...) \
+	LUAHASHMAP_REMOVE_N(,##__VA_ARGS__, \
+		LUAHASHMAP_REMOVE_2(__VA_ARGS__), \
+		LUAHASHMAP_REMOVE_1(__VA_ARGS__), \
+	)
 
 /**
  * LuaHashMap_GetIteratorForKey
@@ -1002,6 +1140,31 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_SetValuePointerAtIterator) \
 	) \
 	(hash_iterator, value)
+
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_SETVALUE_3(A,B,C) LuaHashMap_SetValueForKey(A,B,C)
+	#define LUAHASHMAP_SETVALUE_2(A,B) LuaHashMap_SetValueAtIterator(A,B)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_SETVALUE_N(x,A,B,C,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_SetValue
+ *
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_SetValue(...) \
+	LUAHASHMAP_SETVALUE_N(,##__VA_ARGS__, \
+		LUAHASHMAP_SETVALUE_3(__VA_ARGS__), \
+		LUAHASHMAP_SETVALUE_2(__VA_ARGS__), \
+	)
+
+
 
 /* You may use this to test to see if generics are supported so you don't have to reproduce my test. */
 #define LUAHASHMAP_SUPPORTS_GENERICS 1

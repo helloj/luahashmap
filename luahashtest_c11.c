@@ -132,6 +132,17 @@ int DoKeyStringValueString()
 	assert(0 == Internal_safestrcmp("value4", ret_val));
 
 	
+	// Testing different number of arguments macro
+	exists = LuaHashMap_Exists(&the_iterator);
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	fprintf(stderr, "LuaHashMap_Exists (iterator) for key3 should be found\n");
+
+	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
+	assert(false == LuaHashMap_IteratorIsNotFound(&the_iterator));
+	fprintf(stderr, "LuaHashMap_Exists (key) for key3 should be found\n");
+	
+	
+	
 	LuaHashMap_Free(hash_map);
 	
 	return 0;
