@@ -30,7 +30,7 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 
 
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+#if LUAHASHMAP_SUPPORTS_GENERICS
 
 //#include <inttypes.h>
 
@@ -1454,11 +1454,11 @@ int DoKeyIntegerValueInteger()
 
 int main(int argc, char* argv[])
 {
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L)
-	#warning "C11 test did not find a C11 compiler. The test will be skipped."
+//#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L)
+#if !LUAHASHMAP_SUPPORTS_GENERICS
+	#warning "C11 test did not find C11 _Generic support. The test will be skipped."
 	fprintf(stderr, "This test must be compiled with a C11 compiler.");
 	return 0;
-		
 	
 	
 #else
