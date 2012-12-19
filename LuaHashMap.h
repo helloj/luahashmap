@@ -531,6 +531,8 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 #if ( defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) ) \
 	|| ( defined(__clang__) && ( __has_feature(c_generic_selections) || __has_extension(c_generic_selections) ) )
 
+
+
 /**
  * LuaHashMap_SetValueForKey
  *
@@ -769,6 +771,845 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_SetValuePointerForKeyPointer) \
 	) \
 	(hash_map, value, key)
+
+
+/**
+ * LuaHashMap_SetValueForKeyWithLength
+ *
+ * This C11 _Generic macro essentially overloads all the 4 parameter SetValue<T>ForKey<T>WithLength functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_SetValueForKeyWithLength(hash_map, value, key, strlength) \
+	_Generic((hash_map), LuaHashMap*: _Generic((value), \
+		const char*: _Generic((key), \
+			void*: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+			float: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			double: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			long double: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			char: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned char: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			short: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned short: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			int: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned int: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			long: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned long: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+		char*: _Generic((key), \
+			void*: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+			float: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			double: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			long double: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
+				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+			char: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned char: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			short: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned short: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			int: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned int: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			long: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			unsigned long: _Generic((strlength), \
+				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned short: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
+				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+			default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+		void*: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				short: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				short: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
+				default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
+			default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
+		float: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+		double: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+		long double: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
+				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+		char: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		unsigned char: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		short: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		unsigned short: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		int: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		unsigned int: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		long: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		unsigned long: _Generic((key), \
+			const char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			char*: _Generic((strlength), \
+				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned short: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
+				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+		default: LuaHashMap_SetValuePointerForKeyStringWithLength) \
+	) \
+	(hash_map, value, key, strlength)
+
+
+/**
+ * LuaHashMap_SetValueAtIterator
+ *
+ * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_SetValue<T>AtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_SetValueAtIterator(hash_iterator, value) \
+	_Generic((hash_iterator), LuaHashMapIterator*: _Generic((value), \
+		const char*: LuaHashMap_SetValueStringAtIterator, \
+		char*: LuaHashMap_SetValueStringAtIterator, \
+		void*: LuaHashMap_SetValuePointerAtIterator, \
+		float: LuaHashMap_SetValueNumberAtIterator, \
+		double: LuaHashMap_SetValueNumberAtIterator, \
+		long double: LuaHashMap_SetValueNumberAtIterator, \
+		char: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned char: LuaHashMap_SetValueIntegerAtIterator, \
+		short: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned short: LuaHashMap_SetValueIntegerAtIterator, \
+		int: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned int: LuaHashMap_SetValueIntegerAtIterator, \
+		long: LuaHashMap_SetValueIntegerAtIterator, \
+		unsigned long: LuaHashMap_SetValueIntegerAtIterator, \
+		default: LuaHashMap_SetValuePointerAtIterator) \
+	) \
+	(hash_iterator, value)
+
+
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_SETVALUE_5(A,B,C,D,E) LuaHashMap_SetValueStringForKeyStringWithLength(A,B,C,D,E)
+	#define LUAHASHMAP_SETVALUE_4(A,B,C,D) LuaHashMap_SetValueForKeyWithLength(A,B,C,D)
+	/* I wanted to recursively reuse LuaHashMap_SetValueForKey, but clang gives me an undefined symbol error. 
+	 * Maybe this is a clang bug? So I end up with a big copy-and-paste duplication.
+	 * Also, omitting the defaults in this case gives me compile errors.
+	 */
+	#define LUAHASHMAP_SETVALUE_3(A,B,C) \
+		_Generic((A), \
+			LuaHashMap*: _Generic((B), \
+				const char*: _Generic((C), \
+					const char*: LuaHashMap_SetValueStringForKeyString, \
+					char*: LuaHashMap_SetValueStringForKeyString, \
+					void*: LuaHashMap_SetValueStringForKeyPointer, \
+					float: LuaHashMap_SetValueStringForKeyNumber, \
+					double: LuaHashMap_SetValueStringForKeyNumber, \
+					long double: LuaHashMap_SetValueStringForKeyNumber, \
+					char: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueStringForKeyInteger, \
+					short: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueStringForKeyInteger, \
+					int: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueStringForKeyInteger, \
+					long: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueStringForKeyInteger, \
+					default: LuaHashMap_SetValueStringForKeyPointer),\
+				char*: _Generic((C), \
+					const char*: LuaHashMap_SetValueStringForKeyString, \
+					char*: LuaHashMap_SetValueStringForKeyString, \
+					void*: LuaHashMap_SetValueStringForKeyPointer, \
+					float: LuaHashMap_SetValueStringForKeyNumber, \
+					double: LuaHashMap_SetValueStringForKeyNumber, \
+					long double: LuaHashMap_SetValueStringForKeyNumber, \
+					char: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueStringForKeyInteger, \
+					short: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueStringForKeyInteger, \
+					int: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueStringForKeyInteger, \
+					long: LuaHashMap_SetValueStringForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueStringForKeyInteger, \
+					default: LuaHashMap_SetValueStringForKeyPointer),\
+				void*: _Generic((C), \
+					const char*: LuaHashMap_SetValuePointerForKeyString, \
+					char*: LuaHashMap_SetValuePointerForKeyString, \
+					void*: LuaHashMap_SetValuePointerForKeyPointer, \
+					float: LuaHashMap_SetValuePointerForKeyNumber, \
+					double: LuaHashMap_SetValuePointerForKeyNumber, \
+					long double: LuaHashMap_SetValuePointerForKeyNumber, \
+					char: LuaHashMap_SetValuePointerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValuePointerForKeyInteger, \
+					short: LuaHashMap_SetValuePointerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValuePointerForKeyInteger, \
+					int: LuaHashMap_SetValuePointerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValuePointerForKeyInteger, \
+					long: LuaHashMap_SetValuePointerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValuePointerForKeyInteger, \
+					default: LuaHashMap_SetValuePointerForKeyPointer),\
+				float: _Generic((C), \
+					const char*: LuaHashMap_SetValueNumberForKeyString, \
+					char*: LuaHashMap_SetValueNumberForKeyString, \
+					void*: LuaHashMap_SetValueNumberForKeyPointer, \
+					float: LuaHashMap_SetValueNumberForKeyNumber, \
+					double: LuaHashMap_SetValueNumberForKeyNumber, \
+					long double: LuaHashMap_SetValueNumberForKeyNumber, \
+					char: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueNumberForKeyInteger, \
+					short: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueNumberForKeyInteger, \
+					int: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueNumberForKeyInteger, \
+					long: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
+					default: LuaHashMap_SetValueNumberForKeyPointer),\
+				double: _Generic((C), \
+					const char*: LuaHashMap_SetValueNumberForKeyString, \
+					char*: LuaHashMap_SetValueNumberForKeyString, \
+					void*: LuaHashMap_SetValueNumberForKeyPointer, \
+					float: LuaHashMap_SetValueNumberForKeyNumber, \
+					double: LuaHashMap_SetValueNumberForKeyNumber, \
+					long double: LuaHashMap_SetValueNumberForKeyNumber, \
+					char: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueNumberForKeyInteger, \
+					short: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueNumberForKeyInteger, \
+					int: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueNumberForKeyInteger, \
+					long: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
+					default: LuaHashMap_SetValueNumberForKeyPointer),\
+				long double: _Generic((C), \
+					const char*: LuaHashMap_SetValueNumberForKeyString, \
+					char*: LuaHashMap_SetValueNumberForKeyString, \
+					void*: LuaHashMap_SetValueNumberForKeyPointer, \
+					float: LuaHashMap_SetValueNumberForKeyNumber, \
+					double: LuaHashMap_SetValueNumberForKeyNumber, \
+					long double: LuaHashMap_SetValueNumberForKeyNumber, \
+					char: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueNumberForKeyInteger, \
+					short: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueNumberForKeyInteger, \
+					int: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueNumberForKeyInteger, \
+					long: LuaHashMap_SetValueNumberForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueNumberForKeyInteger, \
+					default: LuaHashMap_SetValueNumberForKeyPointer),\
+				char: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				unsigned char: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				short: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				unsigned short: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				int: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				unsigned int: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				long: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				unsigned long: _Generic((C), \
+					const char*: LuaHashMap_SetValueIntegerForKeyString, \
+					char*: LuaHashMap_SetValueIntegerForKeyString, \
+					void*: LuaHashMap_SetValueIntegerForKeyPointer, \
+					float: LuaHashMap_SetValueIntegerForKeyNumber, \
+					double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					long double: LuaHashMap_SetValueIntegerForKeyNumber, \
+					char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned char: LuaHashMap_SetValueIntegerForKeyInteger, \
+					short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned short: LuaHashMap_SetValueIntegerForKeyInteger, \
+					int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned int: LuaHashMap_SetValueIntegerForKeyInteger, \
+					long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					unsigned long: LuaHashMap_SetValueIntegerForKeyInteger, \
+					default: LuaHashMap_SetValueIntegerForKeyPointer), \
+				default: LuaHashMap_SetValuePointerForKeyPointer), \
+			LuaHashMapIterator*: _Generic((B), \
+				const char*: _Generic((C), \
+					char: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned char: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					short: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned short: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					int: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned int: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					long: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned long: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					default: LuaHashMap_SetValueStringAtIteratorWithLength), \
+				char*: _Generic((C), \
+					char: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned char: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					short: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned short: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					int: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned int: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					long: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					unsigned long: LuaHashMap_SetValueStringAtIteratorWithLength, \
+					default: LuaHashMap_SetValueStringAtIteratorWithLength), \
+				default: LuaHashMap_SetValueStringAtIteratorWithLength), \
+			default: LuaHashMap_SetValuePointerForKeyPointer) \
+		(A,B,C)
+
+	#define LUAHASHMAP_SETVALUE_2(A,B) LuaHashMap_SetValueAtIterator(A,B)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_SETVALUE_N(x,A,B,C,D,E,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_SetValue
+ *
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_SetValue(...) \
+	LUAHASHMAP_SETVALUE_N(,##__VA_ARGS__, \
+		LUAHASHMAP_SETVALUE_5(__VA_ARGS__), \
+		LUAHASHMAP_SETVALUE_4(__VA_ARGS__), \
+		LUAHASHMAP_SETVALUE_3(__VA_ARGS__), \
+		LUAHASHMAP_SETVALUE_2(__VA_ARGS__), \
+	)
+
+
 
 
 /**
@@ -1111,59 +1952,6 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_GetIteratorForKeyPointer) \
 	) \
 	(hash_map, key)
-
-/**
- * LuaHashMap_SetValueAtIterator
- *
- * This C11 _Generic macro essentially overloads all the 2 parameter LuaHashMap_SetValue<T>AtIterator functions so you can call
- * any permutation with this single macro.
- *
- * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
- * or the fallback/default case will resolve to the Pointer version instead of the String version.
- */
-#define LuaHashMap_SetValueAtIterator(hash_iterator, value) \
-	_Generic((hash_iterator), LuaHashMapIterator*: _Generic((value), \
-		const char*: LuaHashMap_SetValueStringAtIterator, \
-		char*: LuaHashMap_SetValueStringAtIterator, \
-		void*: LuaHashMap_SetValuePointerAtIterator, \
-		float: LuaHashMap_SetValueNumberAtIterator, \
-		double: LuaHashMap_SetValueNumberAtIterator, \
-		long double: LuaHashMap_SetValueNumberAtIterator, \
-		char: LuaHashMap_SetValueIntegerAtIterator, \
-		unsigned char: LuaHashMap_SetValueIntegerAtIterator, \
-		short: LuaHashMap_SetValueIntegerAtIterator, \
-		unsigned short: LuaHashMap_SetValueIntegerAtIterator, \
-		int: LuaHashMap_SetValueIntegerAtIterator, \
-		unsigned int: LuaHashMap_SetValueIntegerAtIterator, \
-		long: LuaHashMap_SetValueIntegerAtIterator, \
-		unsigned long: LuaHashMap_SetValueIntegerAtIterator, \
-		default: LuaHashMap_SetValuePointerAtIterator) \
-	) \
-	(hash_iterator, value)
-
-
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
-	#define LUAHASHMAP_SETVALUE_3(A,B,C) LuaHashMap_SetValueForKey(A,B,C)
-	#define LUAHASHMAP_SETVALUE_2(A,B) LuaHashMap_SetValueAtIterator(A,B)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_SETVALUE_N(x,A,B,C,FUNC, ...) FUNC  
-/**
- * LuaHashMap_SetValue
- *
- * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
- * any permutation with this single macro.
- *
- * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
- * or the fallback/default case will resolve to the Pointer version instead of the String version.
- */
-#define LuaHashMap_SetValue(...) \
-	LUAHASHMAP_SETVALUE_N(,##__VA_ARGS__, \
-		LUAHASHMAP_SETVALUE_3(__VA_ARGS__), \
-		LUAHASHMAP_SETVALUE_2(__VA_ARGS__), \
-	)
-
 
 
 /* You may use this to test to see if generics are supported so you don't have to reproduce my test. */
