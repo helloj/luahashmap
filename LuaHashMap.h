@@ -1642,6 +1642,47 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 	(hash_map, key)
 
 /**
+ * LuaHashMap_GetValueStringForKeyWithLength
+ *
+ * This C11 _Generic macro essentially overloads all the 3 parameter GetValueStringForKey<T>WithLength functions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueStringForKeyWithLength(hash_map, key, strlengthoutptr) \
+	_Generic((hash_map), LuaHashMap*: _Generic((key), \
+		void*: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyPointerWithLength), \
+		float: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyNumberWithLength), \
+		double: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyNumberWithLength), \
+		long double: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyNumberWithLength), \
+		char: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		unsigned char: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		short: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		unsigned short: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		int: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		unsigned int: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		long: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength), \
+		unsigned long: _Generic((strlengthoutptr), \
+			size_t*: LuaHashMap_GetValueStringForKeyIntegerWithLength) \
+		) \
+	) \
+	(hash_map, key, strlengthoutptr)
+
+
+
+/**
  * LuaHashMap_GetValuePointerForKey
  *
  * This C11 _Generic macro essentially overloads all the 2 parameter GetValuePointerForKey<T> functions so you can call
@@ -1731,11 +1772,13 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
+	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
 	#define LUAHASHMAP_GETVALUESTRING_2(A,B) LuaHashMap_GetValueStringForKey(A,B)
 	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,FUNC, ...) FUNC  
+	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,C,D,FUNC, ...) FUNC  
 /**
  * LuaHashMap_GetValueString
  *
@@ -1747,6 +1790,8 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
  */
 #define LuaHashMap_GetValueString(...) \
 	LUAHASHMAP_GETVALUESTRING_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUESTRING_4(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUESTRING_3(__VA_ARGS__), \
 		LUAHASHMAP_GETVALUESTRING_2(__VA_ARGS__), \
 		LUAHASHMAP_GETVALUESTRING_1(__VA_ARGS__), \
 	)

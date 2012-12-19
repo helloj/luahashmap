@@ -165,6 +165,10 @@ int DoKeyStringValueString()
 	assert(0 == Internal_safestrcmp("value5", ret_val));
 	
 	
+	size_t out_string_length = 0;
+	ret_val = LuaHashMap_GetValueString(hash_map, (const char*)("key3"), &out_string_length, (sizeof("key3")/sizeof(char))-1);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
 	assert(false == exists);
@@ -667,6 +671,10 @@ int DoKeyPointerValueString()
 	assert(0 == Internal_safestrcmp("value5", ret_val));
 
 	
+	size_t out_string_length = 0;
+	ret_val = LuaHashMap_GetValueString(hash_map, s_keyPointer3, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+	
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
@@ -1112,6 +1120,9 @@ int DoKeyNumberValueString()
 	ret_val = LuaHashMap_GetValueString(&the_iterator);
 	assert(0 == Internal_safestrcmp("value5", ret_val));
 	
+	size_t out_string_length = 0;
+	ret_val = LuaHashMap_GetValueString(hash_map, s_keyNumber3, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 
 	
 	LuaHashMap_Remove(&the_iterator);
@@ -1558,6 +1569,10 @@ int DoKeyIntegerValueString()
 	ret_val = LuaHashMap_GetValueString(&the_iterator);
 	assert(0 == Internal_safestrcmp("value5", ret_val));
 	
+	
+	size_t out_string_length = 0;
+	ret_val = LuaHashMap_GetValueString(hash_map, s_keyInteger3, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 
 	
 	LuaHashMap_Remove(&the_iterator);
