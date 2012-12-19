@@ -781,6 +781,8 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
  *
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ *
+ * @note I've been trying to pull the remaining default clauses out of this, but can't figure out how to do it without causing compile problems.
  */
 #define LuaHashMap_SetValueForKeyWithLength(hash_map, value, key, strlength) \
 	_Generic((hash_map), LuaHashMap*: _Generic((value), \
@@ -793,8 +795,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength), \
 			float: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -803,8 +804,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			double: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -813,8 +813,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			long double: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -823,8 +822,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			char: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -833,8 +831,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned char: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -843,8 +840,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			short: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -853,8 +849,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned short: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -863,8 +858,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			int: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -873,8 +867,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned int: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -883,8 +876,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			long: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -893,8 +885,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned long: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -903,8 +894,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
 		char*: _Generic((key), \
 			void*: _Generic((strlength), \
@@ -915,8 +905,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyPointerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyPointerWithLength), \
 			float: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -925,8 +914,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			double: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -935,8 +923,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			long double: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyNumberWithLength, \
@@ -945,8 +932,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyNumberWithLength, \
 				long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength, \
-				default: LuaHashMap_SetValueStringForKeyNumberWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyNumberWithLength), \
 			char: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -955,8 +941,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned char: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -965,8 +950,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			short: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -975,8 +959,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned short: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -985,8 +968,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			int: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -995,8 +977,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned int: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -1005,8 +986,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			long: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -1015,8 +995,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			unsigned long: _Generic((strlength), \
 				char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned char: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
@@ -1025,8 +1004,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				unsigned int: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
 				long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength, \
-				default: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
+				unsigned long: LuaHashMap_SetValueStringForKeyIntegerWithLength), \
 			default: LuaHashMap_SetValueStringForKeyPointerWithLength), \
 		void*: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1037,8 +1015,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
 				long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
-				default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValuePointerForKeyStringWithLength, \
@@ -1047,8 +1024,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValuePointerForKeyStringWithLength, \
 				long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength, \
-				default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValuePointerForKeyStringWithLength), \
 			default: LuaHashMap_SetValuePointerForKeyStringWithLength), \
 		float: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1059,8 +1035,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
@@ -1069,8 +1044,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 		double: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1081,8 +1055,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
@@ -1091,8 +1064,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 		long double: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1103,8 +1075,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueNumberForKeyStringWithLength, \
@@ -1113,8 +1084,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueNumberForKeyStringWithLength, \
 				long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength, \
-				default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 			default: LuaHashMap_SetValueNumberForKeyStringWithLength), \
 		char: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1125,8 +1095,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1135,8 +1104,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		unsigned char: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1147,8 +1115,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1157,8 +1124,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		short: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1169,8 +1135,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1179,8 +1144,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		unsigned short: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1191,8 +1155,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1201,8 +1164,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		int: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1213,8 +1175,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1223,8 +1184,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		unsigned int: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1235,8 +1195,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1245,8 +1204,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		long: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1257,8 +1215,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1267,8 +1224,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 		unsigned long: _Generic((key), \
 			const char*: _Generic((strlength), \
@@ -1279,8 +1235,7 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
 			char*: _Generic((strlength), \
 				char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned char: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
@@ -1289,10 +1244,9 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 				int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				unsigned int: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
 				long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength, \
-				default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
-			default: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
-		default: LuaHashMap_SetValuePointerForKeyStringWithLength) \
+				unsigned long: LuaHashMap_SetValueIntegerForKeyStringWithLength), \
+			default: LuaHashMap_SetValueIntegerForKeyStringWithLength) \
+		) \
 	) \
 	(hash_map, value, key, strlength)
 
@@ -1682,6 +1636,66 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 
 
 
+/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+	/* Private multiple macros for each different number of arguments */
+	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
+	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
+/*
+	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
+		_Generic((A), \
+			LuaHashMap*: _Generic((B), \
+				default: LuaHashMap_GetValueStringForKey), \
+			LuaHashMapIterator*: _Generic((B), \
+				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
+		) \
+		(A, B)
+*/	
+	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
+		_Generic((A), \
+			LuaHashMap*: _Generic((B), \
+				const char*: LuaHashMap_GetValueStringForKeyString, \
+				char*: LuaHashMap_GetValueStringForKeyString, \
+				void*: LuaHashMap_GetValueStringForKeyPointer, \
+				float: LuaHashMap_GetValueStringForKeyNumber, \
+				double: LuaHashMap_GetValueStringForKeyNumber, \
+				long double: LuaHashMap_GetValueStringForKeyNumber, \
+				char: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned char: LuaHashMap_GetValueStringForKeyInteger, \
+				short: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned short: LuaHashMap_GetValueStringForKeyInteger, \
+				int: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned int: LuaHashMap_GetValueStringForKeyInteger, \
+				long: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned long: LuaHashMap_GetValueStringForKeyInteger, \
+				default: LuaHashMap_GetValueStringForKeyPointer), \
+			LuaHashMapIterator*: _Generic((B), \
+				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
+		) \
+		(A,B)
+
+	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
+
+	/* The private interim macro that simply strips the excess and ends up with the required macro */
+	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,C,D,FUNC, ...) FUNC  
+/**
+ * LuaHashMap_GetValueString
+ *
+ * This C11 _Generic macro essentially overloads all LuaHashMap_GetValueStringForKey and LuaHashMap_GetValueStringAtIterator functions including the WithLength varitions so you can call
+ * any permutation with this single macro.
+ *
+ * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
+ * or the fallback/default case will resolve to the Pointer version instead of the String version.
+ */
+#define LuaHashMap_GetValueString(...) \
+	LUAHASHMAP_GETVALUESTRING_N(,##__VA_ARGS__, \
+		LUAHASHMAP_GETVALUESTRING_4(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUESTRING_3(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUESTRING_2(__VA_ARGS__), \
+		LUAHASHMAP_GETVALUESTRING_1(__VA_ARGS__), \
+	)
+
+
+
 /**
  * LuaHashMap_GetValuePointerForKey
  *
@@ -1768,66 +1782,6 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 		default: LuaHashMap_GetValueIntegerForKeyPointer) \
 	) \
 	(hash_map, key)
-
-
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
-	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
-	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
-/*
-	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
-		_Generic((A), \
-			LuaHashMap*: _Generic((B), \
-				default: LuaHashMap_GetValueStringForKey), \
-			LuaHashMapIterator*: _Generic((B), \
-				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
-		) \
-		(A, B)
-*/	
-	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
-		_Generic((A), \
-			LuaHashMap*: _Generic((B), \
-				const char*: LuaHashMap_GetValueStringForKeyString, \
-				char*: LuaHashMap_GetValueStringForKeyString, \
-				void*: LuaHashMap_GetValueStringForKeyPointer, \
-				float: LuaHashMap_GetValueStringForKeyNumber, \
-				double: LuaHashMap_GetValueStringForKeyNumber, \
-				long double: LuaHashMap_GetValueStringForKeyNumber, \
-				char: LuaHashMap_GetValueStringForKeyInteger, \
-				unsigned char: LuaHashMap_GetValueStringForKeyInteger, \
-				short: LuaHashMap_GetValueStringForKeyInteger, \
-				unsigned short: LuaHashMap_GetValueStringForKeyInteger, \
-				int: LuaHashMap_GetValueStringForKeyInteger, \
-				unsigned int: LuaHashMap_GetValueStringForKeyInteger, \
-				long: LuaHashMap_GetValueStringForKeyInteger, \
-				unsigned long: LuaHashMap_GetValueStringForKeyInteger, \
-				default: LuaHashMap_GetValueStringForKeyPointer), \
-			LuaHashMapIterator*: _Generic((B), \
-				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
-		) \
-		(A,B)
-
-	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,C,D,FUNC, ...) FUNC  
-/**
- * LuaHashMap_GetValueString
- *
- * This C11 _Generic macro essentially overloads all LuaHashMap_GetValueStringForKey and LuaHashMap_GetValueStringAtIterator functions so you can call
- * any permutation with this single macro.
- *
- * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
- * or the fallback/default case will resolve to the Pointer version instead of the String version.
- */
-#define LuaHashMap_GetValueString(...) \
-	LUAHASHMAP_GETVALUESTRING_N(,##__VA_ARGS__, \
-		LUAHASHMAP_GETVALUESTRING_4(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_3(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_2(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_1(__VA_ARGS__), \
-	)
-
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUEPOINTER_2(A,B) LuaHashMap_GetValuePointerForKey(A,B)
