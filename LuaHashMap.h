@@ -1774,7 +1774,39 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
 	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
-	#define LUAHASHMAP_GETVALUESTRING_2(A,B) LuaHashMap_GetValueStringForKey(A,B)
+/*
+	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
+		_Generic((A), \
+			LuaHashMap*: _Generic((B), \
+				default: LuaHashMap_GetValueStringForKey), \
+			LuaHashMapIterator*: _Generic((B), \
+				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
+		) \
+		(A, B)
+*/	
+	#define LUAHASHMAP_GETVALUESTRING_2(A,B) \
+		_Generic((A), \
+			LuaHashMap*: _Generic((B), \
+				const char*: LuaHashMap_GetValueStringForKeyString, \
+				char*: LuaHashMap_GetValueStringForKeyString, \
+				void*: LuaHashMap_GetValueStringForKeyPointer, \
+				float: LuaHashMap_GetValueStringForKeyNumber, \
+				double: LuaHashMap_GetValueStringForKeyNumber, \
+				long double: LuaHashMap_GetValueStringForKeyNumber, \
+				char: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned char: LuaHashMap_GetValueStringForKeyInteger, \
+				short: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned short: LuaHashMap_GetValueStringForKeyInteger, \
+				int: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned int: LuaHashMap_GetValueStringForKeyInteger, \
+				long: LuaHashMap_GetValueStringForKeyInteger, \
+				unsigned long: LuaHashMap_GetValueStringForKeyInteger, \
+				default: LuaHashMap_GetValueStringForKeyPointer), \
+			LuaHashMapIterator*: _Generic((B), \
+				default: LuaHashMap_GetValueStringAtIteratorWithLength) \
+		) \
+		(A,B)
+
 	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */

@@ -169,6 +169,11 @@ int DoKeyStringValueString()
 	ret_val = LuaHashMap_GetValueString(hash_map, (const char*)("key3"), &out_string_length, (sizeof("key3")/sizeof(char))-1);
 	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 
+	ret_val = LuaHashMap_GetValueString(&the_iterator, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+
+	
+	
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
 	assert(false == exists);
@@ -675,6 +680,10 @@ int DoKeyPointerValueString()
 	ret_val = LuaHashMap_GetValueString(hash_map, s_keyPointer3, &out_string_length);
 	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 	
+	ret_val = LuaHashMap_GetValueString(&the_iterator, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+	
+	
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
@@ -1124,6 +1133,9 @@ int DoKeyNumberValueString()
 	ret_val = LuaHashMap_GetValueString(hash_map, s_keyNumber3, &out_string_length);
 	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 
+	ret_val = LuaHashMap_GetValueString(&the_iterator, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+	
 	
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyNumber3);
@@ -1574,6 +1586,9 @@ int DoKeyIntegerValueString()
 	ret_val = LuaHashMap_GetValueString(hash_map, s_keyInteger3, &out_string_length);
 	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
 
+	ret_val = LuaHashMap_GetValueString(&the_iterator, &out_string_length);
+	assert( (sizeof("value5")/sizeof(char))-1 == out_string_length);
+	
 	
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyInteger3);
