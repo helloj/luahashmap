@@ -309,33 +309,7 @@ LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int num
 		return NULL;
 	}
 	hash_map->luaState = lua_state;
-	
-	/* I'm no longer using key_type/value_type. But I wonder if I should reserve it for future changes. */
-/*
-	switch( 0x0F & key_type)
-	{
-		case LUAHASHMAP_KEYSTRING_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYPOINTER_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYNUMBER_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYINTEGER_TYPE:
-		{
-			break;
-		}
-		default:
-		{
-			Internal_InitializeInternalTables(hash_map);
-		}
-	}
-*/
+
 	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
 	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 
@@ -364,32 +338,7 @@ LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, 
 	hash_map->luaState = lua_state;
 	hash_map->memoryAllocator = the_allocator;
 	hash_map->allocatorUserData = user_data;
-	/* I'm no longer using key_type/value_type. But I wonder if I should reserve it for future changes. */
-/*
-	switch( 0x0F & key_type)
-	{
-		case LUAHASHMAP_KEYSTRING_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYPOINTER_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYNUMBER_TYPE:
-		{
-			break;
-		}
-		case LUAHASHMAP_KEYINTEGER_TYPE:
-		{
-			break;
-		}
-		default:
-		{
-			Internal_InitializeInternalTables(hash_map);
-		}
-	}
-*/
+
 	lua_createtable(hash_map->luaState, number_of_array_elements, number_of_hash_elements);	
 	hash_map->uniqueTableNameForSharedState = Internal_NewGlobalLuaRef(hash_map->luaState);
 
