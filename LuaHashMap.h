@@ -501,8 +501,198 @@ LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iter
 LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);	
 
 /* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
-LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+
+
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* Use the C99 inline if available to hint the compiler that this might benefit from inlining. 
+ * Since these functions are merely pulling data out of an already exposed struct, inlining seems reasonable.
+ */
+
+/* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
+LUAHASHMAP_EXPORT inline int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return LUA_TNONE;
+	}
+	return hash_iterator->keyType;
+}
+
+/* Gets the value contained (copied) in the iterator as opposed to doing an actual hash map lookup.
+ * If you have just retrieved the iterator and have not altered anything in the hash map behind the back of the iterator,
+ * then this value should be the same as what is in the actual hash map.
+ */
+LUAHASHMAP_EXPORT inline int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return LUA_TNONE;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return LUA_TNONE;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return LUA_TNONE;
+	}
+	
+	return hash_iterator->valueType;
+}
+
+LUAHASHMAP_EXPORT inline const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		return NULL;
+	}
+	return hash_iterator->currentValue.theString.stringPointer;
+}
+
+LUAHASHMAP_EXPORT inline const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != value_string_length_return)
+	{
+		*value_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	return hash_iterator->currentValue.theString.stringPointer;
+}
+
+LUAHASHMAP_EXPORT inline size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		return 0;
+	}
+	return hash_iterator->currentValue.theString.stringLength;
+}
+
+LUAHASHMAP_EXPORT inline void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TLIGHTUSERDATA != hash_iterator->valueType)
+	{
+		return NULL;
+	}
+	return hash_iterator->currentValue.thePointer;
+}
+
+LUAHASHMAP_EXPORT inline lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
+	if(LUA_TNUMBER != hash_iterator->valueType)
+	{
+		return 0.0;
+	}
+	return hash_iterator->currentValue.theNumber;
+}
+
+LUAHASHMAP_EXPORT inline lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	if(LUA_TNUMBER != hash_iterator->valueType)
+	{
+		return 0;
+	}
+	return (lua_Integer)hash_iterator->currentValue.theNumber;
+}
+
+#else /* We are not using C99 inline so the standard declaration is here. */
+
+/* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
+LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
 /* Gets the value contained (copied) in the iterator as opposed to doing an actual hash map lookup.
  * If you have just retrieved the iterator and have not altered anything in the hash map behind the back of the iterator,
@@ -515,6 +705,8 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHash
 LUAHASHMAP_EXPORT void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator);
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
+#endif /* defined(__STDC_VERSION__) && (__STDC_VERSION__ > 199901L) */
+
 
 
 /* This is only for backdoor access. This is for very advanced use cases that want to directly interact with the Lua State. */

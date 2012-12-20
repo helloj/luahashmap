@@ -53,6 +53,13 @@
 	#include <stdbool.h>
 #endif
 
+/* Create a #define so I can use C99 inline if available without breaking non-conformant compilers */
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+	#define LUAHASHMAP_INLINE inline
+#else
+	#define LUAHASHMAP_INLINE 
+#endif
+	
 
 #ifdef LUAHASHMAP_DEBUG
 #define LUAHASHMAP_ASSERT(e) assert(e)
@@ -129,7 +136,7 @@ struct LuaHashMap
 			} while(0)
 
 		/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
-		static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+		static LUAHASHMAP_INLINE int Internal_NewGlobalLuaRef(lua_State* lua_state)
 		{
 			return luaL_ref(lua_state, LUA_GLOBALSINDEX);
 		}
@@ -161,7 +168,7 @@ struct LuaHashMap
 			} while(0)
 
 		/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
-		static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+		static LUAHASHMAP_INLINE int Internal_NewGlobalLuaRef(lua_State* lua_state)
 		{
 			/* need to get gloal table under the top stack object that luaL_ref automatically refers to */
 			int ret_val;
@@ -195,7 +202,7 @@ struct LuaHashMap
 		} while(0)
 
 	/* Made a function because I couldn't figure out how to return a value in a multiline macro scenario. */
-	static int Internal_NewGlobalLuaRef(lua_State* lua_state)
+	static LUAHASHMAP_INLINE int Internal_NewGlobalLuaRef(lua_State* lua_state)
 	{
 		return luaL_ref(lua_state, LUA_REGISTRYINDEX);
 	}
@@ -3210,156 +3217,6 @@ lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterat
 	return ret_val;
 }
 
-const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return NULL;
-	}
-	if(LUA_TSTRING != hash_iterator->valueType)
-	{
-		return NULL;
-	}
-	return hash_iterator->currentValue.theString.stringPointer;
-}
-
-const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
-{
-	if(NULL == hash_iterator)
-	{
-		if(NULL != value_string_length_return)
-		{
-			*value_string_length_return = 0;
-		}
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		if(NULL != value_string_length_return)
-		{
-			*value_string_length_return = 0;
-		}
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		if(NULL != value_string_length_return)
-		{
-			*value_string_length_return = 0;
-		}
-		return NULL;
-	}
-	if(LUA_TSTRING != hash_iterator->valueType)
-	{
-		if(NULL != value_string_length_return)
-		{
-			*value_string_length_return = 0;
-		}
-		return NULL;
-	}
-
-	if(NULL != value_string_length_return)
-	{
-		*value_string_length_return = hash_iterator->currentKey.theString.stringLength;
-	}
-
-	return hash_iterator->currentValue.theString.stringPointer;
-}
-
-size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0;
-	}
-	if(LUA_TSTRING != hash_iterator->valueType)
-	{
-		return 0;
-	}
-	return hash_iterator->currentValue.theString.stringLength;
-}
-
-
-void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return NULL;
-	}
-	if(LUA_TLIGHTUSERDATA != hash_iterator->valueType)
-	{
-		return NULL;
-	}
-	return hash_iterator->currentValue.thePointer;
-}
-
-lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0.0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0.0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0.0;
-	}
-	if(LUA_TNUMBER != hash_iterator->valueType)
-	{
-		return 0.0;
-	}
-	return hash_iterator->currentValue.theNumber;
-}
-
-lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0;
-	}
-	if(LUA_TNUMBER != hash_iterator->valueType)
-	{
-		return 0;
-	}
-	return (lua_Integer)hash_iterator->currentValue.theNumber;
-}
-
-
 bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator)
 {
 	int value_type;
@@ -3664,15 +3521,6 @@ size_t LuaHashMap_Count(LuaHashMap* hash_map)
 	return Internal_Count(hash_map);
 }
 
-int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return LUA_TNONE;
-	}
-	return hash_iterator->keyType;
-}
-
 int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 {
 	int ret_val;
@@ -3750,6 +3598,28 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	return ret_val;
 }
 
+/* Stuff for public inline functions */
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* Using C99 inline. These need to be externed (but not redefined) here to force compilation unit/linkage requirements by C99. */
+extern int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+extern const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator);
+extern const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return);
+extern size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator);
+extern void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator);
+extern lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator);
+extern lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
+
+#else /* We are not using C99 inline so the implementation must be here. */
+
+int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return LUA_TNONE;
+	}
+	return hash_iterator->keyType;
+}
+
 int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 {
 	if(NULL == hash_iterator)
@@ -3768,6 +3638,155 @@ int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	return hash_iterator->valueType;
 }
 
+const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		return NULL;
+	}
+	return hash_iterator->currentValue.theString.stringPointer;
+}
+
+const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		if(NULL != value_string_length_return)
+		{
+			*value_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != value_string_length_return)
+	{
+		*value_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	return hash_iterator->currentValue.theString.stringPointer;
+}
+
+size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	if(LUA_TSTRING != hash_iterator->valueType)
+	{
+		return 0;
+	}
+	return hash_iterator->currentValue.theString.stringLength;
+}
+
+
+void* LuaHashMap_GetCachedValuePointerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TLIGHTUSERDATA != hash_iterator->valueType)
+	{
+		return NULL;
+	}
+	return hash_iterator->currentValue.thePointer;
+}
+
+lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
+	if(LUA_TNUMBER != hash_iterator->valueType)
+	{
+		return 0.0;
+	}
+	return hash_iterator->currentValue.theNumber;
+}
+
+lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	if(LUA_TNUMBER != hash_iterator->valueType)
+	{
+		return 0;
+	}
+	return (lua_Integer)hash_iterator->currentValue.theNumber;
+}
+#endif /* defined(__STDC_VERSION__) && (__STDC_VERSION__ > 199901L) */
 
 
 
