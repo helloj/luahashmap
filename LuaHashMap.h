@@ -196,7 +196,7 @@ LuaHashMap may not be ideal for projects that:
 
 
 Portability Notes:
-LuaHashMap is compatible with both Lua 5.1 and Lua 5.2 (though you must recompile if you switch between them).
+LuaHashMap is compatible with both Lua 5.1 and Lua 5.2 (though you must recompile LuaHashMap if you switch between them).
 LuaHashMap was written to be portable to all platforms with at least a C89 compiler (because Microsoft Visual Studio refuses to update their pathetic C compiler).
 LuaHashMap was developed with clang, gcc, and Visual Studio on Mac, iOS, Linux, Android, and Windows.
 However, there is an underlying desire to modernize and utilize C99 and C11 features when available so there are conditionals in the code.
