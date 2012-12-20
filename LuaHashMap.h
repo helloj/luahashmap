@@ -196,7 +196,7 @@ LuaHashMap may not be ideal for projects that:
 
 
 Portability Notes:
-LuaHashMap supports both Lua 5.1 and Lua 5.2.
+LuaHashMap is compatible with both Lua 5.1 and Lua 5.2 (though you must recompile if you switch between them).
 LuaHashMap was written to be portable to all platforms with at least a C89 compiler (because Microsoft Visual Studio refuses to update their pathetic C compiler).
 LuaHashMap was developed with clang, gcc, and Visual Studio on Mac, iOS, Linux, Android, and Windows.
 However, there is an underlying desire to modernize and utilize C99 and C11 features when available so there are conditionals in the code.
@@ -229,7 +229,7 @@ Memory management for strings:
 Related to Lua's string internalization, for LuaHashMap, this means when you add a string into the hash table, 
 Lua creates its own copy so you don't need to hold on to the original. 
 But be careful: if you Get a string from LuaHashMap and then completely remove the entries that are holding it, 
-the memory could be deleted out from under you if you still are holding on to the string pointer.
+the memory could be deleted out from under you if you still are holding on to the string pointer and trying to use it.
 
 
 Lua does not have a moving garbage collector nor does it move its memory around invalidating pointers.
@@ -307,7 +307,7 @@ C++ STL like interface:
 For kicks and giggles, there is also a STL (C++ Standard Template Library) like template interface wrapper 
 included which gives an STL hash_map-like interface for LuaHashMap. 
 Theoretically you might be able to switch between implementations fairly easily using a strategic typedef. 
-(Though if you can use the STL, I'm not sure why you would be here. And yes, the STL interface was a colossal waste of time.)
+(Though if you can use the STL, I'm not sure why you would be here. And yes, this STL interface was a colossal waste of time.)
 This probably won't be maintained over the long haul.
 
 
@@ -365,8 +365,33 @@ LUAHASHMAP_SUPPORTS_GENERICS
 Refer to the documentation to see all the macros available.
 
 
+
+Compiler flag to put instances in the Lua global table instead of the registry:
+This is another (experimental) flag designed to put your table instances in the main Lua script's global table instead of the (private) registry.
+The advantage of this is if you are using Lua in your project already and have Lua tables in your scripts that you would like to easily interoperate with on the C side.
+To activate this, recompile with the flag LUAHASHMAP_USE_GLOBAL_TABLE defined.
+
+Also of related note, there are #defines for LUAHASHMAP_SETTABLE and LUAHASHMAP_GETTABLE in the implementation which are set to lua_rawset and lua_rawget.
+Particularly if you are doing advanced things with tables in your scripts, you may want metamethod behaviors (which raw* bypasses for speed).
+So in that case, you'll want to redefine these to lua_settable and lua_gettable.
+
+
+
+
+
 Benchmarks:
 Yes, I did performance benchmarks. More information coming soon. 
+
+
+Future Directions:
+I think LuaHashMap is pretty much done. 
+There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
+There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
+The one major thing I would like to see (but I don't have the time or skill to do) is see if LuaHashMap could be implemented 
+from ripping out just the table implementation from Lua and removing all the unnecessary stuff. I would love to shrink both the 
+disk size profile as well as the virtual machine overhead. I would like to be able to create lots of stand-alone instances of LuaHashMap
+without worrying that I'm wasting memory or need to resort to the current CreateShare workaround.
+So if anybody is interested, I would love to see it.
 
 
 References:
