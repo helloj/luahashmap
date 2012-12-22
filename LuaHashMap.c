@@ -2749,185 +2749,6 @@ void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua
 	LUAHASHMAP_ASSERT(lua_gettop(hash_iterator->hashMap->luaState) == 0);
 }
 
-
-const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return NULL;
-	}
-	if(LUA_TSTRING == hash_iterator->keyType)
-	{
-        return hash_iterator->currentKey.theString.stringPointer;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return NULL;
-	}
-}
-
-const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return)
-{
-	if(NULL == hash_iterator)
-	{
-		if(NULL != key_string_length_return)
-		{
-			*key_string_length_return = 0;
-		}
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		if(NULL != key_string_length_return)
-		{
-			*key_string_length_return = 0;
-		}
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		if(NULL != key_string_length_return)
-		{
-			*key_string_length_return = 0;
-		}
-		return NULL;
-	}
-
-	if(NULL != key_string_length_return)
-	{
-		*key_string_length_return = hash_iterator->currentKey.theString.stringLength;
-	}
-
-	if(LUA_TSTRING == hash_iterator->keyType)
-	{
-        return hash_iterator->currentKey.theString.stringPointer;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return NULL;
-	}
-}
-
-size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0;
-	}
-	
-	if(LUA_TSTRING == hash_iterator->keyType)
-	{
-        return hash_iterator->currentKey.theString.stringLength;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return 0;
-	}
-}
-
-void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return NULL;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return NULL;
-	}
-	
-	if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
-	{
-        return hash_iterator->currentKey.thePointer;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return NULL;
-	}
-}
-
-lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0.0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0.0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0.0;
-	}
-	
-	if(LUA_TNUMBER == hash_iterator->keyType)
-	{
-        return hash_iterator->currentKey.theNumber;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return 0.0;
-	}
-}
-
-lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator)
-{
-	if(NULL == hash_iterator)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->atEnd)
-	{
-		return 0;
-	}
-	if(true == hash_iterator->isNext)
-	{
-		return 0;
-	}
-	
-	if(LUA_TNUMBER == hash_iterator->keyType)
-	{
-        return (lua_Integer)hash_iterator->currentKey.theNumber;
-	}
-	else
-	{
-		/* shouldn't get here */
-		LUAHASHMAP_ASSERT(false);
-		return 0;
-	}
-}
-
 static const char* Internal_GetValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return)
 {
 	const char* ret_val = NULL;
@@ -3550,7 +3371,16 @@ int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 /* Stuff for public inline functions */
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 /* Using C99 inline. These need to be externed (but not redefined) here to force compilation unit/linkage requirements by C99. */
+
+extern const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator);
+extern const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return);
+extern size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator);
+extern void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator);
+extern lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator);
+extern lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator);
+
 extern int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+
 extern const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashMapIterator* hash_iterator);
 extern const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return);
 extern size_t LuaHashMap_GetCachedValueStringLengthAtIterator(LuaHashMapIterator* hash_iterator);
@@ -3568,6 +3398,187 @@ int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator)
 	}
 	return hash_iterator->keyType;
 }
+
+
+const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringPointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
+}
+
+const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != key_string_length_return)
+	{
+		*key_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringPointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
+}
+
+size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringLength;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0;
+	}
+}
+
+void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	
+	if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.thePointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return NULL;
+	}
+}
+
+lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
+	
+	if(LUA_TNUMBER == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theNumber;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0.0;
+	}
+}
+
+
+lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	
+	if(LUA_TNUMBER == hash_iterator->keyType)
+	{
+        return (lua_Integer)hash_iterator->currentKey.theNumber;
+	}
+	else
+	{
+		/* shouldn't get here */
+		LUAHASHMAP_ASSERT(false);
+		return 0;
+	}
+}
+
 
 int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator)
 {

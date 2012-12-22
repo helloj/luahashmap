@@ -23,12 +23,12 @@
 
  */
 /**
-@mainpage LuaHashMap: An easy to use hash table for C.
-LuaHashMap is a hash table library/implementation for use in C. 
-Since C lacks a hash table in the standard library, 
-this library provides a way to fill that hole.
+@mainpage LuaHashMap: An easy to use hash table library for C. 
+
+LuaHashMap is a hash table library/implementation for use in C. Since C lacks a hash table in the standard library, 
+this library provides a way to fill that hole. 
 But instead of reinventing the wheel again to implement a hash table for C, 
-LuaHashMap cleverly wraps Lua, providing a friendly C API for hash tables 
+LuaHashMap cleverly wraps Lua to leverage a proven implementation, while providing a friendly C API for hash tables 
 without needing to learn/use the low-level Lua C-API.
 
 For those not familar with Lua, 
@@ -38,7 +38,7 @@ It is the de-facto scripting language used in the video game industry for the pa
 as well as other non-gaming high profile products such as Adobe Lightroom, Wireshark, and MediaWiki (Wikipedia).
 Lua is fast, small, lightweight, simple, and under the MIT license.
 And tables are the sole data structure in Lua so the underlying hash table is 
-fast, reliable, well documented/understood, and proven. 
+fast, reliable, well documented, understood, and proven. 
 
 So rather than reinventing a new hash table implementation,
 LuaHashMap simply wraps Lua's to mimimize bugs and leverage known performance and behaviors.
@@ -169,6 +169,26 @@ Alternatively, if you know you have at least one entry in the hash, this is a sl
 @endcode
 
 
+Another pattern is to get a value only if it exists. The non-iterator versions of the GetKey family of functions can't distinguish between a non-existent entry and a NULL/0/empty value.
+While you could use the ExistsKey family of functions and then get the value with the GetKey family of functions, this will cause you to do two hash table look ups instead of just one.
+Instead, you should get the iterator and use the ExistsAtIterator function followed by GetCachedValue so only one hash table look is done.
+
+@code
+	// This is the one hash look up.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyInteger(hash_map, 10);
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key=10 exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key=10 does not exist\n");
+	}
+@endcode
+
+
 
 
 
@@ -183,6 +203,7 @@ LuaHashMap is ideal for projects that may agree with one the following:
 - Not already using Lua but don't think the ~100-200KB library (disk) size of Lua is a big deal. Lua is ~100KB for the core, and ~100KB for the standard library which is not needed by LuaHashMap. (pfft! My icon takes more space.)
 - Don't mind the ~4KB overhead (RAM size) of creating a Lua state instance. (Seriously, Apple Mac icons are full color 1024x1024 now.)
 - Want a time proven, heavily tested/used, and documented implementation (i.e. Lua)
+- Want well-known/predictable behavior and performance characteristics
 - Need a library under a permissive license (MIT)
 - Like overall good performance (but doesn't necessarily need to be the best)
 - Want something with minimal dependencies and easy to embed in your application
@@ -303,7 +324,7 @@ Keeping separate hash map instances may be easier to work with.
 
 
 
-C++ STL like interface:
+C++ STL like interface (Experimental):
 For kicks and giggles, there is also a STL (C++ Standard Template Library) like template interface wrapper 
 included which gives an STL hash_map-like interface for LuaHashMap. 
 Theoretically you might be able to switch between implementations fairly easily using a strategic typedef. 
@@ -349,6 +370,7 @@ as well as the iterator versions. So this can be further reduced down to just:
 LuaHashMap_SetValue
 @endcode
 
+So for example:
 @code
 LuaHashMap_SetValue(hash_map, 1, 2.2); // LuaHashMap_SetValueIntegerForKeyNumber
 LuaHashMap_SetValue(hash_map, (const char*)"hello", 0xABCD); // LuaHashMap_SetValueStringForKeyInteger
@@ -366,7 +388,7 @@ Refer to the documentation to see all the macros available.
 
 
 
-Compiler flag to put instances in the Lua global table instead of the registry:
+Compiler flag to put instances in the Lua global table instead of the registry (Experimental):
 This is another (experimental) flag designed to put your table instances in the main Lua script's global table instead of the (private) registry.
 The advantage of this is if you are using Lua in your project already and have Lua tables in your scripts that you would like to easily interoperate with on the C side.
 To activate this, recompile with the flag LUAHASHMAP_USE_GLOBAL_TABLE defined.
@@ -375,12 +397,6 @@ Also of related note, there are #defines for LUAHASHMAP_SETTABLE and LUAHASHMAP_
 Particularly if you are doing advanced things with tables in your scripts, you may want metamethod behaviors (which raw* bypasses for speed).
 So in that case, you'll want to redefine these to lua_settable and lua_gettable.
 
-
-
-
-
-Benchmarks:
-Yes, I did performance benchmarks. More information coming soon. 
 
 
 Future Directions:
@@ -410,18 +426,22 @@ http://www.lua.org/manual/5.1/manual.html
 */
 
 
-
-
-
-
-
 #ifndef C_LUA_HASH_MAP_H
 #define C_LUA_HASH_MAP_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
+	
+	/* Note: For Doxygen to produce clean output, you should set the 
+	 * PREDEFINED option to remove DECLSPEC, CALLCONVENTION, and
+	 * the DOXYGEN_SHOULD_IGNORE_THIS blocks.
+	 * PREDEFINED = DOXYGEN_SHOULD_IGNORE_THIS=1 LUAHASHMAP_EXPORT= LUAHASHMAP_BUILD_AS_DLL=
+	 */
+	
 #if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
 	/* Not ISO/IEC 9899:1999-compliant. */
 	#if !defined(restrict)
@@ -471,16 +491,7 @@ extern "C" {
 #else
 	#include "lua.h"
 #endif
-	
-#ifndef DOXYGEN_SHOULD_IGNORE_THIS
-	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-	
-	/* Note: For Doxygen to produce clean output, you should set the 
-	 * PREDEFINED option to remove DECLSPEC, CALLCONVENTION, and
-	 * the DOXYGEN_SHOULD_IGNORE_THIS blocks.
-	 * PREDEFINED = DOXYGEN_SHOULD_IGNORE_THIS=1 DECLSPEC= CALLCONVENTION=
-	 */
-	
+
 	/** Windows needs to know explicitly which functions to export in a DLL. */
 
 #ifdef LUAHASHMAP_BUILD_AS_DLL
@@ -572,6 +583,7 @@ typedef struct LuaHashMap LuaHashMap;
 
 typedef int LuaHashMap_InternalGlobalKeyType;
 
+/* This exists because anonymous inline structs are not available until C11 */
 struct LUAHASHMAP_EXPORT LuaHashMapStringContainer
 {
 	size_t stringLength;
@@ -581,6 +593,7 @@ struct LUAHASHMAP_EXPORT LuaHashMapStringContainer
 typedef struct LuaHashMapStringContainer LuaHashMapStringContainer;
 
 
+/* This exists because anonymous inline unions are not available until C11 */
 union LuaHashMapKeyValueType
 {
 /*	const char* theString; */
@@ -591,9 +604,21 @@ union LuaHashMapKeyValueType
 /*		lua_Integer theInteger; */
 	void* thePointer;
 };
-	
-/* Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
- * This allows you to use iterators without worrying about leaking.
+
+/**
+ * Defines the iterator type for LuaHashMap.
+ * Iterators are the way to iterate through a hash table. 
+ * Iterators in LuaHashMap conceptually similar to the C++ STL notion of an iterator (but much simpler).
+ *
+ * Mental Model: LuaHashMapIterators (unlike LuaHashMap) are stack objects. No dynamic memory is required.
+ * This allows you to use iterators without worrying about freeing them when done and leaking.
+ * They are also generally seen as short term, inexpensive objects you should be able to refetch at will (an O(1) lookup by key).
+ * (But it is certainly possible to create iterators with dynamic memory and keep them around. Just watch out for them getting stale.)
+ *
+ * Best practice is to use these structs as opaque objects. Use the API functions to retrieve values from the struct/iterators instead of direct access.
+ *
+ * Trivia: You may notice that iterator functions that operate on the LuaHashMap instance don't require an explicit LuaHashMap instance
+ * passed into the function. This is because LuaHashMapIterator saves a copy of the LuaHashMap pointer when it was created.
  */
 struct LUAHASHMAP_EXPORT LuaHashMapIterator
 {
@@ -612,182 +637,1315 @@ struct LUAHASHMAP_EXPORT LuaHashMapIterator
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;
 
-	
+/**
+ * Creates a new instance of a hash table.
+ * This creates a new instance of a LuaHashMap.
+ * You will use this as your opaque LuaHashMap "object" for all the per-instance hash map operations.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ *
+ * @see LuaHashMap_Free, LuaHashMap_CreateWithAllocator, LuaHashMap_CreateWithSizeHints, LuaHashMap_CreateWithAllocatorAndSizeHints, LuaHashMap_CreateShare, LuaHashMap_CreateShareWithSizeHints, LuaHashMap_CreateShareFromLuaState, uaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints, LuaHashMap_CreateShareFromLuaStateWithSizeHints
+ */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_Create(void);
+
+/**
+ * Creates a new instance of a hash table with a custom allocator.
+ * This creates a new instance of a LuaHashMap with a custom allocator.
+ * The allocator adopts the lua_Alloc model as defined by Lua.
+ *
+ * You will use this as your opaque LuaHashMap "object" for all the per-instance hash map operations.
+ *
+ * @param the_allocator The custom memory allocator you want to provide.
+ * @param user_data A user data/context pointer to go with the allocator.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ *
+ * @see LuaHashMap_Free, LuaHashMap_Create, LuaHashMap_CreateWithSizeHints, LuaHashMap_CreateWithAllocatorAndSizeHints, LuaHashMap_CreateShare, LuaHashMap_CreateShareWithSizeHints
+ */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocator(lua_Alloc the_allocator, void* user_data);
 
+/**
+ * Creates a new instance of a hash table with a suggested starting size.
+ * This creates a new instance of a LuaHashMap with a hint to Lua on how many elements to pre-size the hash table for.
+ * If you know the size your hash is going to grow to, this you should specify this number as a performance optimization.
+ * Growing the hash table after running out of buckets is generally an expensive operation so pre-sizing it can help.
+ *
+ * You will use this as your opaque LuaHashMap "object" for all the per-instance hash map operations.
+ *
+ * @param number_of_array_elements Lua tables double as both arrays and hash tables in Lua. As such, this parameter let's you pre-size the number of array elements. Most users of this library will probably use 0 because they don't need the array part.
+ * @param number_of_hash_elements This parameter is used to pre-size the number of hash buckets.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ *
+ * @note Read the Lua Gems free chapter for more information about how Lua tables work.
+ * @see LuaHashMap_Free, LuaHashMap_Create, LuaHashMap_CreateWithAllocator, LuaHashMap_CreateWithAllocatorAndSizeHints, LuaHashMap_CreateShare, LuaHashMap_CreateShareWithSizeHints
+ */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithSizeHints(int number_of_array_elements, int number_of_hash_elements);
+/**
+ * Creates a new instance of a hash table with a custom allocator and a suggested starting size.
+
+ * This creates a new instance of a LuaHashMap with a custom allocator.
+ * The allocator adopts the lua_Alloc model as defined by Lua.
+ * This also let's you hint Lua on how many elements to pre-size the hash table for.
+ * If you know the size your hash is going to grow to, this you should specify this number as a performance optimization.
+ * Growing the hash table after running out of buckets is generally an expensive operation so pre-sizing it can help.
+ *
+ * You will use this as your opaque LuaHashMap "object" for all the per-instance hash map operations.
+ *
+ * @param the_allocator The custom memory allocator you want to provide.
+ * @param user_data A user data/context pointer to go with the allocator.*
+ * @param number_of_array_elements Lua tables double as both arrays and hash tables in Lua. As such, this parameter let's you pre-size the number of array elements. Most users of this library will probably use 0 because they don't need the array part.
+ * @param number_of_hash_elements This parameter is used to pre-size the number of hash buckets.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ *
+ * @see LuaHashMap_Free, LuaHashMap_Create, LuaHashMap_CreateWithAllocator, LuaHashMap_CreateWithSizeHints, LuaHashMap_CreateShare, LuaHashMap_CreateShareWithSizeHints
+ */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateWithAllocatorAndSizeHints(lua_Alloc the_allocator, void* user_data, int number_of_array_elements, int number_of_hash_elements);
 
-/* Special Memory Optimization: Allows you to create new LuaHashMaps from an existing one which will share the same lua_State under the hood.
- * My measurements of a new lua_State instance seem to take about 4-5KB on 64-bit Mac. This will avoid incuring that cost.
- * Technically speaking, the original and shared maps are peers of each other. The implementation does not make a distinction 
+/**
+ * Special Memory Optimization: Allows you to create new LuaHashMaps from an existing one which will share the same lua_State under the hood.
+ * Currently, every LuaHashMap instance created with the Create family of functions (excluding CreateShare) will create a brand new 
+ * virtual machine (lua_State*).  My measurements of a new lua_State instance seem to take about 4-5KB on 64-bit Mac. 
+ * This function was designed to let you avoid incuring that cost by letting you reuse another LuaHashMap's lua_State.
+ * But for all other purposes (besides freeing), your hash map instances will appear completely independent and the API calls you make don't change in any other way.
+ *
+ @code
+		LuaHashMap* first_hash_map = LuaHashMap_Create();
+		LuaHashMap* second_hash_map = LuaHashMap_CreateShare(first_hash_map);
+		LuaHashMap* third_hash_map = LuaHashMap_CreateShare(second_hash_map);
+		LuaHashMap* fourth_hash_map = LuaHashMap_CreateShare(first_hash_map);
+
+		// (do stuff as you normally do to use each hash map)
+		
+		// When done, free resources.
+		LuaHashMap_FreeShare(fourth_hash_map);
+		LuaHashMap_FreeShare(second_hash_map);
+		LuaHashMap_FreeShare(third_hash_map);
+		// Make sure that LuaHashMap_Free is called last, after all the shares are closed.
+		LuaHashMap_Free(first_hash_map);
+ @endcode
+ *
+ * @param original_hash_map The hash map you want to reuse a lua_State from.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ * 
+ * @note Technically speaking, the original and shared maps are peers of each other. The implementation does not make a distinction 
  * about which one the original is so any hash map with the lua_State you want to share may be passed in as the parameter.
- * Make sure to free any shared maps with FreeShare() before you close the final hash map with Free() as Free() calls lua_close().
+ * Make sure to free any shared maps with FreeShare() before you close the final hash map with Free() as Free() calls lua_close() which destroys the lua_State.
+ *
+ * @see FreeShare, Free, LuaHashMap_CreateShareWithSizeHints, LuaHashMap_CreateShareFromLuaState, LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints, LuaHashMap_CreateShareFromLuaStateWithSizeHints
  */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShare(LuaHashMap* original_hash_map);
+
+
+/**
+ * Just like LuaHashMap_CreateShare, except it allows you to pre-size the hash map.
+ *
+ * @param original_hash_map The hash map you want to reuse a lua_State from.
+ * @param number_of_array_elements Lua tables double as both arrays and hash tables in Lua. As such, this parameter let's you pre-size the number of array elements. Most users of this library will probably use 0 because they don't need the array part.
+ * @param number_of_hash_elements This parameter is used to pre-size the number of hash buckets.
+ * @return Returns a pointer to the LuaHashMap instance created or NULL if a failure.
+ *
+ * @see FreeShare, Free, LuaHashMap_CreateShare, LuaHashMap_CreateWithSizeHints
+ */
 LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareWithSizeHints(LuaHashMap* original_hash_map, int number_of_array_elements, int number_of_hash_elements);
 
 
-/* Important Note: This closes the lua_State. If there are any shared hash maps (used CreateShare), 
- * the shared hash maps should be freed before this is called.
+/**
+ * Frees a LuaHashMap instance.
+ * This releases the memory associated with the LuaHashMap.
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @note This closes the lua_State. If there are any shared hash maps (used LuaHashMap_CreateShare), 
+ * the shared hash maps must be freed before this is called.
+ *
+ * @see LuaHashMap_FreeShare, LuaHashMap_Create, LuaHashMap_CreateShare, LuaHashMap_CreateShareFromLuaState
  */
 LUAHASHMAP_EXPORT void LuaHashMap_Free(LuaHashMap* hash_map);
+
+/**
+ * Frees a LuaHashMap instance (intended for those created with LuaHashMap_CreateShare or LuaHashMap_CreateShareFromLuaState).
+ * This releases the memory associated with the LuaHashMap that were created with LuaHashMap_CreateShare or LuaHashMap_CreateShareFromLuaState.
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @note This cleans up everything in the LuaHashMap instance, but avoids a call to lua_close() 
+ * which would otherwise destroy the lua_State and break any other thing sharing that lua_State.
+ *
+ * @see LuaHashMap_FreeShare, LuaHashMap_Create, LuaHashMap_CreateShare, LuaHashMap_CreateShareFromLuaState,
+ * LuaHashMap_CreateShareWithSizeHints, LuaHashMap_CreateShareFromLuaState, 
+ * LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints, LuaHashMap_CreateShareFromLuaStateWithSizeHints
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
-	
-	
-/* string, string */
-/* Note: Inserting NULL for string values is like deleting a field, but not for pointer values */
-/* Note: String returned is the Lua internalized pointer for the key string */
+
+
+/** @defgroup SetValueForKeyFamily SetValueForKey family of functions
+ *  @{
+ */
+
+/* Key String family */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringForKeyStringWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, string> version
+ * This version allows you to specify the string length for each string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param value_string_length The string length (strlen()) of the value string. (This does not count the \0 terminator character.)
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringForKeyString
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* value_string, const char* key_string, size_t value_string_length, size_t key_string_length);
-/* string, pointer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_pointer The value for the key. NULL value pointers are allowed as legitimate values.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValuePointerForKeyString(LuaHashMap* hash_map, void* value_pointer, const char* key_string);	
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, pointer> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_pointer The value for the key. NULL value pointers are allowed as legitimate values.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValuePointerForKeyString
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValuePointerForKeyStringWithLength(LuaHashMap* hash_map, void* value_pointer, const char* key_string, size_t key_string_length);	
-/* string, number */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_number The value for the key.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueNumberForKeyString(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, number> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_number The value for the key.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueNumberForKeyString
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Number value_number, const char* restrict key_string, size_t key_string_length);
-/* string, integer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_integer The value for the key.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueIntegerForKeyString(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <string, number> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_integer The value for the key.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the the Lua internalized pointer for the key string (which may be different than the one you supplied). Returns NULL on failure.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueIntegerForKeyString
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_SetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, lua_Integer value_integer, const char* restrict key_string, size_t key_string_length);
 
 
-/* pointer, string */
+/* Key Pointer family */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <pointer, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_pointer The key for the value. NULL key pointers are allowed as legitimate values.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyPointer(LuaHashMap* hash_map, const char* value_string, void* key_pointer);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <pointer, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_pointer The key for the value. NULL key pointers are allowed as legitimate values.
+ * @param value_string_length The string length (strlen()) of the value string. (This does not count the \0 terminator character.)
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringForKeyPointer
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, const char* value_string, void* key_pointer, size_t value_string_length);
-/* pointer, pointer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <pointer, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_pointer The value for the key. NULL key pointers are allowed as legitimate values.
+ * @param key_pointer The key for the value. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerForKeyPointer(LuaHashMap* hash_map, void* value_pointer, void* key_pointer);
-/* pointer, number */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <pointer, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_number The value for the key.
+ * @param key_pointer The key for the value. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberForKeyPointer(LuaHashMap* hash_map, lua_Number value_number, void* key_pointer);
-/* pointer, integer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <pointer, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_integer The value for the key.
+ * @param key_pointer The key for the value. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerForKeyPointer(LuaHashMap* hash_map, lua_Integer value_integer, void* key_pointer);
 	
-	
-/* number, string */
+
+/* Key Number family */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <number, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_number The key for the value.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyNumber(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <number, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_number The key for the value.
+ * @param value_string_length The string length (strlen()) of the value string. (This does not count the \0 terminator character.)
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringForKeyNumber
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyNumberWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Number key_number, size_t value_string_length);
-/* number, pointer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <number, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_pointer The value for the key. NULL key pointers are allowed as legitimate values.
+ * @param key_number The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerForKeyNumber(LuaHashMap* hash_map, void* value_pointer, lua_Number key_number);
-/* number, number */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <number, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_number The value for the key.
+ * @param key_number The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number value_number, lua_Number key_number);
-/* number, integer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <number, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_integer The value for the key.
+ * @param key_number The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Integer value_integer, lua_Number key_number);
 
-	
-/* integer, string */
+
+/* Key Integer family */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <integer, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_integer The key for the value.
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyInteger(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer);
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <integer, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param key_integer The key for the value.
+ * @param value_string_length The string length (strlen()) of the value string. (This does not count the \0 terminator character.)
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringForKeyInteger
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringForKeyIntegerWithLength(LuaHashMap* restrict hash_map, const char* restrict value_string, lua_Integer key_integer, size_t value_string_length);
-/* integer, pointer */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <integer, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_pointer The value for the key. NULL key pointers are allowed as legitimate values.
+ * @param key_integer The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerForKeyInteger(LuaHashMap* hash_map, void* value_pointer, lua_Integer key_integer);
-/* integer, number */
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <integer, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_number The value for the key.
+ * @param key_integer The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Number value_number, lua_Integer key_integer);
-/* integer, integer*/
+/**
+ * Adds a given key-value pair to the hash table.
+ * Adds or updates a given key-value pair to the hash table.
+ * <integer, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param value_integer The value for the key.
+ * @param key_integer The key for the value.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer value_integer, lua_Integer key_integer);
 	
+/** @} */ 
 
+/** @defgroup GetValueForKeyFamily GetValueForKey family of functions
+ *  @{
+ */
 
-/* Get Functions */
+/* GetValueForKey family functions */
+
+/* Key String family */
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyString, LuaHashMap_GetValueStringForKeyStringWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned value string. You may pass NULL to ignore this result. 
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetValueStringForKeyString, LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t* value_string_length_return, size_t key_string_length);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the value for the key. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, pointer> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the value for the key. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetValuePointerForKeyString, LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the value for the key. Returns 0.0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, number> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the value for the key. Returns 0.0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetValueNumberForKeyString, LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @return Returns the value for the key. Returns 0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <string, integer> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key for the value. NULL key strings disallowed and the operation will simply return NULL.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns the value for the key. Returns 0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetValueIntegerForKeyString, LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
 
 
-
+/* Key Pointer family */
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <pointer, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key for the value. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyPointer, LuaHashMap_GetValueStringForKeyPointerWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <pointer, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key for the value. 
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned value string. You may pass NULL to ignore this result. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetValueStringForKeyPointer, LuaHashMap_GetIteratorForKeyPointer
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyPointerWithLength(LuaHashMap* hash_map, void* key_pointer, size_t* value_string_length_return);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <pointer, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key for the value. 
+ * @return Returns the value for the key. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyPointer
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <pointer, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key for the value. 
+ * @return Returns the value for the key. Returns 0.0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyPointer
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <pointer, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key for the value. 
+ * @return Returns the value for the key. Returns 0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyPointer
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
 
-	
+
+/* Key Number family */
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <number, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key for the value. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyNumber, LuaHashMap_GetValueStringForKeyNumberWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <number, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key for the value. 
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned value string. You may pass NULL to ignore this result. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyNumber, LuaHashMap_GetValueStringForKeyNumber
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyNumberWithLength(LuaHashMap* hash_map, lua_Number key_number, size_t* value_string_length_return);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <number, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key for the value. 
+ * @return Returns the value for the key. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyNumber
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <number, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key for the value. 
+ * @return Returns the value for the key. Returns 0.0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyNumber
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <number, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key for the value. 
+ * @return Returns the value for the key. Returns 0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyNumber
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
 
+
+/* Key Integer family */
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <integer, string> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key for the value. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyInteger, LuaHashMap_GetValueStringForKeyIntegerWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <integer, string> version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key for the value. 
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned value string. You may pass NULL to ignore this result. 
+ * @return Returns the Lua internalized pointer for the key string. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyInteger, LuaHashMap_GetValueStringForKeyInteger
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringForKeyIntegerWithLength(LuaHashMap* hash_map, lua_Integer key_integer, size_t* value_string_length_return);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <integer, pointer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key for the value. 
+ * @return Returns the value for the key. Returns NULL if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyInteger
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <integer, number> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key for the value. 
+ * @return Returns the value for the key. Returns 0.0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyInteger
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
+/**
+ * Returns the value for specified key in the hash table.
+ * Returns the value for specified key in the hash table.
+ * <integer, integer> version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key for the value. 
+ * @return Returns the value for the key. Returns 0 if not found.
+ *
+ * @note Consider using the GetIteratorForKey family of functions if you need to distinguish between a failed look up and an empty value.
+ * @see LuaHashMap_GetIteratorForKeyInteger
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
 
+/** @} */ 
+	
+/** @defgroup ExistsKeyFamily ExistsKey family of functions
+ *  @{
+ */
+
+
 /* Exists Functions*/
+/**
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * string version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key to test.
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ *
+ * @note Consider using the GetIteratorForKey + GetCachedValue family of functions if you need to first check for existence and then retrieve the value if it exists.
+ * @see LuaHashMap_GetIteratorForKeyString, LuaHashMap_ExistsKeyStringWithLength
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key to test.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ *
+ * @note Consider using the GetIteratorForKey + GetCachedValue family of functions if you need to first check for existence and then retrieve the value if it exists.
+ * @see LuaHashMap_GetIteratorForKeyString, LuaHashMap_ExistsKeyString
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
+/**
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * pointer version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key to test.
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ *
+ * @note Consider using the GetIteratorForKey + GetCachedValue family of functions if you need to first check for existence and then retrieve the value if it exists.
+ * @see LuaHashMap_GetIteratorForKeyPointer
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * number version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key to test.
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ *
+ * @note Consider using the GetIteratorForKey + GetCachedValue family of functions if you need to first check for existence and then retrieve the value if it exists.
+ * @see LuaHashMap_GetIteratorForKeyNumber
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * Returns whether a key/value pair exists in the hash table for a specified key.
+ * integer version
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key to test.
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ *
+ * @note Consider using the GetIteratorForKey + GetCachedValue family of functions if you need to first check for existence and then retrieve the value if it exists.
+ * @see LuaHashMap_GetIteratorForKeyInteger
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
+/** @} */ 
 
-/* Remove functions */
+/** @defgroup RemoveKeyFamily RemoveKey family of functions
+ *  @{
+ */
+
+/**
+ * Removes a key/value pair in the hash table for a specified key.
+ * Removes a key/value pair in the hash table for a specified key.
+ * string version
+ * It is safe to try to remove a key that doesn't exist.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key to remove.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Removes a key/value pair in the hash table for a specified key.
+ * Removes a key/value pair in the hash table for a specified key.
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ * It is safe to try to remove a key that doesn't exist.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_string The key to remove.
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
+/**
+ * Removes a key/value pair in the hash table for a specified key.
+ * Removes a key/value pair in the hash table for a specified key.
+ * pointer version
+ * It is safe to try to remove a key that doesn't exist.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_pointer The key to remove.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Removes a key/value pair in the hash table for a specified key.
+ * Removes a key/value pair in the hash table for a specified key.
+ * number version
+ * It is safe to try to remove a key that doesn't exist.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_number The key to remove.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Removes a key/value pair in the hash table for a specified key.
+ * Removes a key/value pair in the hash table for a specified key.
+ * integer version
+ * It is safe to try to remove a key that doesn't exist.
+ *
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @param key_integer The key to remove.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
+/** @} */ 
 
-
-/* Clear List */
-/* This removes all entries, but doesn't shrink the hash (doesn't reclaim memory). */
+/** @defgroup ClearFamily Clear family of functions
+ *  @{
+ */
+/**
+ * Removes all entries from the hash table, but doesn't shrink the hash.
+ * This removes all entries from the hash table, but it doesn't shrink the hash (doesn't reclaim memory). 
+ * @param hash_map The LuaHashMap instance to operate on. 
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_Clear(LuaHashMap* hash_map);
-/* This removes all entries and resets the hash size to 0 (reclaims memory). */
+/**
+ * Removes all entries from the hash table and resets the hash size to 0 (reclaims memory)
+ * This removes all entries from the hash table and  resets the hash size to 0 (reclaims memory).
+ * @param hash_map The LuaHashMap instance to operate on. 
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_Purge(LuaHashMap* hash_map);
 
+/**
+ * Returns whether the hash table is empty or or not.
+ * Returns whether the hash table is empty or or not.
+ * @param hash_map The LuaHashMap instance to operate on. 
+ * @return Returns true if the hash table is empty, otherwise false.
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 
+/** @} */ 
+
 /* Iterator functions */
-LUAHASHMAP_EXPORT bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator);
 
 
+/**
+ * Returns an iterator at the start position of the hash table.
+ * Returns an iterator at the start position of the hash table.
+ * This is what you use if you are going to iterate through the entire collection.
+ *
+ * @param hash_map The LuaHashMap instance to operate on. 
+ * @return Returns an iterator at the start position of the hash table. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * @see LuaHashMap_GetIteratorAtEnd, LuaHashMap_IteratorNext, LuaHashMap_IteratorIsNotFound
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* hash_map);
+/**
+ * Returns an iterator at the end position of the hash table.
+ * Returns an iterator at the end position of the hash table.
+ * This is what you use if you are going to iterate through the entire collection.
+ *
+ * @param hash_map The LuaHashMap instance to operate on. 
+ * @return Returns an iterator at the end position of the hash table. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ *
+ * @note The end iterator doesn't actually point to the last item in the collection. It is actually one item past the end. It is analgous to a null/termination character in a string. So don't try to get the key or value from the end iterator because it won't give you anything useful.
+ *
+@code 	
+	for(LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), LuaHashMapIterator hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
+		! LuaHashMap_IteratorIsEqual(&hash_iterator, &hash_iterator_end);
+		LuaHashMap_IteratorNext(&hash_iterator)
+	)
+	{
+		fprintf(stderr, "Price of %s: %lf\n", 
+				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
+				LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+@endcode
+ * @see LuaHashMap_IteratorNext, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound, LuaHashMap_IteratorIsEqual
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtEnd(LuaHashMap* hash_map);
 
-/* Find functions: Returns an iterator at the designated position if found. 
- @see LuaHashMap_IteratorIsNotFound, LuaHashMap_ExistsKeyString, LuaHashMap_ExistsKeyPointer, LuaHashMap_ExistsKeyNumber, LuaHashMap_ExistsKeyInteger 
+
+/**
+ * Increments the iterator to the next item in the hash table.
+ * Increments the iterator to the next item in the hash table.
+ * @param hash_iterator The LuaHashMapIterator instance to operate on. 
+ * @return Returns true if the iterator successfully went to the next item. False otherwise. This can be useful to know when to stop looping in a control loop.
+@code
+	// This pattern is good if you know you have at least one item in the hash.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+	do
+	{
+		fprintf(stderr, "Price of %s: %lf\n", 
+				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
+				LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+		
+	} while(LuaHashMap_IteratorNext(&hash_iterator));
+@endcode
+ * @see LuaHashMap_GetIteratorAtEnd, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound
+ */
+LUAHASHMAP_EXPORT bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator);
+
+/**
+ * Returns an iterator corresponding to the specified key.
+ * This returns an iterator corresponding to the specified key. 
+ * string version
+ * 
+ * The intent of this method is to allow you to do multiple operations at the current position without doing unnecessary additional hash look ups.
+ * The most common example is you want to test to see if a key/value pair actually exists in the hash table before trying to retrive the value.
+ * Using the GetIteratorForKey function, you do one hash lookup, and then you can test existence and extract the CachedValue from the iterator without any subsequent hash look ups.
+ *
+ * @param hash_map The LuaHashMap instance to operate on
+ * @param key_string The key for the key/value pair
+ * @return Returns an iterator at the position of the specified key. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * 
+ @code
+	// This is the one hash look up.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyString(hash_map, "foo");
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key="foo" exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key="foo" does not exist\n");
+	}
+@endcode
+ * @see LuaHashMap_ExistsAtIterator, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound, LuaHashMap_GetIteratorForKeyStringWithLength
  */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyString(LuaHashMap* restrict hash_map, const char* restrict key_string);
+/**
+ * Returns an iterator corresponding to the specified key.
+ * This returns an iterator corresponding to the specified key. 
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ * 
+ * The intent of this method is to allow you to do multiple operations at the current position without doing unnecessary additional hash look ups.
+ * The most common example is you want to test to see if a key/value pair actually exists in the hash table before trying to retrive the value.
+ * Using the GetIteratorForKey function, you do one hash lookup, and then you can test existence and extract the CachedValue from the iterator without any subsequent hash look ups.
+ *
+ * @param hash_map The LuaHashMap instance to operate on
+ * @param key_string The key for the key/value pair
+ * @param key_string_length The string length (strlen()) of the key string. (This does not count the \0 terminator character.)
+ * @return Returns an iterator at the position of the specified key. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * 
+ @code
+	// This is the one hash look up.
+	size_t key_string_length;
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyStringWithLength(hash_map, "foo", &key_string_length);
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key="foo" exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key="foo" does not exist\n");
+	}
+@endcode
+ * @see LuaHashMap_ExistsAtIterator, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound, LuaHashMap_GetIteratorForKeyString
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyStringWithLength(LuaHashMap* restrict hash_map, const char* restrict key_string, size_t key_string_length);
+/**
+ * Returns an iterator corresponding to the specified key.
+ * This returns an iterator corresponding to the specified key. 
+ * pointer version
+ * 
+ * The intent of this method is to allow you to do multiple operations at the current position without doing unnecessary additional hash look ups.
+ * The most common example is you want to test to see if a key/value pair actually exists in the hash table before trying to retrive the value.
+ * Using the GetIteratorForKey function, you do one hash lookup, and then you can test existence and extract the CachedValue from the iterator without any subsequent hash look ups.
+ *
+ * @param hash_map The LuaHashMap instance to operate on
+ * @param key_pointer The key for the key/value pair
+ * @return Returns an iterator at the position of the specified key. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * 
+ @code
+	// This is the one hash look up.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyPointer(hash_map, fooptr);
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key=fooptr exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key=fooptr does not exist\n");
+	}
+@endcode
+ * @see LuaHashMap_ExistsAtIterator, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyPointer(LuaHashMap* hash_map, void* key_pointer);
+/**
+ * Returns an iterator corresponding to the specified key.
+ * This returns an iterator corresponding to the specified key. 
+ * number version
+ * 
+ * The intent of this method is to allow you to do multiple operations at the current position without doing unnecessary additional hash look ups.
+ * The most common example is you want to test to see if a key/value pair actually exists in the hash table before trying to retrive the value.
+ * Using the GetIteratorForKey function, you do one hash lookup, and then you can test existence and extract the CachedValue from the iterator without any subsequent hash look ups.
+ *
+ * @param hash_map The LuaHashMap instance to operate on
+ * @param key_number The key for the key/value pair
+ * @return Returns an iterator at the position of the specified key. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * 
+ @code
+	// This is the one hash look up.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyPointer(hash_map, fooptr);
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key=fooptr exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key=fooptr does not exist\n");
+	}
+@endcode
+ * @see LuaHashMap_ExistsAtIterator, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashMap* hash_map, lua_Number key_number);
+/**
+ * Returns an iterator corresponding to the specified key.
+ * This returns an iterator corresponding to the specified key. 
+ * integer version
+ * 
+ * The intent of this method is to allow you to do multiple operations at the current position without doing unnecessary additional hash look ups.
+ * The most common example is you want to test to see if a key/value pair actually exists in the hash table before trying to retrive the value.
+ * Using the GetIteratorForKey function, you do one hash lookup, and then you can test existence and extract the CachedValue from the iterator without any subsequent hash look ups.
+ *
+ * @param hash_map The LuaHashMap instance to operate on
+ * @param key_integer The key for the key/value pair
+ * @return Returns an iterator at the position of the specified key. If there is a failure, a "NotFound" iterator will be returned. Use LuaHashMap_IteratorIsNotFound to detect if the iterator is bad.
+ * 
+ @code
+	// This is the one hash look up.
+	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyPointer(hash_map, fooptr);
+	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
+	// This information is in the iterator itself which avoids another hash lookup.
+	if(exists)
+	{
+		fprintf(stderr, "The value for key=fooptr exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
+	}
+	else
+	{
+		fprintf(stderr, "The key/value pair for key=fooptr does not exist\n");
+	}
+@endcode
+ * @see LuaHashMap_ExistsAtIterator, LuaHashMap_GetIteratorAtBegin, LuaHashMap_IteratorIsNotFound
+ */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
-/* Returns true if the iterator is bad (i.e. you tried to get an iterator for a key that doesn't exist. End iterators are distinct from NotFound. */
+/**
+ * Returns true if the iterator is "NotFound".
+ * Returns true if the iterator is bad (i.e. you tried to get an iterator for a key that doesn't exist). 
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on. 
+ * @return Returns true if the iterator is "NotFound" or bad.
+ * @note End iterators are considered valid iterators and this function will return false on this case.
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator);
-/* Returns true if two iterators are pointing to the same location */
+/**
+ * Returns true if two iterators are equal.
+ * Returns true if two iterators are equal.
+ * This generally means they are pointing to the same key/value pair in the same hash table.
+ *
+ * @param hash_iterator1 The first iterator that will be compared.
+ * @param hash_iterator2 The other iterator that will be compared.
+ * @return Returns true if the iterators are equal.
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const LuaHashMapIterator* hash_iterator2);
 
-	
+
+/* SetValueAtIterator family */
+/**
+ * Updates a value in the hash table pointed to by the iterator.
+ * Updates a value in the hash table pointed to by the iterator.
+ * string version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringAtIteratorWithLength
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string);
+/**
+ * Updates a value in the hash table pointed to by the iterator.
+ * Updates a value in the hash table pointed to by the iterator.
+ * string version
+ * This version allows you to specify the string length for each string if you already know it as an optimization.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
+ * @param value_string The value for the key. NULL value strings are treated as strings with length=0 ("").
+ * @param value_string_length The string length (strlen()) of the value string. (This does not count the \0 terminator character.)
+ *
+ * @note Lua copies strings and internalizes them. This means Lua/LuaHashMap have its own copy of the string and you are free to delete your string if you are done with it.
+ * @see LuaHashMap_SetValueStringAtIterator
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIteratorWithLength(LuaHashMapIterator* restrict hash_iterator, const char* restrict value_string, size_t value_string_length);
+/**
+ * Updates a value in the hash table pointed to by the iterator.
+ * Updates a value in the hash table pointed to by the iterator.
+ * pointer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
+ * @param value_pointer The value for the key. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* hash_iterator, void* value_pointer);
+/**
+ * Updates a value in the hash table pointed to by the iterator.
+ * Updates a value in the hash table pointed to by the iterator.
+ * number version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
+ * @param value_number The value for the key. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* hash_iterator, lua_Number value_number);
+/**
+ * Updates a value in the hash table pointed to by the iterator.
+ * Updates a value in the hash table pointed to by the iterator.
+ * integer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
+ * @param value_integer The value for the key. NULL key pointers are allowed as legitimate values.
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_SetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator, lua_Integer value_integer);
 
-	
-LUAHASHMAP_EXPORT const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator);
-LUAHASHMAP_EXPORT const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return);
-LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator);
-LUAHASHMAP_EXPORT void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator);
-LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator);
-LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator);
 
+
+
+/**
+ * Returns the value in the hash table pointed to by the iterator.
+ * Returns the value in the hash table pointed to by the iterator.
+ * string version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to retrieve.
+ * @return Returns the Lua internalized pointer for the key string. 
+ *
+ * @note If you follow the expected use pattern of the API, then you generally don't need to call this function and you want the CachedValue version of this function. As long as you don't modify the hash table behind the back of your iterator, its cached value should be up-to-date, avoiding the need for another full hash table look up.
+ * @see LuaHashMap_GetCachedValueStringAtIterator, LuaHashMap_GetValueStringAtIteratorWithLength
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the value in the hash table pointed to by the iterator.
+ * Returns the value in the hash table pointed to by the iterator.
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to retrieve.
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned value string. You may pass NULL to ignore this result. 
+ * @return Returns the Lua internalized pointer for the key string. 
+ *
+ * @note If you follow the expected use pattern of the API, then you generally don't need to call this function and you want the CachedValue version of this function. As long as you don't modify the hash table behind the back of your iterator, its cached value should be up-to-date, avoiding the need for another full hash table look up.
+ * @see LuaHashMap_GetCachedValueStringAtIteratorWithLength, LuaHashMap_GetValueStringAtIterator
+ */
 LUAHASHMAP_EXPORT const char* LuaHashMap_GetValueStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* value_string_length_return);
+/**
+ * Returns the value in the hash table pointed to by the iterator.
+ * Returns the value in the hash table pointed to by the iterator.
+ * pointer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to retrieve.
+ * @return Returns the value for the key.
+ *
+ * @note If you follow the expected use pattern of the API, then you generally don't need to call this function and you want the CachedValue version of this function. As long as you don't modify the hash table behind the back of your iterator, its cached value should be up-to-date, avoiding the need for another full hash table look up.
+ * @see LuaHashMap_GetCachedValuePointerAtIterator
+ */
 LUAHASHMAP_EXPORT void* LuaHashMap_GetValuePointerAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the value in the hash table pointed to by the iterator.
+ * Returns the value in the hash table pointed to by the iterator.
+ * pointer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to retrieve.
+ * @return Returns the value for the key.
+ *
+ * @note If you follow the expected use pattern of the API, then you generally don't need to call this function and you want the CachedValue version of this function. As long as you don't modify the hash table behind the back of your iterator, its cached value should be up-to-date, avoiding the need for another full hash table look up.
+ * @see LuaHashMap_GetCachedValuePointerAtIterator
+ */
 LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetValueNumberAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the value in the hash table pointed to by the iterator.
+ * Returns the value in the hash table pointed to by the iterator.
+ * pointer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to retrieve.
+ * @return Returns the value for the key.
+ *
+ * @note If you follow the expected use pattern of the API, then you generally don't need to call this function and you want the CachedValue version of this function. As long as you don't modify the hash table behind the back of your iterator, its cached value should be up-to-date, avoiding the need for another full hash table look up.
+ * @see LuaHashMap_GetCachedValuePointerAtIterator
+ */
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
 
+
+
+/* LuaHashMapIterator struct accessor functions. */
+
+/**
+ * Returns whether a key/value pair exists in the hash table pointed to by the iterator.
+ * Returns whether a key/value pair exists in the hash table pointed to by the iterator.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair 
+ * @return Returns true if the key/value pair exists in the hash table. Returns false otherwise.
+ */
 LUAHASHMAP_EXPORT bool LuaHashMap_ExistsAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Removes a key/value pair in the hash table pointed to by the iterator.
+ * Removes a key/value pair in the hash table pointed to by the iterator.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair 
+ */
 LUAHASHMAP_EXPORT void LuaHashMap_RemoveAtIterator(LuaHashMapIterator* hash_iterator);
-
-
 
 
 /* Experimental Functions: These might be removed, modified, or made permanent. */
@@ -812,6 +1970,186 @@ LUAHASHMAP_EXPORT inline int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator*
 	}
 	return hash_iterator->keyType;
 }
+
+
+LUAHASHMAP_EXPORT inline const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringPointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return NULL;
+	}
+}
+
+LUAHASHMAP_EXPORT inline const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return)
+{
+	if(NULL == hash_iterator)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		if(NULL != key_string_length_return)
+		{
+			*key_string_length_return = 0;
+		}
+		return NULL;
+	}
+
+	if(NULL != key_string_length_return)
+	{
+		*key_string_length_return = hash_iterator->currentKey.theString.stringLength;
+	}
+
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringPointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return NULL;
+	}
+}
+
+LUAHASHMAP_EXPORT inline size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	
+	if(LUA_TSTRING == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theString.stringLength;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return 0;
+	}
+}
+
+LUAHASHMAP_EXPORT inline void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return NULL;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return NULL;
+	}
+	
+	if(LUA_TLIGHTUSERDATA == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.thePointer;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return NULL;
+	}
+}
+
+LUAHASHMAP_EXPORT inline lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0.0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0.0;
+	}
+	
+	if(LUA_TNUMBER == hash_iterator->keyType)
+	{
+        return hash_iterator->currentKey.theNumber;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return 0.0;
+	}
+}
+
+LUAHASHMAP_EXPORT inline lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->atEnd)
+	{
+		return 0;
+	}
+	if(true == hash_iterator->isNext)
+	{
+		return 0;
+	}
+	
+	if(LUA_TNUMBER == hash_iterator->keyType)
+	{
+        return (lua_Integer)hash_iterator->currentKey.theNumber;
+	}
+	else
+	{
+		/* shouldn't get here */
+		/* LUAHASHMAP_ASSERT(false); */
+		return 0;
+	}
+}
+
 
 /* Gets the value contained (copied) in the iterator as opposed to doing an actual hash map lookup.
  * If you have just retrieved the iterator and have not altered anything in the hash map behind the back of the iterator,
@@ -987,6 +2325,76 @@ LUAHASHMAP_EXPORT inline lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(
 
 /* I don't know if I really want to support mixed types in a single hashmap. But if I do, then you need to be able to figure out the type. */
 LUAHASHMAP_EXPORT int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+
+/**
+ * Returns the key corresponding to the iterator.
+ * Returns the key corresponding to the current location of the iterator.
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @return Returns the Lua internalized pointer for the key string.
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT const char* LuaHashMap_GetKeyStringAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the key corresponding to the iterator.
+ * Returns the key corresponding to the current location of the iterator.
+ * string version
+ * This version allows you to specify the string length for the string if you already know it as an optimization.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @param key_string_length_return This returns by reference the string length (strlen()) of the returned key string. You may pass NULL to ignore this result. 
+ * @return Returns the Lua internalized pointer for the key string. 
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT const char* LuaHashMap_GetKeyStringAtIteratorWithLength(LuaHashMapIterator* hash_iterator, size_t* key_string_length_return);
+/**
+ * Returns the string length of the key corresponding to the iterator.
+ * Returns the string length of the key corresponding to the current location of the iterator.
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @return Returns the string length (strlen()) of the key pointer.
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeyStringLengthAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the key corresponding to the iterator.
+ * Returns the key corresponding to the current location of the iterator.
+ * pointer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @return Returns the key pointer.
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT void* LuaHashMap_GetKeyPointerAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the key corresponding to the iterator.
+ * Returns the key corresponding to the current location of the iterator.
+ * number version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @return Returns the key number.
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetKeyNumberAtIterator(LuaHashMapIterator* hash_iterator);
+/**
+ * Returns the key corresponding to the iterator.
+ * Returns the key corresponding to the current location of the iterator.
+ * integer version
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on.
+ * @return Returns the key integer.
+ *
+ * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
+ */
+LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetKeyIntegerAtIterator(LuaHashMapIterator* hash_iterator);
+
 
 /* Gets the value contained (copied) in the iterator as opposed to doing an actual hash map lookup.
  * If you have just retrieved the iterator and have not altered anything in the hash map behind the back of the iterator,
@@ -2483,9 +3891,21 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
  * these functions are not resilient to mixed keys.
  * These functions are now deprecated. 
  */
+/**
+ * @deprecated
+ */
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysString(LuaHashMap* hash_map, const char* keys_array[], size_t max_array_size);
+/**
+ * @deprecated
+ */
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysPointer(LuaHashMap* hash_map, void* keys_array[], size_t max_array_size);
+/**
+ * @deprecated
+ */
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysNumber(LuaHashMap* hash_map, lua_Number keys_array[], size_t max_array_size);
+/**
+ * @deprecated
+ */
 LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Integer keys_array[], size_t max_array_size);
 /* End Experiemental Functions */	
 
