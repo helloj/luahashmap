@@ -486,6 +486,22 @@ Yes, I actually did benchmarks.
 Check out the main site:
 http://playcontrol.net/opensource/LuaHashMap
 
+Unit Tests:
+===========
+Yes, I actually did unit tests too. You might refer to these for more examples on how to use LuaHashMap.
+
+- luahashmap.c: The first test program written, which started turning into a small benchmark program in some places.
+- luahashmap.cpp: Uses the C++ STL-like template interface wrapper. The coverage is pretty exhaustive and manages to hit most of the core C API indirectly.
+- luahashmapshared.c: Tests the CreateShare APIs.
+- luahashmap_c11: Tests the C11 _Generic macros. This covers every API that is put into a convenience macro which is the majority of the API.
+
+Note: Depending on your compiler and platform, you may see a lot of compiler warnings in the test programs. 
+These are from using fprintf to print values to the console for visual spot checking/testing.
+To make these compile cleanly, C99 format tokens are very convenient to handle unpredicatable sizes for standard typedefs.
+But since this code needs to compile on legacy compilers, it is not possible to take advantage of these.
+(The C11 test should compile cleanly on C11 compilers.)
+The actual LuaHashMap library should compile cleanly so these test warnings are not a really an issue.
+
 
 Future Directions:
 ==================
@@ -517,6 +533,8 @@ Lua Reference Manual
 http://www.lua.org/manual/5.1/manual.html 
 
 Please look at LuaHashMap.h for the complete list of API functions.
+
+And for more examples, refer to the unit tests in the repository.
 
 @author Eric Wing <ewing . public - at - playcontrol . net>
 */
