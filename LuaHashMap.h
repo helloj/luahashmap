@@ -407,7 +407,7 @@ C11 _Generics (Experimental):
 Yes, I said there is "no macro-hell" earlier. But trust me; this isn't really that bad and it's optional. (And it's really quite cool.)
 C11 introduces _Generic which extends the C preprocessor to allow you to map different functions to a single macro function name based on their parameter types.
 Essentially this brings C++-like function overloading to C, but without all the name-mangling problems and other C++ baggage.
-And this was a lot less code than the C++ parital template specialization mentioned above.
+And this was a lot less code than the C++ partial template specialization mentioned above.
 So for example, these 16 following functions:
 - LuaHashMap_SetValueStringForKeyString
 - LuaHashMap_SetValueStringForKeyPointer
