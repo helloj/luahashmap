@@ -320,9 +320,11 @@ So an addition to the standard API, a CreateShare API exists to allow you to cre
 without creating an entirely new virtual machine instance. Instead it will simply create a new Lua table instance
 in the existing virtual machine and not incur any more RAM overhead.
 
+To the rest of the LuaHashMap API, everything is transparent and requires no other special handling (everything except CreateShare and FreeShare). 
+The hash map instance looks like a separate instance with its own hash and you may think about them in those terms.  
+
 Technically speaking, the original and shared maps are peers of each other. The implementation does not make a distinction 
 about which one the original is so any hash map with the lua_State you want to share may be passed in as the parameter.
-So to the rest of the LuaHashMap API (everything except CreateShare and FreeShare), the hash map instance looks like a separate instance with its own hash and you may think about them in those terms.  
 
 Every CreateShare should be balanced by FreeShare. Free should balance the original Create and should be the very last thing to be called. 
 (Free will destroy the entire virtual machine instance as it calls lua_close().)
@@ -460,8 +462,8 @@ LuaHashMap_SetValue(&iterator, (const char*)"goodbye"); // LuaHashMap_SetValueSt
 
 @note Please watch out for string literals. They technically are not const char*, but an array type which I can't seem to express. So you should use an explict cast for those or they get mapped to the void* (Pointer) rule.
 
-For convenience, if C11 _Generic support is detected on your compiler, the following #define will be defined to 1.
-LUAHASHMAP_SUPPORTS_GENERICS
+For convenience, if C11 _Generic support is detected on your compiler, LUAHASHMAP_SUPPORTS_GENERICS will be defined to 1.
+
 
 Refer to the API documentation to see all the macros available.
 
@@ -473,7 +475,7 @@ This is another (experimental) flag designed to put your table instances in the 
 The advantage of this is if you are using Lua in your project already and have Lua tables in your scripts that you would like to easily interoperate with on the C side.
 To activate this, recompile with the flag LUAHASHMAP_USE_GLOBAL_TABLE defined.
 
-Also of related note, there are #defines for LUAHASHMAP_SETTABLE and LUAHASHMAP_GETTABLE in the implementation which are set to lua_rawset and lua_rawget.
+Also of related note, there are defines for LUAHASHMAP_SETTABLE and LUAHASHMAP_GETTABLE in the implementation which are set to lua_rawset and lua_rawget.
 Particularly if you are doing advanced things with tables in your scripts, you may want metamethod behaviors (which raw* bypasses for speed).
 So in that case, you'll want to redefine these to lua_settable and lua_gettable.
 
@@ -491,8 +493,8 @@ I think LuaHashMap is pretty much done.
 - There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
 - There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
 - The one major thing I would like to see (but I don't have the time or expertise to do) is see if LuaHashMap could be implemented 
-from ripping out just the table implementation from Lua and removing all the unnecessary stuff. I would love to shrink both the 
-disk size profile as well as the virtual machine overhead. I would like to be able to create lots of stand-alone instances of LuaHashMap
+by ripping out just the table implementation from Lua and removing all the other unnecessary stuff. I would love to shrink both the 
+disk size profile as well as the memory overhead needed by having an entire virtual machine. I would like to be able to create lots of stand-alone instances of LuaHashMap
 without worrying that I'm wasting memory or need to resort to the current CreateShare workaround.
 So if anybody is interested, I would love to see it.
 
@@ -633,9 +635,6 @@ typedef struct LuaHashMapVersion
  * have a slightly newer or older version at runtime. That version can be
  * determined with LuaHashMap_GetLinkedVersion(), which, unlike 
  * LUAHASHMAP_GET_COMPILED_VERSION, is not a macro.
- *
- * @note When compiled with SDL, this macro can be used to fill a version structure 
- * compatible with SDL_version.
  *
  * @param X A pointer to a LuaHashMapVersion struct to initialize.
  *
