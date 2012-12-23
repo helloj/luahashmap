@@ -341,11 +341,12 @@ so be very careful about understanding which of your keys are unique.
 In addition, when you Get a number, there is no identifying information (in stock Lua) about whether the number was originally an 
 integer or number. It is up to you to figure it out.
  
-To help support mixed types, two functions are provided:
-int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
-int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+To help support mixed types, three functions are provided:
+- int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+- int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+- int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
-These return the ints defined by Lua for LUA_TSTRING, LUA_TNUMBER, LUA_TLIGHTUSERDATA for strings, numbers, and pointers respectively. 
+These return the int values defined by Lua which are LUA_TSTRING, LUA_TNUMBER, LUA_TLIGHTUSERDATA for strings, numbers, and pointers respectively. 
 Remember that there is no distinction between number and integer in this case.
 
 So while possible to mix types in a single hash map instance, you may find it cumbersome to deal with. 
@@ -513,6 +514,7 @@ http://www.lua.org/pil/
 Lua Reference Manual  
 http://www.lua.org/manual/5.1/manual.html 
 
+Please look at LuaHashMap.h for the complete list of API functions.
 
 @author Eric Wing <ewing . public - at - playcontrol . net>
 */
