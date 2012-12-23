@@ -231,9 +231,9 @@ void TestValuePointerNULL()
 	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
 	do
 	{
-		fprintf(stderr, "Price of %s: %zd\n", 
+		fprintf(stderr, "Price of %s: %d\n", 
 				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-				LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
+				(int)LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
 		
 	} while(LuaHashMap_IteratorNext(&hash_iterator));
 	/* Unlike strings, Lua seems to push NULL pointers as 0 which does not remove an entry. Thus we have 3. */
@@ -254,9 +254,9 @@ void TestValuePointerNULL()
 		LuaHashMap_IteratorNext(&hash_iterator)
 	)
 	{
-		fprintf(stderr, "Price of %s: %zd\n", 
+		fprintf(stderr, "Price of %s: %d\n", 
 				LuaHashMap_GetKeyStringAtIterator(&hash_iterator), 
-				LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
+				(int)LuaHashMap_GetValuePointerAtIterator(&hash_iterator));
 		
 	}
 	assert(1 == LuaHashMap_ExistsKeyString(hash_map, "gas"));
