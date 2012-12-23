@@ -25,6 +25,8 @@
 /**
 @mainpage LuaHashMap: An easy to use hash table library for C. 
 
+Introduction:
+=============
 LuaHashMap is a hash table library/implementation for use in C. Since C lacks a hash table in the standard library, 
 this library provides a way to fill that hole. 
 But instead of reinventing the wheel again to implement a hash table for C, 
@@ -53,11 +55,45 @@ LuaHashMap is designed to be easy to use and convenient.
 LuaHashMap can work with keys and values of the following types: strings, numbers, and pointers.
 The API provides explicit function names for each permutation of types to 
 avoid macro hell and hard to debug situations. 
-(Though C11 users, check out the _Generic macros to use C++ like overloading without all the namemangling problems.)
+(Though C11 users, check out the _Generic macros to use C++ like overloading while still preserving a degree of type safety, and without all the namemangling problems.)
 And there are no hashing functions you need to figure-out/write/provide. (All of this was already done/tuned by Lua itself.)
 
 
+Audience:
+=========
+LuaHashMap is ideal for projects that may agree with one the following:
+- Need a portable hash table for C
+- Need a hash table for C++ but can't use the STL or templates (yes, this happens)
+- Want a really friendly, simple to use API/interface (you don't need to know anything about Lua)
+- Want an explicit, type safe API that doesn't use macro-hell
+- Already using Lua elsewhere in your project or are considering using Lua
+- Not already using Lua but don't think the ~100-200KB library (disk) size of Lua is a big deal. Lua is ~100KB for the core, and ~100KB for the standard library which is not needed by LuaHashMap. (pfft! My icon takes more space.)
+- Don't mind the ~4KB overhead (RAM size) of creating a Lua state instance. (Seriously, Apple Mac icons are full color 1024x1024 now.)
+- Want a time proven, heavily tested/used, and documented implementation (i.e. Lua)
+- Want well-known/predictable behavior and performance characteristics
+- Need a library under a permissive license (MIT)
+- Like overall good performance (but doesn't necessarily need to be the best)
+- Want something with minimal dependencies and easy to embed in your application
+
+LuaHashMap may not be ideal for projects that:
+- Need to fine-tune every single possible detail for the utmost performance (speed/memory)
+- Not already using Lua and bothered by the ~100-200KB disk space of including Lua
+- Can't afford the ~4KB overhead for a Lua state instance
+- Have alternative hash table libraries that better suit your specific needs
+
+
+
+Portability Notes:
+==================
+- LuaHashMap is compatible with both Lua 5.1 and Lua 5.2 (though you must recompile LuaHashMap if you switch between them).
+- LuaHashMap was written to be portable to all platforms with at least a C89 compiler (because Microsoft Visual Studio refuses to update their pathetic C compiler).
+- LuaHashMap was developed with clang, gcc, and Visual Studio on Mac, iOS, Linux, Android, and Windows.
+- However, there is an underlying desire to modernize and utilize C99 and C11 features when available so there are conditionals in the code.
+
+
+
 Programming Overview:
+=====================
 LuaHashMap provides explicit interfaces for 4 types: integers, floating point, strings, and pointers. 
 There is no macro-hell here. (Yes, I typed-out/implemented all the permutations. You can thank me later.) 
 So you get nice straight-forward compiler warnings and more type safety.
@@ -113,6 +149,7 @@ Here's a similar example that prints everything in the hash table using an itera
 Of course this is just a taste. There are a lot more APIs available to make this a full featured library.
 
 More on Iterators:
+------------------
 Iterators are the way to iterate through a hash table. 
 To keep things simple, notice that the GetIterator family of functions all return a full copy of a struct (LuaHashMapIterator). 
 
@@ -139,6 +176,7 @@ Proper programming style of the LuaHashMap iterator functions should keep the "C
 
 
 Iterator Patterns:
+------------------
 
 This demonstrates a typical pattern for using iterators to traverse an entire hash map. You get an iterator at the begin position and another at the end position. You increment your begin position iterator with ItereratorNext() as long as it does not equal the end iterator.
 @code
@@ -176,8 +214,8 @@ Instead, you should get the iterator and use the ExistsAtIterator function follo
 @code
 	// This is the one hash look up.
 	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyInteger(hash_map, 10);
+	// Thie remaining information is in the iterator itself which avoids another hash lookup.
 	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
-	// This information is in the iterator itself which avoids another hash lookup.
 	if(exists)
 	{
 		fprintf(stderr, "The value for key=10 exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
@@ -193,104 +231,95 @@ Instead, you should get the iterator and use the ExistsAtIterator function follo
 
 
 
-Audience:
-LuaHashMap is ideal for projects that may agree with one the following:
-- Need a portable hash table for C
-- Need a hash table for C++ but can't use the STL or templates (yes, this happens)
-- Want a really friendly, simple to use API/interface (you don't need to know anything about Lua)
-- Want an explicit, type safe API that doesn't use macro-hell
-- Already using Lua elsewhere in your project or are considering using Lua
-- Not already using Lua but don't think the ~100-200KB library (disk) size of Lua is a big deal. Lua is ~100KB for the core, and ~100KB for the standard library which is not needed by LuaHashMap. (pfft! My icon takes more space.)
-- Don't mind the ~4KB overhead (RAM size) of creating a Lua state instance. (Seriously, Apple Mac icons are full color 1024x1024 now.)
-- Want a time proven, heavily tested/used, and documented implementation (i.e. Lua)
-- Want well-known/predictable behavior and performance characteristics
-- Need a library under a permissive license (MIT)
-- Like overall good performance (but doesn't necessarily need to be the best)
-- Want something with minimal dependencies and easy to embed in your application
-
-LuaHashMap may not be ideal for projects that:
-- Need to fine-tune every single possible detail for the utmost performance (speed/memory)
-- Not already using Lua and bothered by the ~100-200KB disk space of including Lua
-- Can't afford the ~4KB overhead for a Lua state instance
-- Have alternative hash table libraries that better suit your specific needs
-
-
-
-Portability Notes:
-LuaHashMap is compatible with both Lua 5.1 and Lua 5.2 (though you must recompile LuaHashMap if you switch between them).
-LuaHashMap was written to be portable to all platforms with at least a C89 compiler (because Microsoft Visual Studio refuses to update their pathetic C compiler).
-LuaHashMap was developed with clang, gcc, and Visual Studio on Mac, iOS, Linux, Android, and Windows.
-However, there is an underlying desire to modernize and utilize C99 and C11 features when available so there are conditionals in the code.
-
-
 Extra Lua Details:
+==================
 I said you didn't need to know anything about Lua. Well, that's mostly true, 
 but there are some interesting details you should know about in Lua which may be useful.
 
 
 lua_Number and lua_Integer
+--------------------------
 Canonical (unmodified) Lua only has one number type, which by default is double.
 Double has enough bits to store a 32-bit integer without any loss of precision which is why this works.
 But you may notice that LuaHashMap has APIs to deal with both lua_Number (floating point) and lua_Integer (integer).
 Canonical Lua converts everything to lua_Number so if you provide a lua_Number key that happens to be the same value as a lua_Integer key,
 these may in fact be the same key. 
+
 (But if you are using a patched version of Lua (e.g. LNUM)  Lua that may avoid conversion and keep types separated. 
 Please note that some of the iterator based functions in LuaHashMap may still convert due to the lack of a formal way to detect integer types.) 
 
 
 Lua internalizes strings
+------------------------
 As an implementation detail, all strings in Lua are internalized which means there is only one immutable instance of a string within Lua for duplicate strings. 
 This potentially can be exploited to yield further optimizations in your code.
+
 LuaHashMap does not rely on this fact, 
 but do note that the APIs return the internalized string pointer when you add a key (which may be different than the one you fed the API).
 This was intended to allow you to exploit this fact if you choose in your own code. 
+
 However, if you use alternative implementations of Lua, they are not guaranteed to behave in this same way.
 
-Memory management for strings:
+Memory management for strings
+-----------------------------
 Related to Lua's string internalization, for LuaHashMap, this means when you add a string into the hash table, 
 Lua creates its own copy so you don't need to hold on to the original. 
-But be careful: if you Get a string from LuaHashMap and then completely remove the entries that are holding it, 
+
+But be careful. If you Get a string from LuaHashMap and then completely remove the entries that are holding it, 
 the memory could be deleted out from under you if you still are holding on to the string pointer and trying to use it.
 
 
 Lua does not have a moving garbage collector nor does it move its memory around invalidating pointers.
+------------------------------------------------------------------------------------------------------
 LuaHashMap does exploit an implementation detail of Lua for functions that return strings, 
 such as const char* LuaHashMap_GetValueStringForKeyString. 
 In the Lua API, you communicate between C and Lua using a stack API provided by Lua.
 When you are finished with an operation, the stack should generally be returned to the state you started in.
 That means when this function finishes, the Lua stack should be reset. 
+
 Technically, the pointer to string that is returned is not guaranteed by the Lua specification to still be valid and the pointer could be dangling.
 But as an implementation detail, the Lua authors have stated that this pointer is still valid as long as the string is still in Lua (e.g. not removed).
+
 It is likely that all implementations of Lua share this behavior (since moving collectors are hard to deal with in C for this exact reason of pointers),
 so this implementation detail is probably safe. However, if you do use a completely different implementation of Lua that is not from PUC-Rio, you may want to verify this behavior.
 
-Lua tables have an array optimization
-If you create a hash with sequential, continuous integer keys, you may trigger an optimization in Lua which treats that an array. 
+Lua tables have an array optimization.
+--------------------------------------
+If you create a hash with sequential, continuous integer keys, you may trigger an optimization in Lua which treats that as an array. 
 This will yield very fast performance as Lua is working with C arrays instead of hashing.
 
 
 It is safe/supported to remove keys from a hash while iterating it. (But adding keys while iterating is not supported.)
+-----------------------------------------------------------------------------------------------------------------------
 This is a behavior of Lua which LuaHashMap keeps. (It is related to the fact that Lua does not recompact tables when keys are removed.)
 
 Lua does not recompact/reshuffle tables when you remove keys.
+------------------------------------------------------------
 Also note that the LuaHashMap_Clear() function will only clear the entries from the table. The number of allocated buckets will not shrink.
 If you want to clear all the entries and free the memory, use LuaHashMap_Purge().
 
+Read "Lua Gems"
+---------------
 The book "Lua Gems" gives wonderful insights to how tables are designed and work in Lua, and what their behavior and performance characteristics are.
 The free sample chapter tells you everything you need to know.
+
 http://www.lua.org/gems/sample.pdf
 
 
 
 Advanced tricks:
+================
 
 LuaHashMap_CreateShare:
+-----------------------
 Unfortunately, using the standard API, each LuaHashMap instance also creates an entirely new Lua virtual machine instance.
 On a 64-bit machine, this amounts to about 4-5KB of RAM (measured on a Mac). For large data sets, you will not notice, 
 but for small data sets and a lot of separate instances of LuaHashMap, this might eventually add up.
+
 So an addition to the standard API, a CreateShare API exists to allow you to create a new instance of LuaHashMap
 without creating an entirely new virtual machine instance. Instead it will simply create a new Lua table instance
 in the existing virtual machine and not incur any more RAM overhead.
+
 Technically speaking, the original and shared maps are peers of each other. The implementation does not make a distinction 
 about which one the original is so any hash map with the lua_State you want to share may be passed in as the parameter.
 So to the rest of the LuaHashMap API (everything except CreateShare and FreeShare), the hash map instance looks like a separate instance with its own hash and you may think about them in those terms.  
@@ -301,6 +330,7 @@ Every CreateShare should be balanced by FreeShare. Free should balance the origi
 
 
 Mixed Types in the same hash map:
+---------------------------------
 Lua supports mixed types (i.e. numbers, strings, pointers) in the same table. 
 However you need to be careful about doing this with LuaHashMap and support is still considered experimental as of this writing 
 (though the tests seem to work well enough). 
@@ -311,7 +341,7 @@ so be very careful about understanding which of your keys are unique.
 In addition, when you Get a number, there is no identifying information (in stock Lua) about whether the number was originally an 
 integer or number. It is up to you to figure it out.
  
-To help support mixed types, two (experimental) functions are provided:
+To help support mixed types, two functions are provided:
 int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
@@ -325,50 +355,98 @@ Keeping separate hash map instances may be easier to work with.
 
 
 C++ STL like interface (Experimental):
+--------------------------------------
 For kicks and giggles, there is also a STL (C++ Standard Template Library) like template interface wrapper 
-included which gives an STL hash_map-like interface for LuaHashMap. 
+included which gives an STL hash_map/unordered_map like interface for LuaHashMap. 
+
 Theoretically you might be able to switch between implementations fairly easily using a strategic typedef. 
 (Though if you can use the STL, I'm not sure why you would be here. And yes, this STL interface was a colossal waste of time.)
 This probably won't be maintained over the long haul.
 
+@code
+	// Create
+	lhm::lua_hash_map<lua_Number, lua_Number> hash_map;
+    
+	hash_map.insert(std::pair<lua_Number, lua_Number>(1.1, 1.1));
+	hash_map.insert(std::pair<lua_Number, lua_Number>(2.2, 2.2));
+	hash_map.insert(std::pair<lua_Number, lua_Number>(3.3, 3.3));
+	
+	size_t ret_val = hash_map.size();
+	assert(3 == ret_val);
+	
+	// find key 1.1
+	lhm::lua_hash_map<lua_Number, lua_Number>::iterator iter;
+	iter = hash_map.find(1.1);
+	std::cerr << "*iter (pair)=" << (*iter).first << ", " << (*iter).second << std::endl;
+	assert(1.1 == (*iter).second);
+	
+
+	// erase key 1.1 with an iterator
+	ret_val = hash_map.erase(iter);
+	assert(1 == ret_val);
+	
+	ret_val = hash_map.size();
+	assert(2 == ret_val);
+	
+	
+	// Erase key 3.3 by key
+	ret_val = hash_map.erase(3.3);
+	assert(1 == ret_val);
+	
+	// Remove everything
+	hash_map.clear();
+	assert(true == hash_map.empty());
+@endcode
+
 
 C11 _Generics (Experimental):
+-----------------------------
 Yes, I said there is "no macro-hell" earlier. But trust me; this isn't really that bad and it's optional. (And it's really quite cool.)
 C11 introduces _Generic which extends the C preprocessor to allow you to map different functions to a single macro function name based on their parameter types.
 Essentially this brings C++-like function overloading to C, but without all the name-mangling problems and other C++ baggage.
 And this was a lot less code than the C++ parital template specialization mentioned above.
 So for example, these 16 following functions:
-@code
-LuaHashMap_SetValueStringForKeyString
-LuaHashMap_SetValueStringForKeyPointer
-LuaHashMap_SetValueStringForKeyNumber
-LuaHashMap_SetValueStringForKeyInteger
-LuaHashMap_SetValuePointerForKeyString
-LuaHashMap_SetValuePointerForKeyPointer
-LuaHashMap_SetValuePointerForKeyNumber
-LuaHashMap_SetValuePointerForKeyInteger
-LuaHashMap_SetValueNumberForKeyString
-LuaHashMap_SetValueNumberForKeyPointer
-LuaHashMap_SetValueNumberForKeyNumber
-LuaHashMap_SetValueNumberForKeyInteger
-LuaHashMap_SetValueIntegerForKeyString
-LuaHashMap_SetValueIntegerForKeyPointer
-LuaHashMap_SetValueIntegerForKeyNumber
-LuaHashMap_SetValueIntegerForKeyInteger
-@endcode
+- LuaHashMap_SetValueStringForKeyString
+- LuaHashMap_SetValueStringForKeyPointer
+- LuaHashMap_SetValueStringForKeyNumber
+- LuaHashMap_SetValueStringForKeyInteger
+- LuaHashMap_SetValuePointerForKeyString
+- LuaHashMap_SetValuePointerForKeyPointer
+- LuaHashMap_SetValuePointerForKeyNumber
+- LuaHashMap_SetValuePointerForKeyInteger
+- LuaHashMap_SetValueNumberForKeyString
+- LuaHashMap_SetValueNumberForKeyPointer
+- LuaHashMap_SetValueNumberForKeyNumber
+- LuaHashMap_SetValueNumberForKeyInteger
+- LuaHashMap_SetValueIntegerForKeyString
+- LuaHashMap_SetValueIntegerForKeyPointer
+- LuaHashMap_SetValueIntegerForKeyNumber
+- LuaHashMap_SetValueIntegerForKeyInteger
+
 can now be called with just this one macro:
-@code
-	LuaHashMap_SetValueForKey(hash_map, value, key);
-@endcode
+- LuaHashMap_SetValueForKey(hash_map, value, key);
 
 The preprocessor/compiler will look at your types and automatically inject the correct version of the function to call.
 
 And with a few more (C99) macro tricks, we can also do variable number of arguments 
-to also unify the WithLength versions of the String permutations 
-as well as the iterator versions. So this can be further reduced down to just:
-@code
-LuaHashMap_SetValue
-@endcode
+to also unify the WithLength versions of the String permutations:
+- LuaHashMap_SetValueStringForKeyStringWithLength
+- LuaHashMap_SetValueStringForKeyPointerWithLength
+- LuaHashMap_SetValueStringForKeyNumberWithLength
+- LuaHashMap_SetValueStringForKeyIntegerWithLength
+- LuaHashMap_SetValuePointerForKeyStringWithLength
+- LuaHashMap_SetValueNumberForKeyStringWithLength
+- LuaHashMap_SetValueIntegerForKeyStringWithLength
+
+as well as the Iterator versions:
+- LuaHashMap_SetValueStringAtIterator
+- LuaHashMap_SetValueStringAtIteratorWithLength
+- LuaHashMap_SetValuePointerAtIterator
+- LuaHashMap_SetValueNumberAtIterator
+- LuaHashMap_SetValueIntegerAtIterator
+
+So all of these can be combined and reduced down to just:
+- LuaHashMap_SetValue(...)
 
 So for example:
 @code
@@ -384,11 +462,12 @@ LuaHashMap_SetValue(&iterator, (const char*)"goodbye"); // LuaHashMap_SetValueSt
 For convenience, if C11 _Generic support is detected on your compiler, the following #define will be defined to 1.
 LUAHASHMAP_SUPPORTS_GENERICS
 
-Refer to the documentation to see all the macros available.
+Refer to the API documentation to see all the macros available.
 
 
 
 Compiler flag to put instances in the Lua global table instead of the registry (Experimental):
+----------------------------------------------------------------------------------------------
 This is another (experimental) flag designed to put your table instances in the main Lua script's global table instead of the (private) registry.
 The advantage of this is if you are using Lua in your project already and have Lua tables in your scripts that you would like to easily interoperate with on the C side.
 To activate this, recompile with the flag LUAHASHMAP_USE_GLOBAL_TABLE defined.
@@ -398,31 +477,44 @@ Particularly if you are doing advanced things with tables in your scripts, you m
 So in that case, you'll want to redefine these to lua_settable and lua_gettable.
 
 
+Performance Benchmarks:
+=======================
+Yes, I actually did benchmarks.
+Check out the main site:
+http://playcontrol.net/opensource/LuaHashMap
+
 
 Future Directions:
+==================
 I think LuaHashMap is pretty much done. 
-There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
-There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
-The one major thing I would like to see (but I don't have the time or skill to do) is see if LuaHashMap could be implemented 
+- There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
+- There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
+- The one major thing I would like to see (but I don't have the time or expertise to do) is see if LuaHashMap could be implemented 
 from ripping out just the table implementation from Lua and removing all the unnecessary stuff. I would love to shrink both the 
 disk size profile as well as the virtual machine overhead. I would like to be able to create lots of stand-alone instances of LuaHashMap
 without worrying that I'm wasting memory or need to resort to the current CreateShare workaround.
 So if anybody is interested, I would love to see it.
 
 
-References:
-Lua Performance Tips (explains tables)
-http://www.lua.org/gems/sample.pdf
+Additional Resoruces and References:
+====================================
+Official LuaHashMap Site  
+http://playcontrol.net/opensource/LuaHashMap 
 
-Mailing List Reference: How is string passed from Lua to C
-http://lua-users.org/lists/lua-l/2011-12/msg00222.html
+Lua Performance Tips (explains tables)  
+http://www.lua.org/gems/sample.pdf 
 
-Programming in Lua
+Mailing List Reference: How is string passed from Lua to C  
+http://lua-users.org/lists/lua-l/2011-12/msg00222.html 
+
+Programming in Lua  
 http://www.lua.org/pil/
 
-Lua Reference Manual
-http://www.lua.org/manual/5.1/manual.html
+Lua Reference Manual  
+http://www.lua.org/manual/5.1/manual.html 
 
+
+@author Eric Wing <ewing . public - at - playcontrol . net>
 */
 
 
@@ -636,6 +728,9 @@ struct LUAHASHMAP_EXPORT LuaHashMapIterator
 };
 
 typedef struct LuaHashMapIterator LuaHashMapIterator;
+/** @defgroup Create Create family of functions
+ *  @{
+ */
 
 /**
  * Creates a new instance of a hash table.
@@ -796,15 +891,6 @@ LUAHASHMAP_EXPORT LuaHashMap* LuaHashMap_CreateShareFromLuaStateWithSizeHints(lu
 
 
 /**
- * Returns the lua_State being used by the LuaHashMap.
- * This is only for backdoor access. This is for very advanced use cases that want to directly interact with the Lua State.
- * @param hash_map The LuaHashMap instance to operate on.
- * @return The lua_State used by the hash_map.
- */
-LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
-
-
-/**
  * Frees a LuaHashMap instance.
  * This releases the memory associated with the LuaHashMap.
  * @param hash_map The LuaHashMap instance to operate on.
@@ -827,6 +913,18 @@ LUAHASHMAP_EXPORT void LuaHashMap_Free(LuaHashMap* hash_map);
  * LuaHashMap_CreateShareFromLuaStateWithAllocatorAndSizeHints, LuaHashMap_CreateShareFromLuaStateWithSizeHints
  */
 LUAHASHMAP_EXPORT void LuaHashMap_FreeShare(LuaHashMap* hash_map);
+
+/** @} */ 
+
+/**
+ * Returns the lua_State being used by the LuaHashMap.
+ * This is only for backdoor access. This is for very advanced use cases that want to directly interact with the Lua State.
+ * @param hash_map The LuaHashMap instance to operate on.
+ * @return The lua_State used by the hash_map.
+ */
+LUAHASHMAP_EXPORT lua_State* LuaHashMap_GetLuaState(LuaHashMap* hash_map);
+
+
 
 
 /** @defgroup SetValueForKeyFamily SetValueForKey family of functions
@@ -1629,7 +1727,13 @@ LUAHASHMAP_EXPORT bool LuaHashMap_IsEmpty(LuaHashMap* hash_map);
 
 /** @} */ 
 
+
+
 /* Iterator functions */
+	
+/** @defgroup IteratorFamily Iterator family of functions
+ *  @{
+ */
 
 
 /**
@@ -1704,8 +1808,8 @@ LUAHASHMAP_EXPORT bool LuaHashMap_IteratorNext(LuaHashMapIterator* hash_iterator
  @code
 	// This is the one hash look up.
 	LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorForKeyString(hash_map, "foo");
+	// Thie remaining information is in the iterator itself which avoids another hash lookup.
 	bool exists = LuaHashMap_ExistsAtIterator(&hash_iterator);
-	// This information is in the iterator itself which avoids another hash lookup.
 	if(exists)
 	{
 		fprintf(stderr, "The value for key="foo" exists: %lf\n", LuaHashMap_GetCachedValueNumberAtIterator(&hash_iterator));
@@ -2372,7 +2476,7 @@ LUAHASHMAP_EXPORT inline const char* LuaHashMap_GetCachedValueStringAtIterator(L
  * This version allows you to specify the string length for the string if you already know it as an optimization.
  *
  * @param hash_iterator The LuaHashMapIterator instance to operate on.
- * @param key_string_length_return This returns by reference the string length (strlen()) of the returned key string. You may pass NULL to ignore this result. 
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned key string. You may pass NULL to ignore this result. 
  * @return Returns the Lua internalized pointer for the key string. 
  *
  * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
@@ -2685,7 +2789,7 @@ LUAHASHMAP_EXPORT const char* LuaHashMap_GetCachedValueStringAtIterator(LuaHashM
  * This version allows you to specify the string length for the string if you already know it as an optimization.
  *
  * @param hash_iterator The LuaHashMapIterator instance to operate on.
- * @param key_string_length_return This returns by reference the string length (strlen()) of the returned key string. You may pass NULL to ignore this result. 
+ * @param value_string_length_return This returns by reference the string length (strlen()) of the returned key string. You may pass NULL to ignore this result. 
  * @return Returns the Lua internalized pointer for the key string. 
  *
  * @note This simply pulls the key directly from the struct. This does not involve a full hash look up.
@@ -2747,6 +2851,7 @@ LUAHASHMAP_EXPORT lua_Number LuaHashMap_GetCachedValueNumberAtIterator(LuaHashMa
 LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHashMapIterator* hash_iterator);
 #endif /* defined(__STDC_VERSION__) && (__STDC_VERSION__ > 199901L) */
 
+/** @} */ 
 
 
 
@@ -2766,6 +2871,10 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 #if ( defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) ) \
 	|| ( defined(__clang__) && ( __has_feature(c_generic_selections) || __has_extension(c_generic_selections) ) )
 
+
+/** @defgroup C11_Generics C11 _Generic Macros
+ *  @{
+ */
 
 
 /**
@@ -3518,6 +3627,8 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_SETVALUE_5(A,B,C,D,E) LuaHashMap_SetValueStringForKeyStringWithLength(A,B,C,D,E)
 	#define LUAHASHMAP_SETVALUE_4(A,B,C,D) LuaHashMap_SetValueForKeyWithLength(A,B,C,D)
 	/* I wanted to recursively reuse LuaHashMap_SetValueForKey, but clang gives me an undefined symbol error. 
@@ -3781,10 +3892,14 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_SETVALUE_N(x,A,B,C,D,E,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
+
+
 /**
  * LuaHashMap_SetValue
  *
- * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_SetValueForKey and LuaHashMap_SetValueAtIterator functions so you can call
  * any permutation with this single macro.
  *
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
@@ -3873,6 +3988,8 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
 	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
 /*
@@ -3912,6 +4029,10 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,C,D,FUNC, ...) FUNC  
+
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
+
 /**
  * LuaHashMap_GetValueString
  *
@@ -4019,11 +4140,15 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	(hash_map, key)
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_GETVALUEPOINTER_2(A,B) LuaHashMap_GetValuePointerForKey(A,B)
 	#define LUAHASHMAP_GETVALUEPOINTER_1(A) LuaHashMap_GetValuePointerAtIterator(A)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_GETVALUEPOINTER_N(x,A,B,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
  * LuaHashMap_GetValuePointer
  *
@@ -4041,11 +4166,15 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_GETVALUENUMBER_2(A,B) LuaHashMap_GetValueNumberForKey(A,B)
 	#define LUAHASHMAP_GETVALUENUMBER_1(A) LuaHashMap_GetValueNumberAtIterator(A)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_GETVALUENUMBER_N(x,A,B,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
  * LuaHashMap_GetValueNumber
  *
@@ -4062,12 +4191,16 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	)
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUEINTEGER_2(A,B) LuaHashMap_GetValueIntegerForKey(A,B)
 	#define LUAHASHMAP_GETVALUEINTEGER_1(A) LuaHashMap_GetValueIntegerAtIterator(A)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_GETVALUEINTEGER_N(x,A,B,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
  * LuaHashMap_GetValueInteger
  *
@@ -4117,11 +4250,15 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_EXISTS_1(A) LuaHashMap_ExistsAtIterator(A)
 	#define LUAHASHMAP_EXISTS_2(A,B) LuaHashMap_ExistsKey(A,B)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_EXISTS_N(x,A,B,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
  * LuaHashMap_Exists
  *
@@ -4170,15 +4307,19 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 /* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 	/* Private multiple macros for each different number of arguments */
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
 	#define LUAHASHMAP_REMOVE_1(A) LuaHashMap_RemoveAtIterator(A)
 	#define LUAHASHMAP_REMOVE_2(A,B) LuaHashMap_RemoveKey(A,B)
 
 	/* The private interim macro that simply strips the excess and ends up with the required macro */
 	#define LUAHASHMAP_REMOVE_N(x,A,B,FUNC, ...) FUNC  
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
  * LuaHashMap_Remove
  *
- * This C11 _Generic macro essentially overloads all the LuaHashMap_ExistsKey and LuaHashMap_ExistsAtIterator functions so you can call
+ * This C11 _Generic macro essentially overloads all the LuaHashMap_RemoveKey and LuaHashMap_RemoveAtIterator functions so you can call
  * any permutation with this single macro.
  *
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
@@ -4220,8 +4361,13 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	(hash_map, key)
 
 
-/* You may use this to test to see if generics are supported so you don't have to reproduce my test. */
+/**
+ * Defined only if C11 _Generic support has been detected.
+ * You may use this to test to see if generics are supported so you don't have to reproduce my test.
+ */
 #define LUAHASHMAP_SUPPORTS_GENERICS 1
+
+/** @} */ 
 
 #endif /* end of C11 _Generic */
 
