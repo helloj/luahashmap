@@ -284,7 +284,6 @@ void TestValuePointerNULL()
 
 void BenchMarkSameStringPointer()
 {
-	fprintf(stderr, "BenchMarkSameStringPointer start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
@@ -292,6 +291,8 @@ void BenchMarkSameStringPointer()
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkSameStringPointer start\n");
+
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		gen_random_string(str_buffer, 1024);	
@@ -320,7 +321,7 @@ void BenchMarkSameStringPointer()
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 #endif
 	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
+	free((void*)array_of_strings);
 	fprintf(stderr, "BenchMarkSameStringPointer done\n");
 
 }
@@ -328,13 +329,13 @@ void BenchMarkSameStringPointer()
 
 void BenchMarkDifferentStringPointer()
 {
-	fprintf(stderr, "BenchMarkDifferentStringPointer start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkDifferentStringPointer start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
@@ -376,14 +377,13 @@ void BenchMarkDifferentStringPointer()
 
 void BenchMarkSameStringPointerWithLength()
 {
-	fprintf(stderr, "BenchMarkSameStringPointerWithLength start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkSameStringPointerWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
@@ -426,13 +426,12 @@ void BenchMarkSameStringPointerWithLength()
 
 void BenchMarkDifferentStringPointerWithLength()
 {
-	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
@@ -476,17 +475,16 @@ void BenchMarkDifferentStringPointerWithLength()
 
 void BenchMarkExistsGetLookup()
 {
-	fprintf(stderr, "BenchMarkExistsGetLookup start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
 	const char** array_of_strings = (const char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkExistsGetLookup start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
-		gen_random_string(str_buffer, 1024);	
+		gen_random_string((char*)str_buffer, 1024);	
 		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
 	}
 	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
@@ -521,7 +519,7 @@ void BenchMarkExistsGetLookup()
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 #endif
 	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
+	free((void*)array_of_strings);
 	fprintf(stderr, "BenchMarkExistsGetLookup done\n");
 
 }
@@ -529,14 +527,13 @@ void BenchMarkExistsGetLookup()
 
 void BenchMarkIteratorGetLookup()
 {
-	fprintf(stderr, "BenchMarkIteratorGetLookup start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
 	const char** array_of_strings = (const char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkIteratorGetLookup start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		gen_random_string(str_buffer, 1024);	
@@ -574,7 +571,7 @@ void BenchMarkIteratorGetLookup()
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 #endif
 	LuaHashMap_Free(hash_map);
-	free(array_of_strings);
+	free((void*)array_of_strings);
 	fprintf(stderr, "BenchMarkIteratorGetLookup done\n");
 
 }
@@ -582,14 +579,13 @@ void BenchMarkIteratorGetLookup()
 
 void BenchMarkExistsGetLookupWithLength()
 {
-	fprintf(stderr, "BenchMarkExistsGetLookupWithLength start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkExistsGetLookupWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
@@ -642,14 +638,13 @@ void BenchMarkExistsGetLookupWithLength()
 
 void BenchMarkIteratorGetLookupWithLength()
 {
-	fprintf(stderr, "BenchMarkIteratorGetLookupWithLength start\n");
-
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkIteratorGetLookupWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
@@ -700,15 +695,14 @@ void BenchMarkIteratorGetLookupWithLength()
 
 
 void BenchMarkStringInsertionDifferentPointer()
-{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer start\n");
-	
+{	
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointer start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
@@ -756,15 +750,14 @@ void BenchMarkStringInsertionDifferentPointer()
 
 
 void BenchMarkStringInsertionSamePointer()
-{
-	fprintf(stderr, "BenchMarkStringInsertionSamePointer start\n");
-	
+{	
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	char** array_of_internal_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
 	size_t i;
+	fprintf(stderr, "BenchMarkStringInsertionSamePointer start\n");
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
@@ -815,15 +808,14 @@ void BenchMarkStringInsertionSamePointer()
 
 
 void BenchMarkStringInsertionDifferentPointerWithLength()
-{
-	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength start\n");
-	
+{	
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map1 = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
 	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)calloc(1,sizeof(LuaHashMapStringContainer));
@@ -875,8 +867,6 @@ void BenchMarkStringInsertionDifferentPointerWithLength()
 
 void BenchMarkStringInsertionSamePointerWithLength()
 {
-	fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength start\n");
-	
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
 	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMapStringContainer** array_of_internal_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
@@ -884,6 +874,7 @@ void BenchMarkStringInsertionSamePointerWithLength()
 	LuaHashMap* hash_map2 = LuaHashMap_CreateShareWithSizeHints(hash_map1, 0, NUMBER_OF_ELEMENTS);
 	size_t i;
 	srand(1);
+	fprintf(stderr, "BenchMarkStringInsertionSamePointerWithLength start\n");
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (char*)calloc(1024,sizeof(char));
@@ -1007,7 +998,7 @@ int main(int argc, char* argv[])
 	assert(3 == ret_size);
 	for(i=0; i<ret_size; i++)
 	{
-		fprintf(stderr, "Key[%zd] is %s\n", i, key_array[i]);
+		fprintf(stderr, "Key[%d] is %s\n", (int)i, key_array[i]);
 	}
 
 	assert(0 == LuaHashMap_IsEmpty(hash_map));

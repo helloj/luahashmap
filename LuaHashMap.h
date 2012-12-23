@@ -2870,9 +2870,16 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 
 /* C11 introduces _Generic which presents some interesting possibilities. */
-#if ( defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) ) \
-	|| ( defined(__clang__) && ( __has_feature(c_generic_selections) || __has_extension(c_generic_selections) ) )
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+	#define LUAHASHMAP_SHOULD_USE_C_GENERICS 1
+#elif defined(__clang__)
+	/* Needed to break up test into multiple lines because the Visual Studio preprocessor wasn't doing short-circuit evaluation and was trying to process __has_feature */
+	#if __has_feature(c_generic_selections) || __has_extension(c_generic_selections)
+		#define LUAHASHMAP_SHOULD_USE_C_GENERICS 1
+	#endif
+#endif
 
+#if LUAHASHMAP_SHOULD_USE_C_GENERICS
 
 /** @defgroup C11_Generics C11 _Generic Macros
  *  @{

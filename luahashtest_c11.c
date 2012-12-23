@@ -1924,7 +1924,7 @@ int main(int argc, char* argv[])
 {
 //#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 201112L)
 #if !LUAHASHMAP_SUPPORTS_GENERICS
-	#warning "C11 test did not find C11 _Generic support. The test will be skipped."
+	#pragma message ("C11 test did not find C11 _Generic support. The test will be skipped.")
 	fprintf(stderr, "This test must be compiled with a C11 compiler.");
 	return 0;
 	

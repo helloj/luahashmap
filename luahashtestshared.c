@@ -73,7 +73,7 @@ void DoBenchMark(LuaHashMap* hash_map)
 		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
 		//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
 	}
-	fprintf(stderr, "num keys= %zu\n", LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
+	fprintf(stderr, "num keys= %d\n", (int)LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
 	
 	LuaHashMap_Purge(hash_map);
 	CFTimeInterval end_time = CACurrentMediaTime();
@@ -123,7 +123,7 @@ void DoKeyStringValueString(LuaHashMap* hash_map)
 	assert(3 == ret_size);
 	for(i=0; i<ret_size; i++)
 	{
-		fprintf(stderr, "Key[%zu] is %s\n", i, key_array[i]);
+		fprintf(stderr, "Key[%d] is %s\n", (int)i, key_array[i]);
 	}
 	
 	assert(0 == LuaHashMap_IsEmpty(hash_map));
@@ -162,7 +162,7 @@ void DoKeyStringValueString(LuaHashMap* hash_map)
 		ret_ptr = LuaHashMap_GetValuePointerForKeyPointer(hash_map, (void*)i);
 		//		LuaHashMap_RemoveKeyPointer(hash_map, ret_ptr);
 	}
-	fprintf(stderr, "num keys= %zu\n", LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
+	fprintf(stderr, "num keys= %d\n", (int)LuaHashMap_GetKeysInteger(hash_map, NULL, 0));
 	
 	LuaHashMap_Clear(hash_map);
 	CFTimeInterval end_time = CACurrentMediaTime();
@@ -230,7 +230,7 @@ void TestSharedSeparationWithNumberAndInt(LuaHashMap* hash_map_shared_keynumber_
 		count_keynum_valuenum++;
 	} while(LuaHashMap_IteratorNext(&keynum_valuenum_iterator));
 
-	fprintf(stderr, "count_keynum_valuenum=%zu\n", count_keynum_valuenum);
+	fprintf(stderr, "count_keynum_valuenum=%d\n", (int)count_keynum_valuenum);
 	assert(3 == count_keynum_valuenum);
 	assert(3 == LuaHashMap_Count(hash_map_shared_keynumber_valuenumber));
 
@@ -239,11 +239,11 @@ void TestSharedSeparationWithNumberAndInt(LuaHashMap* hash_map_shared_keynumber_
 	count_keyint_valueint = 0;
 	do
 	{
-		fprintf(stderr, "Using LuaHashMap_GetValueIntegerAtIterator iterator: %zd\n", LuaHashMap_GetValueIntegerAtIterator(&keyint_valueint_iterator));
+		fprintf(stderr, "Using LuaHashMap_GetValueIntegerAtIterator iterator: %d\n", (int)LuaHashMap_GetValueIntegerAtIterator(&keyint_valueint_iterator));
 		count_keyint_valueint++;
 	} while(LuaHashMap_IteratorNext(&keyint_valueint_iterator));
 	
-	fprintf(stderr, "count_keyint_valueint=%zu\n", count_keyint_valueint);
+	fprintf(stderr, "count_keyint_valueint=%d\n", (int)count_keyint_valueint);
 	assert(3 == count_keyint_valueint);
 	assert(3 == LuaHashMap_Count(hash_map_shared_keyint_valueint));
 
@@ -320,7 +320,7 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 	LuaHashMap_SetValuePointerForKeyPointer(hash_map_shared_mixed, (void*)300, (void*)3);
 
 	
-	fprintf(stderr, "LuaHashMap_Count(hash_map_shared_mixed)=%zu\n", LuaHashMap_Count(hash_map_shared_mixed));
+	fprintf(stderr, "LuaHashMap_Count(hash_map_shared_mixed)=%d\n", (int)LuaHashMap_Count(hash_map_shared_mixed));
 	assert(16 == LuaHashMap_Count(hash_map_shared_mixed));
 	
 	shared_iterator = LuaHashMap_GetIteratorAtBegin(hash_map_shared_mixed);
@@ -338,12 +338,12 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 		int keytype = LuaHashMap_GetKeyTypeAtIterator(&shared_iterator);
 		int valuetype = LuaHashMap_GetValueTypeAtIterator(&shared_iterator);
 
-		fprintf(stderr, "At position %zd, keytype=%s, valuetype=%s\n", i, StringForLuaType(keytype), StringForLuaType(valuetype));
+		fprintf(stderr, "At position %d, keytype=%s, valuetype=%s\n", (int)i, StringForLuaType(keytype), StringForLuaType(valuetype));
 		
 		switch(keytype)
 		{
 			case LUA_TLIGHTUSERDATA:
-				fprintf(stderr, "\tKeyPointer:%zd", LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
+				fprintf(stderr, "\tKeyPointer:%d", (int)LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
 				break;
 			case LUA_TNUMBER:
 				fprintf(stderr, "\tKeyNumber:%lf", LuaHashMap_GetKeyNumberAtIterator(&shared_iterator));
@@ -357,7 +357,7 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 		switch(valuetype)
 		{
 			case LUA_TLIGHTUSERDATA:
-				fprintf(stderr, "\tValuePointer:%zd", LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
+				fprintf(stderr, "\tValuePointer:%d", (int)LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 				break;
 			case LUA_TNUMBER:
 				fprintf(stderr, "\tValueNumber:%lf", LuaHashMap_GetValueNumberAtIterator(&shared_iterator));
@@ -386,7 +386,7 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 	LuaHashMap_RemoveKeyNumber(hash_map_shared_mixed, 100.0);
 
 	
-	fprintf(stderr, "LuaHashMap_Count(hash_map_shared_mixed)=%zu\n", LuaHashMap_Count(hash_map_shared_mixed));
+	fprintf(stderr, "LuaHashMap_Count(hash_map_shared_mixed)=%d\n", (int)LuaHashMap_Count(hash_map_shared_mixed));
 	assert(9 == LuaHashMap_Count(hash_map_shared_mixed));
 	
 	
@@ -397,16 +397,16 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 		int keytype = LuaHashMap_GetKeyTypeAtIterator(&shared_iterator);
 		int valuetype = LuaHashMap_GetValueTypeAtIterator(&shared_iterator);
 		
-		fprintf(stderr, "At position %zd, keytype=%s, valuetype=%s\n", i, StringForLuaType(keytype), StringForLuaType(valuetype));
+		fprintf(stderr, "At position %d, keytype=%s, valuetype=%s\n", (int)i, StringForLuaType(keytype), StringForLuaType(valuetype));
 		
 		switch(keytype)
 		{
 			case LUA_TLIGHTUSERDATA:
-				fprintf(stderr, "\tKeyPointer:%zd", LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
+				fprintf(stderr, "\tKeyPointer:%d", (int)LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
 				switch(valuetype)
 				{
 					case LUA_TLIGHTUSERDATA:
-						fprintf(stderr, "\tValuePointer:%zd", LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
+						fprintf(stderr, "\tValuePointer:%d", (int)LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						assert((void*)1 == LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
 						assert((void*)100 == LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						break;
@@ -430,7 +430,7 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 				switch(valuetype)
 				{
 					case LUA_TLIGHTUSERDATA:
-						fprintf(stderr, "\tValuePointer:%zd", LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
+						fprintf(stderr, "\tValuePointer:%d", (int)LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						assert(400.0 == LuaHashMap_GetKeyNumberAtIterator(&shared_iterator));
 						assert((void*)400 == LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						break;
@@ -453,7 +453,7 @@ void TestMixedMap(LuaHashMap* hash_map_original)
 				switch(valuetype)
 				{
 					case LUA_TLIGHTUSERDATA:
-						fprintf(stderr, "\tValuePointer:%zd", LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
+						fprintf(stderr, "\tValuePointer:%d", (int)LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						assert( 0 == strcmp("key500", LuaHashMap_GetKeyStringAtIterator(&shared_iterator)) );
 						assert((void*)500 == LuaHashMap_GetValuePointerAtIterator(&shared_iterator));
 						break;
