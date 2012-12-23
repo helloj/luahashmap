@@ -121,7 +121,7 @@ The following example inserts values into the table with string keys.
 @endcode
 
 
-Iterators in LuaHashMap conceptually similar to the C++ STL notion of an iterator (but much simpler).
+Iterators in LuaHashMap are conceptually similar to the C++ STL notion of an iterator (but much simpler).
 They let you iterator through a hash table and let you get and set values.
 Here's a similar example that prints everything in the hash table using an iterator.
 
