@@ -100,7 +100,7 @@ int DoKeyStringValueString()
 
 
 	iter = hash_map.find("key3");
-	std::pair<const char*, const char*> ret_pair = *iter;
+//	std::pair<const char*, const char*> ret_pair = *iter;
 
 	
 	std::cerr << "erasing key3\n";

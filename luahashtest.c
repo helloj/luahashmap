@@ -135,7 +135,7 @@ void TestSimpleKeyStringNumberValueWithIterator()
 		LuaHashMap_SetValueNumberForKeyString(hash_map, i, str_buffer);
 	}
 //	assert(1000000 == LuaHashMap_Count(hash_map));
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 	
 	hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
 	do
@@ -287,20 +287,21 @@ void BenchMarkSameStringPointer()
 	fprintf(stderr, "BenchMarkSameStringPointer start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	const char** array_of_strings = (const char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		gen_random_string(str_buffer, 1024);	
 		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -330,10 +331,9 @@ void BenchMarkDifferentStringPointer()
 	fprintf(stderr, "BenchMarkDifferentStringPointer start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
@@ -341,10 +341,12 @@ void BenchMarkDifferentStringPointer()
 		gen_random_string(array_of_strings[i], 1024);	
 		LuaHashMap_SetValueIntegerForKeyString(hash_map, i, array_of_strings[i]);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
 	CFTimeInterval start_time = CACurrentMediaTime();
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
 	{
@@ -377,11 +379,10 @@ void BenchMarkSameStringPointerWithLength()
 	fprintf(stderr, "BenchMarkSameStringPointerWithLength start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
@@ -390,9 +391,11 @@ void BenchMarkSameStringPointerWithLength()
 		array_of_strings[i]->stringLength = strlen(str_buffer);
 		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -426,22 +429,23 @@ void BenchMarkDifferentStringPointerWithLength()
 	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)malloc(sizeof(LuaHashMapStringContainer));
 		array_of_strings[i]->stringPointer = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i]->stringPointer, 1024);
+		gen_random_string((char*)array_of_strings[i]->stringPointer, 1024);
 		array_of_strings[i]->stringLength = strlen(array_of_strings[i]->stringPointer);
 		LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, array_of_strings[i]->stringPointer, array_of_strings[i]->stringLength);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -462,7 +466,7 @@ void BenchMarkDifferentStringPointerWithLength()
 	LuaHashMap_Free(hash_map);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
-		free(array_of_strings[i]->stringPointer);
+		free((void*)array_of_strings[i]->stringPointer);
 		free(array_of_strings[i]);
 	}
 	fprintf(stderr, "BenchMarkDifferentStringPointerWithLength done\n");
@@ -475,20 +479,21 @@ void BenchMarkExistsGetLookup()
 	fprintf(stderr, "BenchMarkExistsGetLookup start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	const char** array_of_strings = (const char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		gen_random_string(str_buffer, 1024);	
 		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -527,20 +532,21 @@ void BenchMarkIteratorGetLookup()
 	fprintf(stderr, "BenchMarkIteratorGetLookup start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
-	char** array_of_strings = (char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
+	const char** array_of_strings = (const char**)malloc(NUMBER_OF_ELEMENTS*sizeof(char*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
 		gen_random_string(str_buffer, 1024);	
 		array_of_strings[i] = LuaHashMap_SetValueIntegerForKeyString(hash_map, i, str_buffer);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -579,11 +585,10 @@ void BenchMarkExistsGetLookupWithLength()
 	fprintf(stderr, "BenchMarkExistsGetLookupWithLength start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
@@ -593,9 +598,11 @@ void BenchMarkExistsGetLookupWithLength()
 		array_of_strings[i]->stringLength = strlen(str_buffer);
 		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -638,11 +645,10 @@ void BenchMarkIteratorGetLookupWithLength()
 	fprintf(stderr, "BenchMarkIteratorGetLookupWithLength start\n");
 
 	const size_t NUMBER_OF_ELEMENTS = 1000000;
-	const size_t NUM_OF_LOOPS = 2;
 	char str_buffer[1024];
 	LuaHashMapStringContainer** array_of_strings = (LuaHashMapStringContainer**)malloc(NUMBER_OF_ELEMENTS*sizeof(LuaHashMapStringContainer*));
 	LuaHashMap* hash_map = LuaHashMap_CreateWithSizeHints(0, NUMBER_OF_ELEMENTS);
-	size_t i,j;
+	size_t i;
 	srand(1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
@@ -651,9 +657,11 @@ void BenchMarkIteratorGetLookupWithLength()
 		array_of_strings[i]->stringLength = strlen(str_buffer);
 		array_of_strings[i]->stringPointer = LuaHashMap_SetValueIntegerForKeyStringWithLength(hash_map, i, str_buffer, array_of_strings[i]->stringLength);
 	}
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map));
 
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
+	const size_t NUM_OF_LOOPS = 2;
+	size_t j;
 	CFTimeInterval start_time = CACurrentMediaTime();
 
 	for(j=0; j<NUM_OF_LOOPS; j++)
@@ -733,7 +741,7 @@ void BenchMarkStringInsertionDifferentPointer()
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}
 #endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map1));
 	
 	LuaHashMap_FreeShare(hash_map2);
 	LuaHashMap_Free(hash_map1);
@@ -790,7 +798,7 @@ void BenchMarkStringInsertionSamePointer()
 		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}
 #endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map1));
 	
 	LuaHashMap_FreeShare(hash_map2);
 	LuaHashMap_Free(hash_map1);
@@ -820,7 +828,7 @@ void BenchMarkStringInsertionDifferentPointerWithLength()
 	{
 		array_of_strings[i] = (LuaHashMapStringContainer*)calloc(1,sizeof(LuaHashMapStringContainer));
 		array_of_strings[i]->stringPointer = (char*)calloc(1024,sizeof(char));
-		gen_random_string(array_of_strings[i]->stringPointer, 1024);
+		gen_random_string((char*)array_of_strings[i]->stringPointer, 1024);
 		array_of_strings[i]->stringLength = strlen(array_of_strings[i]->stringPointer);
 	}
 #if defined(ENABLE_BENCHMARK) && defined(__APPLE__)
@@ -850,13 +858,13 @@ void BenchMarkStringInsertionDifferentPointerWithLength()
 	fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}
 #endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map1));
 	
 	LuaHashMap_FreeShare(hash_map2);
 	LuaHashMap_Free(hash_map1);
 	for(i=0; i<NUMBER_OF_ELEMENTS; i++)
 	{
-		free(array_of_strings[i]->stringPointer);
+		free((void*)array_of_strings[i]->stringPointer);
 		free(array_of_strings[i]);
 	}
 	fprintf(stderr, "BenchMarkStringInsertionDifferentPointerWithLength done\n");
@@ -910,7 +918,7 @@ void BenchMarkStringInsertionSamePointerWithLength()
 		fprintf(stderr, "diff time: %lf\n", end_time-start_time);
 	}
 #endif
-	fprintf(stderr, "count: %d\n", LuaHashMap_Count(hash_map1));
+	fprintf(stderr, "count: %d\n", (int)LuaHashMap_Count(hash_map1));
 	
 	LuaHashMap_FreeShare(hash_map2);
 	LuaHashMap_Free(hash_map1);
