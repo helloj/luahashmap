@@ -209,7 +209,7 @@ Alternatively, if you know you have at least one entry in the hash, this is a sl
 
 Another pattern is to get a value only if it exists. The non-iterator versions of the GetKey family of functions can't distinguish between a non-existent entry and a NULL/0/empty value.
 While you could use the ExistsKey family of functions and then get the value with the GetKey family of functions, this will cause you to do two hash table look ups instead of just one.
-Instead, you should get the iterator and use the ExistsAtIterator function followed by GetCachedValue so only one hash table look is done.
+Instead, you should get the iterator and use the ExistsAtIterator function followed by GetCachedValue so only one hash table look up is done.
 
 @code
 	// This is the one hash look up.
