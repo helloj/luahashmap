@@ -508,6 +508,7 @@ Future Directions:
 I think LuaHashMap is pretty much done. 
 - There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
 - There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
+- Investigate using a metamethod to keep an up-to-date count of the number of elements for those who really need an O(1) access. This would probably be a compile time switch which would leverage the ability to swap out rawset.
 - The one major thing I would like to see (but I don't have the time or expertise to do) is see if LuaHashMap could be implemented 
 by ripping out just the table implementation from Lua and removing all the other unnecessary stuff. I would love to shrink both the 
 disk size profile as well as the memory overhead needed by having an entire virtual machine. I would like to be able to create lots of stand-alone instances of LuaHashMap
