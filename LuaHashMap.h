@@ -2877,7 +2877,7 @@ LUAHASHMAP_EXPORT lua_Integer LuaHashMap_GetCachedValueIntegerAtIterator(LuaHash
 /* Experimental Functions: These might be removed, modified, or made permanent. */
 
 /**
- * Returns the number of items in the hash table.
+ * (Experimental) Returns the number of items in the hash table.
  * This returns the number of key/value pairs currently in your hash table. 
  * This is O(n). Since it is slow, it should be used sparingly.
  * @param hash_map The LuaHashMap instance to operate on
