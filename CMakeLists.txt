@@ -304,8 +304,8 @@ IF (BUILD_DOCUMENTATION)
 	ENDIF (DOT)
 	# This processes our Doxyfile.in and substitutes paths to generate
 	# a final Doxyfile
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in 
-		${PROJECT_BINARY_DIR}/doc/Doxyfile)
+	CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/doc/LuaHashMap_Doxyfile.in 
+		${PROJECT_BINARY_DIR}/doc/LuaHashMap_Doxyfile)
 	# This creates a new target to build documentation.
 	# It runs ${DOXYGEN} which is the full path and executable to
 	# Doxygen on your system, set by the FindDoxygen.cmake module
@@ -313,7 +313,7 @@ IF (BUILD_DOCUMENTATION)
 	# It runs the final generated Doxyfile against it.
 	# The DOT_PATH is substituted into the Doxyfile.
 	ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN}
-		${PROJECT_BINARY_DIR}/doc/Doxyfile)
+		${PROJECT_BINARY_DIR}/doc/LuaHashMap_Doxyfile)
 ENDIF (BUILD_DOCUMENTATION)
 
 
