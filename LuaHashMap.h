@@ -23,7 +23,7 @@
 
  */
 /**
-@mainpage LuaHashMap: An easy to use hash table library for C. 
+@mainpage LuaHashMap: An easy to use hash table library for C
 
 Introduction:
 =============
