@@ -678,7 +678,7 @@ typedef struct LuaHashMap LuaHashMap;
 typedef int LuaHashMap_InternalGlobalKeyType;
 
 /* This exists because anonymous inline structs are not available until C11 */
-struct LUAHASHMAP_EXPORT LuaHashMapStringContainer
+struct LuaHashMapStringContainer
 {
 	size_t stringLength;
 	const char* stringPointer;
@@ -714,7 +714,7 @@ union LuaHashMapKeyValueType
  * Trivia: You may notice that iterator functions that operate on the LuaHashMap instance don't require an explicit LuaHashMap instance
  * passed into the function. This is because LuaHashMapIterator saves a copy of the LuaHashMap pointer when it was created.
  */
-struct LUAHASHMAP_EXPORT LuaHashMapIterator
+struct LuaHashMapIterator
 {
 	/* These are all implementation details.
 	 * You should probably not directly touch.
