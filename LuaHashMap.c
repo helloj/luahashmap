@@ -2018,6 +2018,11 @@ static LuaHashMapIterator Internal_CreateBadIterator()
 	return the_iterator;
 }
 
+/* Stuff for public inline functions */
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* Using C99 inline. These need to be externed (but not redefined) here to force compilation unit/linkage requirements by C99. */
+extern bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator);
+#else /* We are not using C99 inline so the implementation must be here. */
 bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator)
 {
 	if(NULL == hash_iterator)
@@ -2034,6 +2039,7 @@ bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator)
 		return false;		
 	}
 }
+#endif /* defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) */
 
 LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* hash_map)
 {

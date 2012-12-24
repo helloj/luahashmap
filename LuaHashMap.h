@@ -65,6 +65,8 @@ LuaHashMap is ideal for projects that may agree with one the following:
 - Need a portable hash table for C
 - Need a hash table for C++ but can't use the STL or templates (yes, this happens)
 - Want a really friendly, simple to use API/interface (you don't need to know anything about Lua)
+- Want an easy to integrate API that doesn't require you to modify or wrap all your key objects to conform to an interface
+- Don't want to be bothered with writing your own hashing functions
 - Want an explicit, type safe API that doesn't use macro-hell
 - Already using Lua elsewhere in your project or are considering using Lua
 - Not already using Lua but don't think the ~100-200KB library (disk) size of Lua is a big deal. Lua is ~100KB for the core, and ~100KB for the standard library which is not needed by LuaHashMap. (pfft! My icon takes more space.)
@@ -76,7 +78,7 @@ LuaHashMap is ideal for projects that may agree with one the following:
 - Want something with minimal dependencies and easy to embed in your application
 
 LuaHashMap may not be ideal for projects that:
-- Need to fine-tune every single possible detail for the utmost performance (speed/memory)
+- Need to fine-tune every single possible detail for the utmost performance (speed/memory/battery)
 - Not already using Lua and bothered by the ~100-200KB disk space of including Lua
 - Can't afford the ~4KB overhead for a Lua state instance
 - Have alternative hash table libraries that better suit your specific needs
@@ -335,7 +337,7 @@ Mixed Types in the same hash map:
 ---------------------------------
 Lua supports mixed types (i.e. numbers, strings, pointers) in the same table. 
 However you need to be careful about doing this with LuaHashMap and support is still considered experimental as of this writing 
-(though the tests seem to work well enough). 
+(though the unit tests seem to work well enough, and of course Lua itself was already designed for this). 
 
 First and most importantly, you must understand that Lua only has one number type and thus integers and numbers 
 (doubles in stock Lua) are the same. So an integer key of say 100 would be the same as a number key of 100.00, 
@@ -351,8 +353,8 @@ To help support mixed types, three functions are provided:
 These return the int values defined by Lua which are LUA_TSTRING, LUA_TNUMBER, LUA_TLIGHTUSERDATA for strings, numbers, and pointers respectively. 
 Remember that there is no distinction between number and integer in this case.
 
-So while possible to mix types in a single hash map instance, you may find it cumbersome to deal with. 
-Keeping separate hash map instances may be easier to work with.
+So while possible to mix types in a single hash map instance, you may find it cumbersome to deal with depending on what you are doing. 
+You may find keeping separate hash map instances may be easier to work with.
 
 
 
@@ -500,7 +502,7 @@ These are from using fprintf to print values to the console for visual spot chec
 To make these compile cleanly, C99 format tokens are very convenient to handle unpredicatable sizes for standard typedefs.
 But since this code needs to compile on legacy compilers, it is not possible to take advantage of these.
 (The C11 test should compile cleanly on C11 compilers.)
-The actual LuaHashMap library should compile cleanly so these test warnings are not a really an issue.
+The actual LuaHashMap library should compile cleanly so these test warnings are not really an issue.
 
 
 Future Directions:
@@ -599,16 +601,41 @@ extern "C" {
 		#define lua_State void
 		#define __LUAHASHMAP_LUA_STATE_DEFINED__			
 	#endif
+	/* Some of my inline functions use these Lua type (int) definitions */
+	#if !defined(LUA_TNONE)
+		#define LUA_TNONE (-1)
+		#define __LUAHASHMAP_LUA_TNONE_DEFINED__			
+	#endif
+	#if !defined(LUA_TLIGHTUSERDATA)
+		#define LUA_TLIGHTUSERDATA 2
+		#define __LUAHASHMAP_LUA_TLIGHTUSERDATA_DEFINED__			
+	#endif
+	#if !defined(LUA_TNUMBER)
+		#define LUA_TNUMBER 3
+		#define __LUAHASHMAP_LUA_TNUMBER_DEFINED__			
+	#endif
+	#if !defined(LUA_TSTRING)
+		#define LUA_TSTRING 4
+		#define __LUAHASHMAP_LUA_TSTRING_DEFINED__			
+	#endif
+	#if !defined(LUA_NOREF)
+		#define LUA_NOREF (-2)
+		#define __LUAHASHMAP_LUA_NOREF_DEFINED__			
+	#endif
+
 	#if !defined(lua_h) /* You detect nor undo a typedef */
 		typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 		#define __LUAHASHMAP_LUA_ALLOC_DEFINED__					
 	#endif
 #else
 	#include "lua.h"
+	#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+		/* I only need this for the define of LUA_NOREF which is only needed here for my inline function which requires C99. */
+		#include "lauxlib.h"
+	#endif
 #endif
 
-	/** Windows needs to know explicitly which functions to export in a DLL. */
-
+/** Windows needs to know explicitly which functions to export in a DLL. */
 #ifdef LUAHASHMAP_BUILD_AS_DLL
 	#ifdef WIN32
 		#define LUAHASHMAP_EXPORT __declspec(dllexport)
@@ -1966,6 +1993,35 @@ LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyNumber(LuaHashM
  */
 LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer);
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+/* Use the C99 inline if available to hint the compiler that this might benefit from inlining. 
+ * Since these functions are merely pulling data out of an already exposed struct, inlining seems reasonable.
+ */
+/**
+ * Returns true if the iterator is "NotFound".
+ * Returns true if the iterator is bad (i.e. you tried to get an iterator for a key that doesn't exist). 
+ *
+ * @param hash_iterator The LuaHashMapIterator instance to operate on. 
+ * @return Returns true if the iterator is "NotFound" or bad.
+ * @note End iterators are considered valid iterators and this function will return false on this case.
+ */
+LUAHASHMAP_EXPORT inline bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator)
+{
+	if(NULL == hash_iterator)
+	{
+		return true;
+	}
+	/* To make this distinct from a good iterator and an end iterator, whichTable==LUA_NOREF seems to be the only unique characteristic. */
+	if(LUA_NOREF == hash_iterator->whichTable)
+	{
+		return true;
+	}
+	else
+	{
+		return false;		
+	}
+}
+#else /* We are not using C99 inline so the standard declaration is here. */
 /**
  * Returns true if the iterator is "NotFound".
  * Returns true if the iterator is bad (i.e. you tried to get an iterator for a key that doesn't exist). 
@@ -1975,6 +2031,8 @@ LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorForKeyInteger(LuaHash
  * @note End iterators are considered valid iterators and this function will return false on this case.
  */
 LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsNotFound(const LuaHashMapIterator* hash_iterator);
+#endif /* defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) */
+
 /**
  * Returns true if two iterators are equal.
  * Returns true if two iterators are equal.
@@ -1991,6 +2049,8 @@ LUAHASHMAP_EXPORT bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash
 /**
  * Updates a value in the hash table pointed to by the iterator.
  * Updates a value in the hash table pointed to by the iterator.
+ * The iterator must be a valid iterator (i.e. the key it points to must already be in the hash table).
+ * This will not insert new key/value pairs into the hash table.
  * string version
  *
  * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
@@ -2003,6 +2063,8 @@ LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIterator(LuaHashMapIterator* r
 /**
  * Updates a value in the hash table pointed to by the iterator.
  * Updates a value in the hash table pointed to by the iterator.
+ * The iterator must be a valid iterator (i.e. the key it points to must already be in the hash table).
+ * This will not insert new key/value pairs into the hash table.
  * string version
  * This version allows you to specify the string length for each string if you already know it as an optimization.
  *
@@ -2017,6 +2079,8 @@ LUAHASHMAP_EXPORT void LuaHashMap_SetValueStringAtIteratorWithLength(LuaHashMapI
 /**
  * Updates a value in the hash table pointed to by the iterator.
  * Updates a value in the hash table pointed to by the iterator.
+ * The iterator must be a valid iterator (i.e. the key it points to must already be in the hash table).
+ * This will not insert new key/value pairs into the hash table.
  * pointer version
  *
  * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
@@ -2026,6 +2090,8 @@ LUAHASHMAP_EXPORT void LuaHashMap_SetValuePointerAtIterator(LuaHashMapIterator* 
 /**
  * Updates a value in the hash table pointed to by the iterator.
  * Updates a value in the hash table pointed to by the iterator.
+ * The iterator must be a valid iterator (i.e. the key it points to must already be in the hash table).
+ * This will not insert new key/value pairs into the hash table.
  * number version
  *
  * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
@@ -2035,6 +2101,8 @@ LUAHASHMAP_EXPORT void LuaHashMap_SetValueNumberAtIterator(LuaHashMapIterator* h
 /**
  * Updates a value in the hash table pointed to by the iterator.
  * Updates a value in the hash table pointed to by the iterator.
+ * The iterator must be a valid iterator (i.e. the key it points to must already be in the hash table).
+ * This will not insert new key/value pairs into the hash table.
  * integer version
  *
  * @param hash_iterator The LuaHashMapIterator instance pointing to the key/value pair you want to update the value to.
@@ -4438,6 +4506,31 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_GetKeysInteger(LuaHashMap* hash_map, lua_Int
 #if defined(__LUAHASHMAP_LUA_STATE_DEFINED__)
 	#undef lua_State
 	#undef __LUAHASHMAP_LUA_STATE_DEFINED__
+#endif
+
+#if defined(__LUAHASHMAP_LUA_TNONE_DEFINED__)
+	#undef LUA_TNONE
+	#undef __LUAHASHMAP_LUA_TNONE_DEFINED__
+#endif
+
+#if defined(__LUAHASHMAP_LUA_TLIGHTUSERDATA_DEFINED__)
+	#undef LUA_TLIGHTUSERDATA
+	#undef __LUAHASHMAP_LUA_TLIGHTUSERDATA_DEFINED__
+#endif
+
+#if defined(__LUAHASHMAP_LUA_TNUMBER_DEFINED__)
+	#undef LUA_TNUMBER
+	#undef __LUAHASHMAP_LUA_TNUMBER_DEFINED__
+#endif
+
+#if defined(__LUAHASHMAP_LUA_TSTRING_DEFINED__)
+	#undef LUA_TSTRING
+	#undef __LUAHASHMAP_LUA_TSTRING_DEFINED__
+#endif
+
+#if defined(__LUAHASHMAP_LUA_NOREF_DEFINED__)
+	#undef LUA_NOREF
+	#undef __LUAHASHMAP_LUA_NOREF_DEFINED__
 #endif
 
 /* You can't undo a typedef */
