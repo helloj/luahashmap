@@ -67,7 +67,9 @@ LuaHashMap is ideal for projects that may agree with one the following:
 - Want a really friendly, simple to use API/interface (you don't need to know anything about Lua)
 - Want an easy to integrate API that doesn't require you to modify or wrap all your key objects to conform to an interface
 - Don't want to be bothered with writing your own hashing functions
+- Want to explicit support and optimizations for different types (numbers, strings, pointers) 
 - Want an explicit, type safe API that doesn't use macro-hell
+- Want to mix different types (numbers, strings, pointers) in the same hash table (and avoid casting everything to the same type)
 - Already using Lua elsewhere in your project or are considering using Lua
 - Not already using Lua but don't think the ~100-200KB library (disk) size of Lua is a big deal. Lua is ~100KB for the core, and ~100KB for the standard library which is not needed by LuaHashMap. (pfft! My icon takes more space.)
 - Don't mind the ~4KB overhead (RAM size) of creating a Lua state instance. (Seriously, Apple Mac icons are full color 1024x1024 now.)
@@ -173,7 +175,8 @@ LuaHashMap_GetValue<TV>AtIterator
 
 The "Cached" value is the value copied in the struct when the iterator was last created/iterated/updated.
 The non-cached version incurs a full lookup in the hash to find the value.
-Generally, if you have the iterator and haven't modified the hash table behind the back of the iterator, the cached value is correct and will be faster.
+Generally, if you have the iterator and haven't modified the hash table behind the back of the iterator 
+(e.g. use a non-iterator LuaHashMap function to change or remove a value), the cached value is correct and will be faster.
 Proper programming style of the LuaHashMap iterator functions should keep the "Cached" value up to date.
 
 
@@ -331,32 +334,102 @@ about which one the original is so any hash map with the lua_State you want to s
 Every CreateShare should be balanced by FreeShare. Free should balance the original Create and should be the very last thing to be called. 
 (Free will destroy the entire virtual machine instance as it calls lua_close().)
 
+@code
+LuaHashMap* first_hash_map = LuaHashMap_Create();
+LuaHashMap* second_hash_map = LuaHashMap_CreateShare(first_hash_map);
+LuaHashMap* third_hash_map = LuaHashMap_CreateShare(second_hash_map);
+LuaHashMap* fourth_hash_map = LuaHashMap_CreateShare(first_hash_map);
+
+// (do stuff as you normally do to use each hash map)
+
+// When done, free resources.
+LuaHashMap_FreeShare(fourth_hash_map);
+LuaHashMap_FreeShare(second_hash_map);
+LuaHashMap_FreeShare(third_hash_map);
+// Make sure that LuaHashMap_Free is called last, after all the shares are closed.
+LuaHashMap_Free(first_hash_map);
+@endcode
+
 
 
 Mixed Types in the same hash map:
 ---------------------------------
-Lua supports mixed types (i.e. numbers, strings, pointers) in the same table. 
-However you need to be careful about doing this with LuaHashMap and support is still considered experimental as of this writing 
-(though the unit tests seem to work well enough, and of course Lua itself was already designed for this). 
+Lua supports mixed types (i.e. numbers, strings, pointers) in the same table.
+However you need to be careful about doing this with LuaHashMap since typing systems are not as dynamic/automatic in C.
 
-First and most importantly, you must understand that Lua only has one number type and thus integers and numbers 
-(doubles in stock Lua) are the same. So an integer key of say 100 would be the same as a number key of 100.00, 
-so be very careful about understanding which of your keys are unique. 
-In addition, when you Get a number, there is no identifying information (in stock Lua) about whether the number was originally an 
-integer or number. It is up to you to figure it out.
- 
+Putting in mixed types is easy. You simply call the normal API functions as you always do:
+@code
+LuaHashMap_SetValueStringForKeyString(hash_map, "string_value1", "string_key1");
+LuaHashMap_SetValuePointerForKeyNumber(hash_map, (void*)0x2, 2.0);
+LuaHashMap_SetValueStringForKeyPointer(hash_map, "string_value3", (void*)0x3);
+// You can even change the value type for an existing key
+LuaHashMap_SetValueNumberForKeyString(hash_map, 4.0, "string_key1");
+@endcode
+
+But accessing the key/value pairs is the real trick. The fundamental rule is that you must call the correct type function to access the value.
+So if you know for a fact that for the "string_key1" is a number type (from the last line above), then you can do as you always do.
+@code
+// The last time we set this key, the value was a number, so call the GetValueNumber version of the function.
+// Don't call the the GetValueString or GetValuePointer version in this case; the behavior is undefined.
+luaNumber the_number = LuaHashMap_GetValueNumberForKeyString(hash_map, "string_key1");
+@endcode
+
+In the case where you don't know what the key types and value types are, iterators are the solution.
 To help support mixed types, three functions are provided:
 - int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
 - int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 - int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
 
 These return the int values defined by Lua which are LUA_TSTRING, LUA_TNUMBER, LUA_TLIGHTUSERDATA for strings, numbers, and pointers respectively. 
-Remember that there is no distinction between number and integer in this case.
+
+You may have noticed that there is no distinct type for integers in this list.
+This is an extremely important point. You must understand that Lua only has one number type and thus integers and numbers 
+(doubles in stock Lua) are the same. So an integer key of say 100 would be the same as a number key of 100.00, 
+so be very careful about understanding which of your keys are unique. 
+In addition, when you Get a number, there is no identifying information (in stock Lua) about whether the number was originally an 
+integer or number, so it is up to you to decide if that number is really an integer or not.
+
+That said, here is an example that iterates through a collection and dynamically figures out the correct types and calls the correct API functions to extract the values.
+@code
+LuaHashMapIterator shared_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
+// Assumes at least 1 entry in the collection
+do
+{
+	int keytype = LuaHashMap_GetKeyTypeAtIterator(&shared_iterator);
+	int valuetype = LuaHashMap_GetValueTypeAtIterator(&shared_iterator);
+
+	switch(keytype)
+	{
+		case LUA_TLIGHTUSERDATA:
+			fprintf(stderr, "\tKeyPointer:%zd", LuaHashMap_GetKeyPointerAtIterator(&shared_iterator));
+			break;
+		case LUA_TNUMBER:
+			fprintf(stderr, "\tKeyNumber:%lf", LuaHashMap_GetKeyNumberAtIterator(&shared_iterator));
+			break;
+		case LUA_TSTRING:
+			fprintf(stderr, "\tKeyString:%s", LuaHashMap_GetKeyStringAtIterator(&shared_iterator));
+			break;
+	}
+	switch(valuetype)
+	{
+		case LUA_TLIGHTUSERDATA:
+			fprintf(stderr, "\tValuePointer:%zd", LuaHashMap_GetCachedValuePointerAtIterator(&shared_iterator));
+			break;
+		case LUA_TNUMBER:
+			fprintf(stderr, "\tValueNumber:%lf", LuaHashMap_GetCachedValueNumberAtIterator(&shared_iterator));
+			break;
+		case LUA_TSTRING:
+			fprintf(stderr, "\tValueString:%s", LuaHashMap_GetCachedValueStringAtIterator(&shared_iterator));
+			break;
+	}
+	fprintf(stderr, "\n");
+
+} while(LuaHashMap_IteratorNext(&shared_iterator));
+@endcode
 
 So while possible to mix types in a single hash map instance, you may find it cumbersome to deal with depending on what you are doing. 
-You may find keeping separate hash map instances may be easier to work with.
-
-
+You may find keeping separate hash map instances may be easier to work with. 
+But if mixing types is advantageous for you, then this is a powerful feature of Lua/LuaHashMap at your disposal.
 
 
 C++ STL like interface (Experimental):
@@ -511,6 +584,7 @@ I think LuaHashMap is pretty much done.
 - There may still be some minor optimization work that can be done (maybe allow safety checks to be disabled via compile flag).
 - There maybe some tweaking on C11 features on _Generics to tighten up the "default" rules.
 - Investigate using a metamethod to keep an up-to-date count of the number of elements for those who really need an O(1) access. This would probably be a compile time switch which would leverage the ability to swap out rawset.
+- Investigate adding a new explicit type for LuaHashMap instances in tables. While this can be done with Pointer, maybe there is some utility in keeping a one-to-one mapping of Lua tables with LuaHashMaps, particularly if using backdoor access to interoperate directly with Lua. (There is probably little demand for this.)
 - The one major thing I would like to see (but I don't have the time or expertise to do) is see if LuaHashMap could be implemented 
 by ripping out just the table implementation from Lua and removing all the other unnecessary stuff. I would love to shrink both the 
 disk size profile as well as the memory overhead needed by having an entire virtual machine. I would like to be able to create lots of stand-alone instances of LuaHashMap
