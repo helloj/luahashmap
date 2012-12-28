@@ -567,7 +567,7 @@ Yes, I actually did unit tests too. You might refer to these for more examples o
 
 - luahashmap.c: The first test program written, which started turning into a small benchmark program in some places.
 - luahashmap.cpp: Uses the C++ STL-like template interface wrapper. The coverage is pretty exhaustive and manages to hit most of the core C API indirectly.
-- luahashmapshared.c: Tests the CreateShare APIs.
+- luahashmapshared.c: Tests the CreateShare APIs. Mixed typed tests are also in here.
 - luahashmap_c11: Tests the C11 _Generic macros. This covers every API that is put into a convenience macro which is the majority of the API.
 
 Note: Depending on your compiler and platform, you may see a lot of compiler warnings in the test programs. 
