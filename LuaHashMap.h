@@ -126,7 +126,7 @@ The following example inserts values into the table with string keys.
 
 
 Iterators in LuaHashMap are conceptually similar to the C++ STL notion of an iterator (but much simpler).
-They let you iterator through a hash table and let you get and set values.
+They let you iterate (traverse) through a hash table and let you get and set values.
 Here's a similar example that prints everything in the hash table using an iterator.
 
 @code
@@ -154,7 +154,7 @@ Of course this is just a taste. There are a lot more APIs available to make this
 
 More on Iterators:
 ------------------
-Iterators are the way to iterate through a hash table. 
+Iterators are the way to iterate/traverse through a hash table. 
 To keep things simple, notice that the GetIterator family of functions all return a full copy of a struct (LuaHashMapIterator). 
 
 A major concept with iterators to notice is they are simply a struct that are intended to live on the stack when you use them.
@@ -170,14 +170,14 @@ Unlike removing, it is not safe to add new entries to the table while iterating 
 
 
 Also of note, there are two ways to extract values from iterators:
-LuaHashMap_GetCachedValue<TV>AtIterator
-LuaHashMap_GetValue<TV>AtIterator
+- LuaHashMap_GetCachedValue<TV>AtIterator
+- LuaHashMap_GetValue<TV>AtIterator
 
 The "Cached" value is the value copied in the struct when the iterator was last created/iterated/updated.
 The non-cached version incurs a full lookup in the hash to find the value.
 Generally, if you have the iterator and haven't modified the hash table behind the back of the iterator 
 (e.g. use a non-iterator LuaHashMap function to change or remove a value), the cached value is correct and will be faster.
-Proper programming style of the LuaHashMap iterator functions should keep the "Cached" value up to date.
+Proper programming style of the LuaHashMap iterator functions should keep the "Cached" value up to date so you should rarely (if ever) need the non-cached version.
 
 
 Iterator Patterns:
@@ -2602,7 +2602,6 @@ LUAHASHMAP_EXPORT inline int LuaHashMap_GetCachedValueTypeAtIterator(const LuaHa
  * Returns the cached value saved in the iterator.
  * Returns the cached value saved in the iterator.
  * string version
- * This version allows you to specify the string length for the string if you already know it as an optimization.
  *
  * @param hash_iterator The LuaHashMapIterator instance to operate on.
  * @return Returns the Lua internalized pointer for the key string. 
