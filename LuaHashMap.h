@@ -506,7 +506,7 @@ can now be called with just this one macro:
 
 The preprocessor/compiler will look at your types and automatically inject the correct version of the function to call.
 
-We can take this a step further with a few more macro tricks from C99 plus an extension called "comma pasting".
+We can take this a step further with a few more macro tricks from C99.
 Utilizing these features, we can also handle variable number of arguments 
 to also unify the WithLength versions of the String permutations:
 - LuaHashMap_SetValueStringForKeyStringWithLength
@@ -538,16 +538,7 @@ LuaHashMap_SetValue(&iterator, (const char*)"goodbye"); // LuaHashMap_SetValueSt
 
 @note Please watch out for string literals. They technically are not const char*, but an array type which I can't seem to express. So you should use an explict cast for those or they get mapped to the void* (Pointer) rule.
 
-Unfortunately, the comma pasting extension (the ,#__VA_ARGS__ part) is not part of the C standard as far as I know.
-(If anybody knows how to accomplish this without using an extension, please let me know.)
-But I believe this extension is available on gcc, clang/llvm, and the latest versions of Visual Studio.
-I currently do not know how to check for this feature at compile time, but for now I'm going to speculate that the compilers
-that support C11 also support this extension so the feature is available when C11 is detected.
-If you need to disable this, define the preprocessor macro LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION to 1.
-The _Generic macros that are fixed length will continue to be available even when the comma pasting extension is disabled.
-
 For convenience, if C11 _Generic support is detected on your compiler, LUAHASHMAP_SUPPORTS_GENERICS will be defined to 1.
-
 
 Refer to the API documentation to see all the macros available.
 
@@ -3803,11 +3794,30 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	(hash_iterator, value)
 
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
+
+/* Adapted from http://efesx.com/2010/08/31/overloading-macros */
+/* and http://efesx.com/2010/07/17/variadic-macro-to-count-number-of-arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
+	/* Needed to add last parameter because it appears at least one argument needs to exist with __VA_ARGS__ with named parameters by the C99 standard */
+#define LUAHASHMAP_VA_NUM_ARGS(...) LUAHASHMAP_VA_NUM_ARGS_IMPL(__VA_ARGS__, 5,4,3,2,1,unused_to_suppress_pedantic_warnings)
+#define LUAHASHMAP_VA_NUM_ARGS_IMPL(_1,_2,_3,_4,_5,N,...) N
+
+#define LUAHASHMAP_MACRO_DISPATCHER(func, ...) \
+	LUAHASHMAP_MACRO_DISPATCHER_(func, LUAHASHMAP_VA_NUM_ARGS(__VA_ARGS__))
+#define LUAHASHMAP_MACRO_DISPATCHER_(func, nargs) \
+	LUAHASHMAP_MACRO_DISPATCHER__(func, nargs)
+#define LUAHASHMAP_MACRO_DISPATCHER__(func, nargs) \
+	func ## nargs
+
+/** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
+#endif /* DOXYGEN_SHOULD_IGNORE_THIS */
+
+
+#ifndef DOXYGEN_SHOULD_IGNORE_THIS
+	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_SETVALUE_5(A,B,C,D,E) LuaHashMap_SetValueStringForKeyStringWithLength(A,B,C,D,E)
 	#define LUAHASHMAP_SETVALUE_4(A,B,C,D) LuaHashMap_SetValueForKeyWithLength(A,B,C,D)
 	/* I wanted to recursively reuse LuaHashMap_SetValueForKey, but clang gives me an undefined symbol error. 
@@ -4069,9 +4079,6 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 	#define LUAHASHMAP_SETVALUE_2(A,B) LuaHashMap_SetValueAtIterator(A,B)
 
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_SETVALUE_N(x,A,B,C,D,E,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 
@@ -4085,13 +4092,7 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_SetValue(...) \
-	LUAHASHMAP_SETVALUE_N(,##__VA_ARGS__, \
-		LUAHASHMAP_SETVALUE_5(__VA_ARGS__), \
-		LUAHASHMAP_SETVALUE_4(__VA_ARGS__), \
-		LUAHASHMAP_SETVALUE_3(__VA_ARGS__), \
-		LUAHASHMAP_SETVALUE_2(__VA_ARGS__), \
-	)
+#define LuaHashMap_SetValue(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_SETVALUE_, __VA_ARGS__)(__VA_ARGS__)
 
 
 
@@ -4166,11 +4167,9 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUESTRING_4(A,B,C,D) LuaHashMap_GetValueStringForKeyStringWithLength(A,B,C,D)
 	#define LUAHASHMAP_GETVALUESTRING_3(A,B,C) LuaHashMap_GetValueStringForKeyWithLength(A,B,C)
 /*
@@ -4208,10 +4207,6 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 
 	#define LUAHASHMAP_GETVALUESTRING_1(A) LuaHashMap_GetValueStringAtIterator(A)
 
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUESTRING_N(x,A,B,C,D,FUNC, ...) FUNC  
-
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
@@ -4225,13 +4220,7 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_GetValueString(...) \
-	LUAHASHMAP_GETVALUESTRING_N(,##__VA_ARGS__, \
-		LUAHASHMAP_GETVALUESTRING_4(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_3(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_2(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUESTRING_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_GetValueString(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_GETVALUESTRING_, __VA_ARGS__)(__VA_ARGS__)
 
 
 
@@ -4321,17 +4310,11 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 		default: LuaHashMap_GetValueIntegerForKeyPointer) \
 	) \
 	(hash_map, key)
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUEPOINTER_2(A,B) LuaHashMap_GetValuePointerForKey(A,B)
 	#define LUAHASHMAP_GETVALUEPOINTER_1(A) LuaHashMap_GetValuePointerAtIterator(A)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUEPOINTER_N(x,A,B,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
@@ -4343,23 +4326,13 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_GetValuePointer(...) \
-	LUAHASHMAP_GETVALUEPOINTER_N(,##__VA_ARGS__, \
-		LUAHASHMAP_GETVALUEPOINTER_2(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUEPOINTER_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_GetValuePointer(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_GETVALUEPOINTER_, __VA_ARGS__)(__VA_ARGS__)
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUENUMBER_2(A,B) LuaHashMap_GetValueNumberForKey(A,B)
 	#define LUAHASHMAP_GETVALUENUMBER_1(A) LuaHashMap_GetValueNumberAtIterator(A)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUENUMBER_N(x,A,B,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
@@ -4371,23 +4344,13 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_GetValueNumber(...) \
-	LUAHASHMAP_GETVALUENUMBER_N(,##__VA_ARGS__, \
-		LUAHASHMAP_GETVALUENUMBER_2(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUENUMBER_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_GetValueNumber(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_GETVALUENUMBER_, __VA_ARGS__)(__VA_ARGS__)
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
 	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_GETVALUEINTEGER_2(A,B) LuaHashMap_GetValueIntegerForKey(A,B)
 	#define LUAHASHMAP_GETVALUEINTEGER_1(A) LuaHashMap_GetValueIntegerAtIterator(A)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_GETVALUEINTEGER_N(x,A,B,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
@@ -4399,11 +4362,7 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_GetValueInteger(...) \
-	LUAHASHMAP_GETVALUEINTEGER_N(,##__VA_ARGS__, \
-		LUAHASHMAP_GETVALUEINTEGER_2(__VA_ARGS__), \
-		LUAHASHMAP_GETVALUEINTEGER_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_GetValueInteger(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_GETVALUEINTEGER_, __VA_ARGS__)(__VA_ARGS__)
 
 
 
@@ -4437,17 +4396,11 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	) \
 	(hash_map, key)
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_EXISTS_1(A) LuaHashMap_ExistsAtIterator(A)
 	#define LUAHASHMAP_EXISTS_2(A,B) LuaHashMap_ExistsKey(A,B)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_EXISTS_N(x,A,B,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
@@ -4459,11 +4412,7 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_Exists(...) \
-	LUAHASHMAP_EXISTS_N(,##__VA_ARGS__, \
-		LUAHASHMAP_EXISTS_2(__VA_ARGS__), \
-		LUAHASHMAP_EXISTS_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_Exists(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_EXISTS_, __VA_ARGS__)(__VA_ARGS__)
 
 
 /**
@@ -4496,17 +4445,11 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	(hash_map, key)
 
 
-/* Adapted from http://stackoverflow.com/questions/3046889/optional-parameters-with-c-macros */
-	/* Private multiple macros for each different number of arguments */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 	/** @cond DOXYGEN_SHOULD_IGNORE_THIS */
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+	/* Private multiple macros for each different number of arguments */
 	#define LUAHASHMAP_REMOVE_1(A) LuaHashMap_RemoveAtIterator(A)
 	#define LUAHASHMAP_REMOVE_2(A,B) LuaHashMap_RemoveKey(A,B)
-
-	/* The private interim macro that simply strips the excess and ends up with the required macro */
-	#define LUAHASHMAP_REMOVE_N(x,A,B,FUNC, ...) FUNC  
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
 /** @endcond DOXYGEN_SHOULD_IGNORE_THIS */
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /**
@@ -4518,11 +4461,7 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
  * @warning String literals are technically of type const char[] and not const char* so you must explicitly cast
  * or the fallback/default case will resolve to the Pointer version instead of the String version.
  */
-#define LuaHashMap_Remove(...) \
-	LUAHASHMAP_REMOVE_N(,##__VA_ARGS__, \
-		LUAHASHMAP_REMOVE_2(__VA_ARGS__), \
-		LUAHASHMAP_REMOVE_1(__VA_ARGS__), \
-	)
+#define LuaHashMap_Remove(...) LUAHASHMAP_MACRO_DISPATCHER(LUAHASHMAP_REMOVE_, __VA_ARGS__)(__VA_ARGS__)
 
 /**
  * LuaHashMap_GetIteratorForKey

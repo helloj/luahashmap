@@ -50,7 +50,7 @@ int DoKeyStringValueString()
 	const char* somekey = "key1";
 	char* somekey_nonconst = (char*)somekey; // testing non-const
 	fprintf(stderr, "LuaHashMap_SetValueStringForKeyString\n");
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), somekey_nonconst);
 #else
 	LuaHashMap_SetValue(hash_map, (const char*)("value1"), somekey_nonconst);
@@ -137,7 +137,7 @@ int DoKeyStringValueString()
 
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	fprintf(stderr, "LuaHashMap_Exists (iterator) for key3 should be found\n");
@@ -183,7 +183,7 @@ int DoKeyStringValueString()
 	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
 	assert(false == exists);
 	fprintf(stderr, "LuaHashMap_Exists (key) for key3 should not be found\n");
-#endif /* !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION */
+#endif /* !LUAHASHMAP_DISABLE_VA_ARGS_MACROS */
 	
 	LuaHashMap_Free(hash_map);
 	
@@ -212,7 +212,7 @@ int DoKeyStringValuePointer()
 	const char* somekey = "key1";
 	char* somekey_nonconst = (char*)somekey; // testing non-const
 
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, somekey_nonconst);
 #else
 	LuaHashMap_SetValue(hash_map, s_valuePointer1, somekey_nonconst);
@@ -286,7 +286,7 @@ int DoKeyStringValuePointer()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -315,7 +315,7 @@ int DoKeyStringValuePointer()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	LuaHashMap_Free(hash_map);
 	
@@ -337,7 +337,7 @@ int DoKeyStringValueNumber()
 	const char* somekey = "key1";
 	char* somekey_nonconst = (char*)somekey; // testing non-const
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1.0, somekey_nonconst);
 #else
 	LuaHashMap_SetValue(hash_map, 1.0, somekey_nonconst);
@@ -413,7 +413,7 @@ int DoKeyStringValueNumber()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -445,7 +445,7 @@ int DoKeyStringValueNumber()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, (const char*)("key3"));
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	LuaHashMap_Free(hash_map);
 	
@@ -467,7 +467,7 @@ int DoKeyStringValueInteger()
 	const char* somekey = "key1";
 	char* somekey_nonconst = (char*)somekey; // testing non-const
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1, somekey_nonconst);
 #else
 	LuaHashMap_SetValue(hash_map, 1, somekey_nonconst);
@@ -544,7 +544,7 @@ int DoKeyStringValueInteger()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -571,7 +571,7 @@ int DoKeyStringValueInteger()
 	LuaHashMap_SetValue(hash_map, 5, (const char*)("key3"), (sizeof("key3")/sizeof(char))-1);
 	ret_val = LuaHashMap_GetValueInteger(&the_iterator);
 	assert(5 == ret_val);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -598,7 +598,7 @@ int DoKeyPointerValueString()
 	// String literals are a problem because the type is char[] and not char*.
 	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
 	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), s_keyPointer1);
 #else
 	LuaHashMap_SetValue(hash_map, (const char*)("value1"), s_keyPointer1);
@@ -674,7 +674,7 @@ int DoKeyPointerValueString()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -713,7 +713,7 @@ int DoKeyPointerValueString()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	
@@ -733,7 +733,7 @@ int DoKeyPointerValuePointer()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, s_keyPointer1);
 #else
 	LuaHashMap_SetValue(hash_map, s_valuePointer1, s_keyPointer1);
@@ -808,7 +808,7 @@ int DoKeyPointerValuePointer()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -826,7 +826,7 @@ int DoKeyPointerValuePointer()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -843,7 +843,7 @@ int DoKeyPointerValueNumber()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1.0, s_keyPointer1);
 #else
 	LuaHashMap_SetValue(hash_map, 1.0, s_keyPointer1);
@@ -919,7 +919,7 @@ int DoKeyPointerValueNumber()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -937,7 +937,7 @@ int DoKeyPointerValueNumber()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -954,7 +954,7 @@ int DoKeyPointerValueInteger()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1, s_keyPointer1);
 #else
 	LuaHashMap_SetValue(hash_map, 1, s_keyPointer1);
@@ -1029,7 +1029,7 @@ int DoKeyPointerValueInteger()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1047,7 +1047,7 @@ int DoKeyPointerValueInteger()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyPointer3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 
 	LuaHashMap_Free(hash_map);
@@ -1074,7 +1074,7 @@ int DoKeyNumberValueString()
 	// String literals are a problem because the type is char[] and not char*.
 	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
 	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), s_keyNumber1);
 #else
 	LuaHashMap_SetValue(hash_map, (const char*)("value1"), s_keyNumber1);
@@ -1151,7 +1151,7 @@ int DoKeyNumberValueString()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1190,7 +1190,7 @@ int DoKeyNumberValueString()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyNumber3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1209,7 +1209,7 @@ int DoKeyNumberValuePointer()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, s_keyNumber1);
 #else
 	LuaHashMap_SetValue(hash_map, s_valuePointer1, s_keyNumber1);
@@ -1284,7 +1284,7 @@ int DoKeyNumberValuePointer()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1302,7 +1302,7 @@ int DoKeyNumberValuePointer()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyNumber3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1319,7 +1319,7 @@ int DoKeyNumberValueNumber()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1.0, s_keyNumber1);
 #else
 	LuaHashMap_SetValue(hash_map, 1.0, s_keyNumber1);
@@ -1395,7 +1395,7 @@ int DoKeyNumberValueNumber()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1413,7 +1413,7 @@ int DoKeyNumberValueNumber()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyNumber3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1430,7 +1430,7 @@ int DoKeyNumberValueInteger()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1, s_keyNumber1);
 #else
 	LuaHashMap_SetValue(hash_map, 1, s_keyNumber1);
@@ -1505,7 +1505,7 @@ int DoKeyNumberValueInteger()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1523,7 +1523,7 @@ int DoKeyNumberValueInteger()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyNumber3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1551,7 +1551,7 @@ int DoKeyIntegerValueString()
 	// String literals are a problem because the type is char[] and not char*.
 	// An explicit typecast to char* must be used or the default case will be hit which goes to Pointer
 	// http://www.robertgamble.net/2012/01/c11-generic-selections.html
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, (const char*)("value1"), s_keyInteger1);
 #else
 	LuaHashMap_SetValue(hash_map, (const char*)("value1"), s_keyInteger1);
@@ -1628,7 +1628,7 @@ int DoKeyIntegerValueString()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1667,7 +1667,7 @@ int DoKeyIntegerValueString()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyInteger3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1686,7 +1686,7 @@ int DoKeyIntegerValuePointer()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, s_valuePointer1, s_keyInteger1);
 #else
 	LuaHashMap_SetValue(hash_map, s_valuePointer1, s_keyInteger1);
@@ -1761,7 +1761,7 @@ int DoKeyIntegerValuePointer()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1779,7 +1779,7 @@ int DoKeyIntegerValuePointer()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyInteger3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -1796,7 +1796,7 @@ int DoKeyIntegerValueNumber()
 	size_t ret_count;
 	bool exists;
 	
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	LuaHashMap_SetValueForKey(hash_map, 1.0, s_keyInteger1);
 #else
 	LuaHashMap_SetValue(hash_map, 1.0, s_keyInteger1);
@@ -1872,7 +1872,7 @@ int DoKeyIntegerValueNumber()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -1890,7 +1890,7 @@ int DoKeyIntegerValueNumber()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyInteger3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 
 	LuaHashMap_Free(hash_map);
@@ -1907,7 +1907,7 @@ int DoKeyIntegerValueInteger()
 	size_t ret_count;
 	bool exists;
 
-#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION	
+#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS	
 	LuaHashMap_SetValueForKey(hash_map, 1, s_keyInteger1);
 #else
 	LuaHashMap_SetValue(hash_map, 1, s_keyInteger1);
@@ -1982,7 +1982,7 @@ int DoKeyIntegerValueInteger()
 	
 	
 	// Testing different number of arguments macros
-#if !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#if !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	exists = LuaHashMap_Exists(&the_iterator);
 	assert(true == exists);
 	
@@ -2000,7 +2000,7 @@ int DoKeyIntegerValueInteger()
 	LuaHashMap_Remove(&the_iterator);
 	exists = LuaHashMap_Exists(hash_map, s_keyInteger3);
 	assert(false == exists);
-#endif // !LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
+#endif // !LUAHASHMAP_DISABLE_VA_ARGS_MACROS
 	
 	
 	LuaHashMap_Free(hash_map);
@@ -2027,8 +2027,11 @@ int main(int argc, char* argv[])
 	
 #else
 	
-	#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
-		fprintf(stderr, "Warning: Comma pasting extension for C11 _Generic support has been disabled\n.");
+	// I originally added a flag to disable the variable argument macros when I discovered my original technique relied on a compiler extension (comma pasting extension).
+	// I have rewritten the code to remove that dependency so everything should be standard now.
+	// But because this was such a pain to insert the first time, I have left the macros in place and just renamed them in case I need to disable these again.
+	#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
+		fprintf(stderr, "Warning: __VA_ARGS__ macros for C11 _Generic support has been disabled\n.");
 	#endif
 
 	DoKeyStringValueString();
@@ -2057,8 +2060,8 @@ int main(int argc, char* argv[])
 
 	fprintf(stderr, "Program passed all tests!\n");
 		
-	#if LUAHASHMAP_DISABLE_COMMA_PASTING_EXTENSION
-		fprintf(stderr, "(Remember that the Comma pasting extension for C11 _Generic support was disabled)\n.");
+	#if LUAHASHMAP_DISABLE_VA_ARGS_MACROS
+		fprintf(stderr, "(Remember that the  __VA_ARGS__ macros for C11 _Generic support were disabled)\n.");
 	#endif
 
 	return 0;
