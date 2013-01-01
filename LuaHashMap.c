@@ -127,7 +127,10 @@ struct LuaHashMap
 	#if LUA_VERSION_NUM <= 501 /* Lua 5.1 or less */
 		#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_GLOBALSINDEX, unique_key)
 
+/* Unused: But here is the implementation if needed. */
+/*
 		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_GLOBALSINDEX, unique_key)
+*/
 
 		#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
 			do { \
@@ -152,12 +155,15 @@ struct LuaHashMap
 				lua_remove(lua_state, -2); \
 			} while(0)
 
+/* Unused: But here is the implementation if needed. */
+/*
 		#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) \
 			do { \
 				lua_pushglobaltable(lua_state); \
 				lua_rawseti(lua_state, -1, unique_key); \
 				lua_pop(lua_state, 1); \
 			} while(0)
+*/
 
 		#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
 			do { \
@@ -193,7 +199,10 @@ struct LuaHashMap
 
 	#define LUAHASHMAP_GETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawgeti(lua_state, LUA_REGISTRYINDEX, unique_key)
 
+/* Unused: But here is the implementation if needed. */
+/*
 	#define LUAHASHMAP_SETGLOBAL_UNIQUESTRING(lua_state, unique_key) lua_rawseti(lua_state, LUA_REGISTRYINDEX, unique_key)
+*/
 
 	#define LUAHASHMAP_REPLACE_WITH_EMPTY_TABLE(lua_state, unique_key) \
 		do { \
@@ -1646,7 +1655,7 @@ bool LuaHashMap_ExistsKeyInteger(LuaHashMap* hash_map, lua_Integer key_integer)
 	return ret_val;
 }
 
-void Internal_Clear(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
+static void Internal_Clear(LuaHashMap* hash_map, LuaHashMap_InternalGlobalKeyType table_name)
 {
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_map->luaState, table_name); /* stack: [table] */
 	lua_pushnil(hash_map->luaState);  /* first key */
@@ -2055,7 +2064,7 @@ LuaHashMapIterator LuaHashMap_GetIteratorAtEnd(LuaHashMap* hash_map)
 	return Internal_GetIteratorEnd(hash_map, hash_map->uniqueTableNameForSharedState);
 }
 
-void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_iterator, int stack_index)
+static void Internal_SetCurrentValueInIteratorFromStackIndex(LuaHashMapIterator* the_iterator, int stack_index)
 {
 	int value_type = lua_type(the_iterator->hashMap->luaState, -1);
 	switch(value_type)
@@ -2442,6 +2451,7 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
 		}
 		else if(LUA_TNUMBER == hash_iterator1->keyType)
 		{
+			/* This line is correct! Clang's -Wfloat-equal (-Weverything) complains about this line. Ignore that warning. */
 			return (hash_iterator1->currentKey.theNumber == hash_iterator2->currentKey.theNumber);
 		}
 		else
@@ -2458,7 +2468,7 @@ bool LuaHashMap_IteratorIsEqual(const LuaHashMapIterator* hash_iterator1, const 
  * It is expected to be immediately followed by pushing the value and calling settable.
  * This should not fail. Validation checking is expected to be done before this.
  */
-void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
+static void Internal_PushTableAndKeyInIterator(LuaHashMapIterator* hash_iterator)
 {
 	LUAHASHMAP_GETGLOBAL_UNIQUESTRING(hash_iterator->hashMap->luaState, hash_iterator->hashMap->uniqueTableNameForSharedState); /* stack: [table] */
 
