@@ -376,9 +376,9 @@ luaNumber the_number = LuaHashMap_GetValueNumberForKeyString(hash_map, "string_k
 
 In the case where you don't know what the key types and value types are, iterators are the solution.
 To help support mixed types, three functions are provided:
-- int LuaHashMap_GetKeyTypeAtIterator(LuaHashMapIterator* hash_iterator);
+- int LuaHashMap_GetKeyTypeAtIterator(const LuaHashMapIterator* hash_iterator);
 - int LuaHashMap_GetValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
-- int LuaHashMap_GetCachedValueTypeAtIterator(LuaHashMapIterator* hash_iterator);
+- int LuaHashMap_GetCachedValueTypeAtIterator(const LuaHashMapIterator* hash_iterator);
 
 These return the int values defined by Lua which are LUA_TSTRING, LUA_TNUMBER, LUA_TLIGHTUSERDATA for strings, numbers, and pointers respectively. 
 
