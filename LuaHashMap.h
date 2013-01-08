@@ -477,7 +477,7 @@ This probably won't be maintained over the long haul.
 @endcode
 
 
-C11 _Generics (Experimental):
+C11 _Generic (Generic Selection) (Experimental):
 -----------------------------
 Yes, I said there is "no macro-hell" earlier. But trust me; this isn't really that bad and it's optional. (And it's really quite cool.)
 C11 introduces _Generic which extends the C preprocessor to allow you to map different functions to a single macro function name based on their parameter types.
@@ -744,9 +744,9 @@ typedef struct LuaHashMapVersion
 
 /* Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
  */
-#define LUAHASHMAP_MAJOR_VERSION		0
-#define LUAHASHMAP_MINOR_VERSION		2
-#define LUAHASHMAP_PATCHLEVEL			1
+#define LUAHASHMAP_MAJOR_VERSION		1
+#define LUAHASHMAP_MINOR_VERSION		0
+#define LUAHASHMAP_PATCHLEVEL			0
 
 /**
  * This macro fills in a version structure with the version of the
