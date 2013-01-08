@@ -3036,6 +3036,8 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 	#if __has_feature(c_generic_selections) || __has_extension(c_generic_selections)
 		#define LUAHASHMAP_SHOULD_USE_C_GENERICS 1
 	#endif
+#else
+	#define LUAHASHMAP_SHOULD_USE_C_GENERICS 0
 #endif
 
 #if LUAHASHMAP_SHOULD_USE_C_GENERICS
@@ -4499,6 +4501,9 @@ LUAHASHMAP_EXPORT size_t LuaHashMap_Count(LuaHashMap* hash_map);
 #define LUAHASHMAP_SUPPORTS_GENERICS 1
 
 /** @} */ 
+#else
+
+#define LUAHASHMAP_SUPPORTS_GENERICS 0
 
 #endif /* end of C11 _Generic */
 

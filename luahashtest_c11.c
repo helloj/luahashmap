@@ -32,6 +32,9 @@ static int Internal_safestrcmp(const char* str1, const char* str2)
 
 #if LUAHASHMAP_SUPPORTS_GENERICS
 
+// Toggle this in case the variable argument macros need to be disabled
+#define LUAHASHMAP_DISABLE_VA_ARGS_MACROS 0
+
 //#include <inttypes.h>
 
 
