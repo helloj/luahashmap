@@ -396,7 +396,7 @@ LuaHashMapIterator shared_iterator = LuaHashMap_GetIteratorAtBegin(hash_map);
 do
 {
 	int keytype = LuaHashMap_GetKeyTypeAtIterator(&shared_iterator);
-	int valuetype = LuaHashMap_GetValueTypeAtIterator(&shared_iterator);
+	int valuetype = LuaHashMap_GetCachedValueTypeAtIterator(&shared_iterator);
 
 	switch(keytype)
 	{
