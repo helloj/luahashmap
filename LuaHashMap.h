@@ -186,7 +186,7 @@ Iterator Patterns:
 This demonstrates a typical pattern for using iterators to traverse an entire hash map. You get an iterator at the begin position and another at the end position. You increment your begin position iterator with ItereratorNext() as long as it does not equal the end iterator.
 @code
 	// Showing a different way to loop 
-	for(LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), LuaHashMapIterator hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
+	for(LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
 		! LuaHashMap_IteratorIsEqual(&hash_iterator, &hash_iterator_end);
 		LuaHashMap_IteratorNext(&hash_iterator)
 	)
@@ -1878,7 +1878,7 @@ LUAHASHMAP_EXPORT LuaHashMapIterator LuaHashMap_GetIteratorAtBegin(LuaHashMap* h
  * @note The end iterator doesn't actually point to the last item in the collection. It is actually one item past the end. It is analgous to a null/termination character in a string. So don't try to get the key or value from the end iterator because it won't give you anything useful.
  *
 @code 	
-	for(LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), LuaHashMapIterator hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
+	for(LuaHashMapIterator hash_iterator = LuaHashMap_GetIteratorAtBegin(hash_map), hash_iterator_end = LuaHashMap_GetIteratorAtEnd(hash_map);
 		! LuaHashMap_IteratorIsEqual(&hash_iterator, &hash_iterator_end);
 		LuaHashMap_IteratorNext(&hash_iterator)
 	)
