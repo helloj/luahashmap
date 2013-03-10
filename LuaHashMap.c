@@ -3397,6 +3397,8 @@ extern lua_Integer LuaHashMap_GetKeyIntegerAtIterator(const LuaHashMapIterator* 
 
 extern int LuaHashMap_GetKeyTypeAtIterator(const LuaHashMapIterator* hash_iterator);
 
+extern int LuaHashMap_GetCachedValueTypeAtIterator(const LuaHashMapIterator* hash_iterator);
+
 extern const char* LuaHashMap_GetCachedValueStringAtIterator(const LuaHashMapIterator* hash_iterator);
 extern const char* LuaHashMap_GetCachedValueStringAtIteratorWithLength(const LuaHashMapIterator* restrict hash_iterator, size_t* restrict value_string_length_return);
 extern size_t LuaHashMap_GetCachedValueStringLengthAtIterator(const LuaHashMapIterator* hash_iterator);
